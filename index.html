@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=7, IE=9" />
+        <!--The viewport meta tag is used to improve the presentation and behavior
+        of the samples on iOS devices-->
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"
+        />
+        <title></title>
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dijit/themes/soria/soria.css">
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dojox/grid/resources/Grid.css">
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dojox/grid/resources/SoriaGrid.css">
+        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/esri/dijit/css/Popup.css">
+        <link rel="stylesheet" type="text/css" href="css/autocomplete.css">
+        <style type="text/css">
+            html, body, #map {
+                height:100%;
+                width:100%;
+                margin:0;
+                padding:0;
+            }
+            body {
+                background-color:#FFF;
+                overflow:hidden;
+                font-family:"Trebuchet MS";
+            }
+            #search {
+                display: block;
+                position: absolute;
+                z-index: 2;
+                top: 20px;
+                left: 100px;
+            }
+            #search2 {
+                display: block;
+                position: absolute;
+                z-index: 2;
+                top: 20px;
+                left: 400px;
+            }
+        </style>
+        <script type="text/javascript">
+            var dojoConfig = {
+                parseOnLoad: true
+            };
+        </script>
+        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1"></script>
+        <script type="text/javascript" src="js/autocomplete.js"></script>
+        <script type="text/javascript">
+            dojo.require("dijit.dijit"); // optimize: load dijit layer
+            dojo.require("dijit.layout.BorderContainer");
+            dojo.require("dijit.layout.ContentPane");
+            dojo.require("esri.map");
+            dojo.require("esri.IdentityManager");
+            dojo.require("esri.arcgis.utils");
+
+
+            var map;
+
+            function init() {
+                esri.config.defaults.io.proxyUrl = "/arcgisserver/apis/javascript/proxy/proxy.ashx";
+                //This service is for development and testing purposes only. We recommend that you create your own geometry service for use within your applications. 
+                esri.config.defaults.geometryService = new esri.tasks.GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
+
+                var urlObject = esri.urlToObject(document.location.href);
+                var webmap = "1837df95711a4fd69fc33393736e80ba";
+                var bingMapsKey = "Enter your Bing Maps Key";
+                if (urlObject.query) {
+                    webmap = urlObject.query.webmap;
+                    bingMapsKey = urlObject.query.bingMapsKey;
+                }
+
+                var mapDeferred = esri.arcgis.utils.createMap(webmap, "map", {
+                    mapOptions: {
+                        slider: true
+                    },
+                    bingMapsKey: bingMapsKey,
+                    geometryServiceURL: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer"
+                });
+                mapDeferred.addCallback(function (response) {
+                    map = response.map;
+
+                    //resize the map when the browser resizes
+                    dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
+                    dojo.connect(window, "onresize", resizeMap);
+
+                    var autocomplete = new esri.autocomplete(dojo.byId('search'), {
+                        theme: 'myTheme',
+                        placeholder: 'Find address or place',
+                        popupTitle: 'Location',
+                        resetTitle: 'Clear Location',
+                        locator: 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
+                        maxLocations: 6,
+                        minCharacters: 3,
+                        showPoint: true,
+						useBoundingBox: false,
+						hideDelay: 6000,
+						searchDelay: 300,
+                        pointSymbol: new esri.symbol.PictureMarkerSymbol('http://tmimages.esri.com/esri.com/map/bluepoint-21x29.png', 21, 29).setOffset(0, 12),
+                        map: map,
+                        onNoResults: function () {
+                            alert("Location could not be found.");
+                        },
+                        onSearch: function () {
+                            //setSharing();
+                            //clearTimeout(configOptions.mapTimer);
+                        }
+                    });
+
+                    var autocomplete2 = new esri.autocomplete(dojo.query('#search2')[0], {
+                        useBoundingBox: true,
+                        map: map
+                    });
+
+                });
+                mapDeferred.addErrback(function (error) {
+                    console.log("Map creation failed: ", dojo.toJson(error));
+                });
+
+            }
+
+            function resizeMap() {
+                map.resize();
+                map.reposition();
+            }
+
+            //show map on load 
+            dojo.addOnLoad(init);
+        </script>
+    </head>
+    
+    <body class="soria">
+        <div id="search"></div>
+        <div id="search2"></div>
+        <div id="map"></div>
+    </body>
+
+</html>
