@@ -86,8 +86,9 @@
                     dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
                     dojo.connect(window, "onresize", resizeMap);
 
+                    // autocomplete with all common options set. Only map is required.
                     var autocomplete = new esri.autocomplete(dojo.byId('search'), {
-                        theme: 'myTheme',
+                        theme: 'myTheme', // Used to add a class to style the autocomplete
                         placeholder: 'Find address or place',
                         popupTitle: 'Location',
                         resetTitle: 'Clear Location',
@@ -95,20 +96,21 @@
                         maxLocations: 6,
                         minCharacters: 3,
                         showPoint: true,
-						useBoundingBox: false,
-						hideDelay: 6000,
-						searchDelay: 300,
+                        useBoundingBox: false, // don't search within current extent
+                        hideDelay: 6000,
+                        searchDelay: 300,
                         pointSymbol: new esri.symbol.PictureMarkerSymbol('http://tmimages.esri.com/esri.com/map/bluepoint-21x29.png', 21, 29).setOffset(0, 12),
                         map: map,
-                        onNoResults: function () {
+                        onNoResults: function (evt) {
                             alert("Location could not be found.");
+                            console.log(evt);
                         },
-                        onSearch: function () {
-                            //setSharing();
-                            //clearTimeout(configOptions.mapTimer);
+                        onSearch: function (evt) {
+                            console.log(searched, evt);
                         }
                     });
 
+                    // basic option using bounding box for narrowing search
                     var autocomplete2 = new esri.autocomplete(dojo.query('#search2')[0], {
                         useBoundingBox: true,
                         map: map
