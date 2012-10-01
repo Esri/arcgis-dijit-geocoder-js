@@ -1,0 +1,8 @@
+<div class="${theme}">
+	<div class="${_autoCompleteClass}" data-dojo-attach-point="containerNode">
+		<div tabindex="0" class="${_searchButtonClass}" title="${placeholder}" data-dojo-attach-point="submitNode" data-dojo-attach-event="ondijitclick:_submitSearch" role="menuitem"></div>
+		<div tabindex="0" class="${_clearButtonClass}" data-dojo-attach-point="clearNode" data-dojo-attach-event="ondijitclick:_clearAutocomplete" role="menuitem"></div>
+		<input tabindex="0" placeholder="${placeholder}" title="${placeholder}" value="${value}" autocomplete="off" type="text" data-dojo-attach-point="inputNode" data-dojo-attach-event="ondijitclick:_inputClick" role="textbox">
+	</div>
+	<div class="${_resultsContainerClass}" data-dojo-attach-point="resultsNode"></div>
+</div>

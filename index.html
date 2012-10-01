@@ -13,7 +13,7 @@
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dojox/grid/resources/Grid.css">
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dojox/grid/resources/SoriaGrid.css">
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/esri/dijit/css/Popup.css">
-        <link rel="stylesheet" type="text/css" href="css/autocomplete.css">
+        <link rel="stylesheet" type="text/css" href="css/Autocomplete.css">
         <style type="text/css">
             html, body, #map {
                 height:100%;
@@ -47,7 +47,7 @@
             };
         </script>
         <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1"></script>
-        <script type="text/javascript" src="js/autocomplete.js"></script>
+        <script type="text/javascript" src="Autocomplete.js"></script>
         <script type="text/javascript">
             dojo.require("dijit.dijit"); // optimize: load dijit layer
             dojo.require("dijit.layout.BorderContainer");
@@ -57,7 +57,7 @@
             dojo.require("esri.arcgis.utils");
 
 
-            var map;
+            var map, autocomplete, autocomplete2;
 
             function init() {
                 esri.config.defaults.io.proxyUrl = "/arcgisserver/apis/javascript/proxy/proxy.ashx";
@@ -87,19 +87,16 @@
                     dojo.connect(window, "onresize", resizeMap);
 
                     // autocomplete with all common options set. Only map is required.
-                    var autocomplete = new esri.autocomplete(dojo.byId('search'), {
-                        theme: 'myTheme', // Used to add a class to style the autocomplete
+                    autocomplete = new esri.dijit.Autocomplete({
+                        theme: 'esriAutocomplete', // Used to add a class to style the autocomplete
                         placeholder: 'Find address or place',
-                        popupTitle: 'Location',
                         resetTitle: 'Clear Location',
                         locator: 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
                         maxLocations: 6,
                         minCharacters: 3,
-                        showPoint: true,
                         useBoundingBox: false, // don't search within current extent
                         hideDelay: 6000,
                         searchDelay: 300,
-                        pointSymbol: new esri.symbol.PictureMarkerSymbol('http://tmimages.esri.com/esri.com/map/bluepoint-21x29.png', 21, 29).setOffset(0, 12),
                         map: map,
                         onNoResults: function (evt) {
                             alert("Location could not be found.");
@@ -108,13 +105,15 @@
                         onSearch: function (evt) {
                             console.log(searched, evt);
                         }
-                    });
+                    }, dojo.byId('search'));
+					autocomplete.startup();
 
                     // basic option using bounding box for narrowing search
-                    var autocomplete2 = new esri.autocomplete(dojo.query('#search2')[0], {
+                    autocomplete2 = new esri.dijit.Autocomplete({
                         useBoundingBox: true,
                         map: map
-                    });
+                    }, dojo.query('#search2')[0]);
+					autocomplete2.startup();
 
                 });
                 mapDeferred.addErrback(function (error) {
