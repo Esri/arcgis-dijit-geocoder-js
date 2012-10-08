@@ -1,5 +1,5 @@
 .esriAutocomplete .esriAc {
-    width: 192px;
+    width: 212px;
     position: relative;
     display: inline-block;
     vertical-align: middle;
@@ -50,7 +50,7 @@
     top: 0;
     color: #333;
     background: none;
-    width: 140px;
+    width: 160px;
 }
 
 .esriAutocomplete .esriAc input:focus {
@@ -123,7 +123,7 @@
     -webkit-border-bottom-right-radius: 2px;
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
-    width: 250px;
+    width: 270px;
 }
 
 .esriAutocomplete .esriAcResults li {
