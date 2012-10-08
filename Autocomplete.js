@@ -59,6 +59,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this.watch("resetTitle", this._updateResetTitle);
         this.watch("theme", this._updateTheme);
         this.watch("activeLocator", this._updateActiveLocator);
+        this.watch("locators", this._createLocatorMenu);
     },
 
     // update value of text box
@@ -84,32 +85,36 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         dojo.query(this.domNode).removeClass(oldVal).addClass(newVal);
     },
 
+    // change active locator
     _changeLocator: function (value) {
         this.activeLocator = value;
         this._updateActiveLocator();
     },
 
+    // change active locator
     _updateActiveLocator: function () {
         this._hide();
         this._inputKeyup();
     },
 
+    // create menu for changing active locator
     _createLocatorMenu: function () {
-        if (this.locatorMenuNode) {
-            var html = '';
-            html += '<select tabindex="0">';
-            for (var i = 0; i < this.locators.length; i++) {
-                html += '<option value="' + i + '">' + this.locators[i].name + '</option>';
+        if (this.locators.length > 1) {
+            if (this.locatorMenuNode) {
+                var html = '';
+                html += '<select tabindex="0">';
+                for (var i = 0; i < this.locators.length; i++) {
+                    html += '<option value="' + i + '">' + this.locators[i].name + '</option>';
+                }
+                html += '</select>';
+                this.locatorMenuNode.innerHTML = html;
             }
-            html += '</select>';
-            this.locatorMenuNode.innerHTML = html;
         }
     },
 
+    // post create widget function
     postCreate: function () {
-        if (this.locators.length > 1) {
-            this._createLocatorMenu();
-        }
+        this._createLocatorMenu();
     },
 
     // start widget
@@ -499,10 +504,12 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                 numResult = resultNumber;
             }
             console.log(candidates[numResult]);
+            // if result has attributes
             if (candidates[numResult].attributes) {
                 var extent;
                 if (
                 candidates[numResult].attributes.hasOwnProperty('Xmin') && candidates[numResult].attributes.hasOwnProperty('Ymin') && candidates[numResult].attributes.hasOwnProperty('Xmax') && candidates[numResult].attributes.hasOwnProperty('Ymax')) {
+                    // if result has extent attributes
                     console.log('extent 1');
                     // new extent
                     extent = new esri.geometry.Extent({
@@ -516,6 +523,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                     instance.map.setExtent(esri.geometry.geographicToWebMercator(extent));
                 } else if (
                 candidates[numResult].attributes.hasOwnProperty('westLon') && candidates[numResult].attributes.hasOwnProperty('southLat') && candidates[numResult].attributes.hasOwnProperty('eastLon') && candidates[numResult].attributes.hasOwnProperty('northLat')) {
+                    // result has lat/lon extent attributes
                     console.log('extent 2');
                     // new extent
                     extent = new esri.geometry.Extent({
@@ -528,6 +536,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                     // set map extent to location
                     instance.map.setExtent(esri.geometry.geographicToWebMercator(extent));
                 } else {
+                    // use point
                     console.log('point');
                     instance.map.centerAndZoom(candidates[numResult].location, instance.zoomLevel);
                 }
