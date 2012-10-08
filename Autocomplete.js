@@ -1,4 +1,3 @@
-// todo: accept old locators.
 dojo.provide("esri.dijit.Autocomplete");
 
 // dependencies
@@ -8,7 +7,7 @@ dojo.require("dijit._Templated");
 dojo.require("dojox.NodeList.delegate");
 dojo.require("dojo.NodeList-manipulate");
 
-// define the autocomplete
+// define the autocomplete widget
 dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 
     templatePath: "templates/Autocomplete.html",
