@@ -23,6 +23,10 @@
     border-radius: 12px;
 }
 
+.esriAutocomplete .esriAcLocatorMenu{
+    display: inline-block;
+}
+
 .esriAutocomplete .esriAcActive {
     -moz-border-radius: 12px 12px 0 0;
     -webkit-border-radius: 12px 12px 0 0;

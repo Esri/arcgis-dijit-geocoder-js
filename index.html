@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-    
+
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=7, IE=9" />
@@ -33,13 +33,6 @@
                 top: 20px;
                 left: 100px;
             }
-            #search2 {
-                display: block;
-                position: absolute;
-                z-index: 2;
-                top: 20px;
-                left: 400px;
-            }
         </style>
         <script type="text/javascript">
             var dojoConfig = {
@@ -57,11 +50,11 @@
             dojo.require("esri.arcgis.utils");
 
 
-            var map, autocomplete, autocomplete2;
+            var map, autocomplete;
 
             function init() {
                 esri.config.defaults.io.proxyUrl = "/arcgisserver/apis/javascript/proxy/proxy.ashx";
-                //This service is for development and testing purposes only. We recommend that you create your own geometry service for use within your applications. 
+                //This service is for development and testing purposes only. We recommend that you create your own geometry service for use within your applications.
                 esri.config.defaults.geometryService = new esri.tasks.GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
 
                 var urlObject = esri.urlToObject(document.location.href);
@@ -91,29 +84,33 @@
                         theme: 'esriAutocomplete', // Used to add a class to style the autocomplete
                         placeholder: 'Find address or place',
                         resetTitle: 'Clear Location',
-                        locator: 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
+                        zoomLevel: 6,
+                        locators:[
+                            {
+                                url:'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
+                                name:'World'
+                            },
+                            {
+                                url:'http://janani2k8:6080/arcgis/rest/services/SussexComposite/GeocodeServer',
+                                name:'Sussex 911'
+                            },
+                            {
+                                url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
+                                name: 'IHS_Composite Dexter'
+                            },
+                            {
+                                url: 'http://janani2k8:6080/arcgis/rest/services/IHS_Composite/GeocodeServer',
+                                name: 'IHS_Composite Janani'
+                            }
+                        ],
                         maxLocations: 6,
                         minCharacters: 3,
                         useBoundingBox: false, // don't search within current extent
                         hideDelay: 6000,
                         searchDelay: 300,
-                        map: map,
-                        onNoResults: function (evt) {
-                            alert("Location could not be found.");
-                            console.log(evt);
-                        },
-                        onSearch: function (evt) {
-                            console.log(searched, evt);
-                        }
+                        map: map
                     }, dojo.byId('search'));
 					autocomplete.startup();
-
-                    // basic option using bounding box for narrowing search
-                    autocomplete2 = new esri.dijit.Autocomplete({
-                        useBoundingBox: true,
-                        map: map
-                    }, dojo.query('#search2')[0]);
-					autocomplete2.startup();
 
                 });
                 mapDeferred.addErrback(function (error) {
@@ -127,11 +124,11 @@
                 map.reposition();
             }
 
-            //show map on load 
+            //show map on load
             dojo.addOnLoad(init);
         </script>
     </head>
-    
+
     <body class="soria">
         <div id="search"></div>
         <div id="search2"></div>
