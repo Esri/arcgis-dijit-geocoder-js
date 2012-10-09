@@ -47,11 +47,17 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this._resultsItemClass = 'esriAcItem';
         this._resultsItemEvenClass = 'even';
         this._resultsItemOddClass = 'odd';
+        this._resultsPartialMatchClass = 'esriAcPartial';
         this._searchButtonClass = 'esriAcSearch';
         this._clearButtonClass = 'esriAcClear';
         this._clearButtonActiveClass = 'esriAcClearActive';
         this._locatorMenuClass = 'esriAcLocatorMenu';
         this._locatorHeaderClass = 'esriAcHeader';
+        // keys
+        this._submitKey = 13;
+        this._previousKey = 38;
+        this._nextKey = 40;
+        this._cancelKey = 27;
     },
 
     // init
@@ -124,7 +130,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     onAutoCompleteResults: function (results, locatorIndex) {},
 
     // return results
-    getResults: function(){
+    getResults: function () {
         return this.results;
     },
 
@@ -183,7 +189,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         }, instance.hideDelay);
     },
 
-    _insertLocatorResults: function(results, locatorIndex){
+    _insertLocatorResults: function (results, locatorIndex) {
         var candidates = results.candidates;
         // set results
         this.results[locatorIndex] = results;
@@ -204,22 +210,20 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                 if (i % 2 === 0) {
                     // set it to odd
                     layerClass += this._resultsItemOddClass;
-                }
-                else {
+                } else {
                     layerClass += this._resultsItemEvenClass;
                 }
                 // create list item
-                html += '<li data-locator-index="' + locatorIndex + '" data-result-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + candidates[i].address.replace(regex, '<strong>' + partialMatch + '</strong>') + '</li>';
+                html += '<li data-item="true" data-locator-index="' + locatorIndex + '" data-result-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + candidates[i].address.replace(regex, '<strong class="' + this._resultsPartialMatchClass + '">' + partialMatch + '</strong>') + '</li>';
             }
             // close list
             html += '</ul>';
-        }
-        else{
+        } else {
             html += '<div class="' + this._noResultsClass + '">' + this.noResultsText + '</div>';
         }
         var node = dojo.query('[data-locator-results="' + locatorIndex + '"]', this.resultsNode)[0];
         // set HTML
-        if(node){
+        if (node) {
             node.innerHTML = html;
         }
         // show!
@@ -228,7 +232,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this.onAutoCompleteResults(results, locatorIndex);
     },
 
-    _show: function(){
+    _show: function () {
         // clear hide timer
         this._resetHideTimer();
         // node of the search box container
@@ -239,7 +243,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         dojo.query(this.resultsNode).style('display', 'block');
     },
 
-    _showAll: function(){
+    _showAll: function () {
         // string to set
         var html = '';
         // node of the search box container
@@ -255,7 +259,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         // for each result
         for (var i = 0; i < this.locators.length; ++i) {
             // if more than 1 locator
-            if(this.locators.length > 1){
+            if (this.locators.length > 1) {
                 html += '<div class="' + this._locatorHeaderClass + '">' + this.locators[i].name + '</div>';
             }
             html += '<div data-locator-results="' + i + '"">';
@@ -290,52 +294,52 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         var inputKey = dojo.connect(this.inputNode, "onkeyup", this, "_inputKeyup");
         instance.delegations.push(inputKey);
         // hover over results, reset timer
-        var widgetHover = dojo.query(instance.resultsNode).delegate('. + ' + this._resultsItemClass + ', .' + this._locatorHeaderClass, 'mousemove', function (event) {
+        var widgetHover = dojo.query(instance.resultsNode).delegate('[data-item="true"]', 'mousemove', function (event) {
             // stop results from hiding
             instance._resetHideTimer();
         });
         instance.delegations.push(widgetHover);
         // list item click
-        var listClick = dojo.query(instance.resultsNode).delegate('.' + this._resultsItemClass, 'onclick,keyup', function (event) {
+        var listClick = dojo.query(instance.resultsNode).delegate('[data-item="true"]', 'onclick,keyup', function (event) {
             // clear timers
             instance._resetHideTimer();
             clearTimeout(instance.showTimer);
-            // index of this list item
-            var locNum = parseInt(dojo.query(this).attr('data-result-index')[0], 10);
-            var locator = parseInt(dojo.query(this).attr('data-locator-index')[0], 10);
-            // size of lists
-            var liSize = instance.results[locator].candidates.length;
+            // all items
+            var lists = dojo.query('[data-item="true"]', instance.resultsNode);
+            // index of current item
+            var currentIndex = dojo.indexOf(lists, this);
             // input box text
             var locTxt = dojo.query(this).text();
             // next/previous index
             var newIndex;
-            // if click or enter key pushed
-            if (event.type === 'click' || (event.type === 'keyup' && event.keyCode === 13)) {
+            if (event.type === 'click' || (event.type === 'keyup' && event.keyCode === instance._submitKey)) { // if click or enter key pushed
+                // index of the locator to locate with
+                var locatorIndex = parseInt(dojo.query(this).attr('data-locator-index')[0], 10);
+                // index of this list item
+                var resultIndex = parseInt(dojo.query(this).attr('data-result-index')[0], 10);
                 // set input text value to this text
-                dojo.query('input', instance.domNode).attr('value', locTxt);
+                dojo.query(instance.inputNode).attr('value', locTxt);
                 // set current text var
                 instance.value = locTxt;
-                // _locate
-                instance._locate(instance.results[locator], locNum);
+                // Locate
+                instance._locate(instance.results[locatorIndex], resultIndex);
                 // hide autocomplete
                 instance._hide();
-            } else if (event.type === 'keyup' && event.keyCode === 38) {
+            } else if (event.type === 'keyup' && event.keyCode === instance._previousKey) { // Up arrow key
                 // go to previous item
-                newIndex = locNum - 1;
+                newIndex = currentIndex - 1;
                 if (newIndex < 0) {
-                    newIndex = liSize - 1;
+                    newIndex = lists.length - 1;
                 }
-                dojo.query('li', instance.resultsNode)[newIndex].focus();
-            } else if (event.type === 'keyup' && event.keyCode === 40) {
+                lists[newIndex].focus();
+            } else if (event.type === 'keyup' && event.keyCode === instance._nextKey) { //Down arrow key
                 // go to next item
-                newIndex = locNum + 1;
-                if (newIndex >= liSize) {
+                newIndex = currentIndex + 1;
+                if (newIndex >= lists.length) {
                     newIndex = 0;
                 }
-                dojo.query('li', instance.resultsNode)[newIndex].focus();
-            }
-            // esc key
-            else if (event.keyCode === 27) {
+                lists[newIndex].focus();
+            } else if (event.keyCode === instance._cancelKey) { // esc key
                 // clear timers
                 clearTimeout(instance.hideTimer);
                 clearTimeout(instance.showTimer);
@@ -344,12 +348,6 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             }
         });
         instance.delegations.push(listClick);
-        // Locator menu change
-        var locatorMenuChange = dojo.query(instance.locatorMenuNode).delegate('select', 'onchange', function () {
-            var value = parseInt(dojo.query(this).attr('value')[0], 10);
-            instance._changeLocator(value);
-        });
-        instance.delegations.push(locatorMenuChange);
     },
 
     _inputKeyup: function (event) {
@@ -368,17 +366,15 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             // set length of value
             alength = aquery.length;
         }
-        var lists;
+        var lists = dojo.query('[data-item="true"]', instance.resultsNode);
         // if enter key was pushed
-        if (event && event.keyCode === 13) {
-            // query then _locate
+        if (event && event.keyCode === instance._submitKey) {
+            // query then Locate
             instance._query(instance.activeLocator, instance._locate);
             // hide autocomplete
             instance._hide();
             // if up arrow pushed
-        } else if (event && event.keyCode === 38) {
-            // get all list items
-            lists = dojo.query('li', instance.resultsNode);
+        } else if (event && event.keyCode === instance._previousKey) {
             // get list item length
             var listsLen = lists.length;
             // if not zero
@@ -387,9 +383,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                 lists[listsLen - 1].focus();
             }
             // if down arrow pushed
-        } else if (event && event.keyCode === 40) {
-            // get all lists
-            lists = dojo.query('li', instance.resultsNode);
+        } else if (event && event.keyCode === instance._nextKey) {
             // if first item
             if (lists[0]) {
                 // focus first item
@@ -398,7 +392,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             // if input value is larger than 2
         }
         // esc key
-        else if (event && event.keyCode === 27) {
+        else if (event && event.keyCode === instance._cancelKey) {
             // clear timers
             clearTimeout(instance.hideTimer);
             clearTimeout(instance.showTimer);
@@ -419,9 +413,9 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     },
 
     _submitSearch: function (event) {
-        if (event.type === 'click' || (event.type === 'keyup' && event.keyCode === 13)) {
-            var instance = this;
-            // query and then _locate
+        var instance = this;
+        if (event.type === 'click' || (event.type === 'keyup' && event.keyCode === instance._submitKey)) {
+            // query and then Locate
             instance._query(instance.activeLocator, instance._locate);
             // hide autocomplete
             instance._hide();
@@ -442,8 +436,8 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     },
 
     _clearAutocomplete: function (event) {
-        if (event.type === 'click' || (event.type === 'keyup' && event.keyCode === 13)) {
-            var instance = this;
+        var instance = this;
+        if (event.type === 'click' || (event.type === 'keyup' && event.keyCode === instance._submitKey)) {
             // hide autocomplete
             instance._hide();
             // clear address
@@ -503,7 +497,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                         callback.call(instance, data, activeLocator);
                     }
                 },
-                error: function(){
+                error: function () {
                     if (typeof callback === 'function') {
                         // call callback function
                         callback.call(instance, null, activeLocator);

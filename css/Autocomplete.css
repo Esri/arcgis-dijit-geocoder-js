@@ -111,7 +111,6 @@
     -webkit-border-bottom-right-radius: 2px;
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
-    width: 270px;
 }
 
 .esriAutocomplete .esriAcResultsLoading{
@@ -136,21 +135,27 @@
     list-style: none;
 }
 
-.esriAutocomplete .esriAcResults li {
+.esriAutocomplete .esriAcResults .esriAcItem {
     padding: 4px 10px;
     cursor: pointer;
     outline: 0;
+    width: 270px;
+    height: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
 }
 
 .esriAutocomplete .esriAcResults .even {
     background-color: whiteSmoke;
 }
 
-.esriAutocomplete .esriAcResults li:hover, .esriAutocomplete .esriAcResults .even:focus, .esriAutocomplete .esriAcResults .odd:focus {
+.esriAutocomplete .esriAcResults .esriAcItem:hover, .esriAutocomplete .esriAcResults .even:focus, .esriAutocomplete .esriAcResults .odd:focus {
     color: #fff;
     background-color: #007ac2;
 }
 
-.esriAutocomplete .esriAcResults li strong {
+.esriAutocomplete .esriAcResults .esriAcItem .esriAcPartial {
     font-weight: bold;
 }
