@@ -117,6 +117,7 @@
     background: url(../images/ajax-loader.gif) center center no-repeat;
     height: 16px;
     padding:4px 10px;
+    width: 270px;
 }
 
 .esriAutocomplete .esriAcHeader{
@@ -127,7 +128,6 @@
 .esriAutocomplete .esriAcNoResults{
     padding: 4px 10px;
     color: #ccc;
-    width: 270px;
 }
 
 .esriAutocomplete .esriAcResults ul {
