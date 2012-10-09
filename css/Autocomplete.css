@@ -127,6 +127,7 @@
 .esriAutocomplete .esriAcNoResults{
     padding: 4px 10px;
     color: #ccc;
+    width: 270px;
 }
 
 .esriAutocomplete .esriAcResults ul {
