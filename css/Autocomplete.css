@@ -23,10 +23,6 @@
     border-radius: 12px;
 }
 
-.esriAutocomplete .esriAcLocatorMenu{
-    display: inline-block;
-}
-
 .esriAutocomplete .esriAcActive {
     -moz-border-radius: 12px 12px 0 0;
     -webkit-border-radius: 12px 12px 0 0;
@@ -94,10 +90,6 @@
     cursor: pointer;
 }
 
-.esriAutocomplete .esriAc .esriAcLoading {
-    background: url(../images/ajax-loader.gif) no-repeat;
-}
-
 .esriAutocomplete .esriAc .esriAcClear:hover, .esriAutocomplete .esriAc .esriAcClear:focus {
     opacity: 0.75;
 }
@@ -106,12 +98,8 @@
     z-index: 99;
     position: absolute;
     left: 0;
-}
-
-.esriAutocomplete .esriAcResults ul {
     margin: 0 0 0 1px;
     padding: 0;
-    list-style: none;
     background: #fff;
     font-size: 14px;
     line-height: 18px;
@@ -126,8 +114,30 @@
     width: 270px;
 }
 
+.esriAutocomplete .esriAcResultsLoading{
+    background: url(../images/ajax-loader.gif) center center no-repeat;
+    height: 16px;
+    padding:4px 10px;
+}
+
+.esriAutocomplete .esriAcHeader{
+    padding:4px 10px;
+    background:#ccc;
+}
+
+.esriAutocomplete .esriAcNoResults{
+    padding: 4px 10px;
+    color: #ccc;
+}
+
+.esriAutocomplete .esriAcResults ul {
+    margin:0;
+    padding: 0;
+    list-style: none;
+}
+
 .esriAutocomplete .esriAcResults li {
-    padding: 6px 10px;
+    padding: 4px 10px;
     cursor: pointer;
     outline: 0;
 }
