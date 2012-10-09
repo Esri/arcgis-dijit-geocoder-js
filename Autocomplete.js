@@ -254,7 +254,10 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         });
         // for each result
         for (var i = 0; i < this.locators.length; ++i) {
-            html += '<div class="' + this._locatorHeaderClass + '">' + this.locators[i].name + '</div>';
+            // if more than 1 locator
+            if(this.locators.length > 1){
+                html += '<div class="' + this._locatorHeaderClass + '">' + this.locators[i].name + '</div>';
+            }
             html += '<div data-locator-results="' + i + '"">';
             html += '<div class="' + this._resultsLoadingClass + '"></div>';
             html += '</div>';
@@ -498,6 +501,12 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                     if (typeof callback === 'function') {
                         // call callback function
                         callback.call(instance, data, activeLocator);
+                    }
+                },
+                error: function(){
+                    if (typeof callback === 'function') {
+                        // call callback function
+                        callback.call(instance, null, activeLocator);
                     }
                 }
             });
