@@ -190,6 +190,9 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     },
 
     _insertLocatorResults: function (results, locatorIndex) {
+        // reset timer
+        this._resetHideTimer();
+        // set canidates
         var candidates = results.candidates;
         // set results
         this.results[locatorIndex] = results;
@@ -226,36 +229,29 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         if (node) {
             node.innerHTML = html;
         }
-        // show!
-        this._show();
         // autocomplete results
         this.onAutoCompleteResults(results, locatorIndex);
     },
 
     _show: function () {
-        // clear hide timer
-        this._resetHideTimer();
         // node of the search box container
         var container = dojo.query(this.containerNode);
-        // add class to container
-        container.addClass(this._autoCompleteActiveClass);
-        // show!
-        dojo.query(this.resultsNode).style('display', 'block');
-    },
-
-    _showAll: function () {
-        // string to set
-        var html = '';
-        // node of the search box container
-        var container = dojo.query(this.containerNode);
-        // add class to container
-        container.addClass(this._autoCompleteActiveClass);
         // position and height of the search box
         var position = dojo.position(container[0]);
         // position the autocomplete
         dojo.query(this.resultsNode).style({
             'top': position.h + 'px'
         });
+        // add class to container
+        container.addClass(this._autoCompleteActiveClass);
+        // clear hide timer
+        this._resetHideTimer();
+        dojo.query(this.resultsNode).style('display', 'block');
+    },
+
+    _showAll: function () {
+        // string to set
+        var html = '';
         // for each result
         for (var i = 0; i < this.locators.length; ++i) {
             // if more than 1 locator
@@ -270,6 +266,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this.resultsNode.innerHTML = html;
         // for each locator
         for (var j = 0; j < this.locators.length; ++j) {
+            // insert results
             this._query(j, this._insertLocatorResults);
         }
         // show!
