@@ -1,0 +1,11 @@
+<div class="${theme}">
+	<div class="${_autoCompleteClass}" data-dojo-attach-point="containerNode" role="presentation">
+		<div tabindex="0" class="${_searchButtonClass}" title="${placeholder}" data-dojo-attach-point="submitNode" data-dojo-attach-event="ondijitclick:_submitSearch" role="menuitem"></div>
+		<div class="${_locatorMenuArrowClass}" data-dojo-attach-point="locatorMenuArrowNode" role="presentation" data-dojo-attach-point="inputNode" data-dojo-attach-event="ondijitclick:_toggleLocatorMenu"></div>
+		<input tabindex="0" placeholder="${placeholder}" title="${placeholder}" value="${value}" autocomplete="off" type="text" data-dojo-attach-point="inputNode" data-dojo-attach-event="ondijitclick:_inputClick" role="textbox">
+		<div tabindex="0" class="${_clearButtonClass}" data-dojo-attach-point="clearNode" data-dojo-attach-event="ondijitclick:_clearAutocomplete" role="menuitem"></div>
+		<div class="${_autoCompleteClearClass}"></div>
+	</div>
+	<div class="${_resultsContainerClass}" data-dojo-attach-point="resultsNode" role="presentation"></div>
+	<div class="${_locatorMenuClass}" data-dojo-attach-point="locatorMenuNode" role="presentation"></div>
+</div>

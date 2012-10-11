@@ -10,7 +10,7 @@ dojo.require("dojo.NodeList-manipulate");
 // define the autocomplete widget
 dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 
-    templatePath: "templates/Autocomplete.html",
+    templatePath: "templates/Autocomplete2.html",
     widgetsInTemplate: false,
 
     // default settings
@@ -51,7 +51,11 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this._searchButtonClass = 'esriAcSearch';
         this._clearButtonClass = 'esriAcClear';
         this._clearButtonActiveClass = 'esriAcClearActive';
+        this._locatorMenuClass = 'esriAcLocatorMenu';
         this._locatorHeaderClass = 'esriAcHeader';
+		this._locatorMenuClass = 'esriAcMenu';
+		this._locatorMenuArrowClass = 'esriAcMenuArrow';
+		this._autoCompleteClearClass = 'esriAcClearFloat';
         // keys
         this._submitKey = 13;
         this._previousKey = 38;
@@ -118,6 +122,72 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             this._setDelegations();
         }
     },
+	
+	
+	_showLocatorMenu: function(){
+		var container = dojo.query(this.containerNode);
+		// position and height of the search box
+		var position = dojo.position(container[0]);
+		// position the autocomplete
+		dojo.query(this.locatorMenuNode).style({
+			'top': position.h + 'px'
+		});
+		// add class to container
+		container.addClass(this._autoCompleteActiveClass);
+		dojo.query(this.locatorMenuNode).style('display', 'block');
+	},
+	
+	_hideLocatorMenu: function(){
+		var container = dojo.query(this.containerNode);
+		// add class to container
+		container.removeClass(this._autoCompleteActiveClass);
+		dojo.query(this.locatorMenuNode).style('display', 'none');
+	},
+	
+	
+	_toggleLocatorMenu: function(){
+		var display = dojo.query(this.locatorMenuNode).style('display');
+		// node of the search box container
+		if(display[0] === 'block'){
+			this._hideLocatorMenu();
+		}
+		else{
+			this._showLocatorMenu();
+		}
+	},
+	
+	// create menu for changing active locator
+    _createLocatorMenu: function () {
+        if (this.locators.length > 1) {
+            if (this.locatorMenuNode) {
+				var html = '';
+				html += '<div class="esriAcHeader">Locators</div>';
+				html += '<ul>';
+				// for each result
+				for (var i = 0; i < this.locators.length; i++) {
+					// set layer class
+					var layerClass = this._resultsItemClass + ' ';
+					// if it's odd
+					if (i % 2 === 0) {
+						// set it to odd
+						layerClass += this._resultsItemOddClass;
+					} else {
+						layerClass += this._resultsItemEvenClass;
+					}
+					// create list item
+					html += '<li data-item="true" role="menuitem" tabindex="0" class="' + layerClass + '">' + this.locators[i].name  + '</li>';
+				}
+				// close list
+				html += '</ul>';
+                this.locatorMenuNode.innerHTML = html;
+            }
+        }
+    },
+
+    // post create widget function
+    postCreate: function () {
+        this._createLocatorMenu();
+    },
 
     // called after search
     onLocate: function (results) {},
@@ -159,6 +229,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 
     // clear the input box
     _clearAddress: function () {
+		this._hideLocatorMenu();
         // empty input value
         dojo.query(this.inputNode).attr('value', '');
         // set current text
@@ -251,23 +322,13 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     _showAll: function () {
         // string to set
         var html = '';
-        // for each result
-        for (var i = 0; i < this.locators.length; ++i) {
-            // if more than 1 locator
-            if (this.locators.length > 1) {
-                html += '<div class="' + this._locatorHeaderClass + '">' + this.locators[i].name + '</div>';
-            }
-            html += '<div data-locator-results="' + i + '"">';
-            html += '<div class="' + this._resultsLoadingClass + '"></div>';
-            html += '</div>';
-        }
+		html += '<div data-locator-results="' + this.activeLocator + '"">';
+		html += '<div class="' + this._resultsLoadingClass + '"></div>';
+		html += '</div>';
         // set HTML
         this.resultsNode.innerHTML = html;
-        // for each locator
-        for (var j = 0; j < this.locators.length; ++j) {
-            // insert results
-            this._query(j, this._insertLocatorResults);
-        }
+		// query active locator
+		this._query(this.activeLocator, this._insertLocatorResults);
         // show!
         this._show();
         // call autocomplete event
@@ -344,6 +405,16 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             }
         });
         instance.delegations.push(listClick);
+		// locator menu item click
+        var locatorMenuClick = dojo.query(instance.locatorMenuNode).delegate('[data-item="true"]', 'onclick,keyup', function (event) {
+            // all items
+            var lists = dojo.query('[data-item="true"]', instance.locatorMenuNode);
+            // index of current item
+            var currentIndex = dojo.indexOf(lists, this);
+			instance._changeLocator(currentIndex);
+			instance._hideLocatorMenu();
+        });
+        instance.delegations.push(locatorMenuClick);
     },
 
     _inputKeyup: function (event) {

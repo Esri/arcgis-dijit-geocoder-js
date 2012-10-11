@@ -13,7 +13,7 @@
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dojox/grid/resources/Grid.css">
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dojox/grid/resources/SoriaGrid.css">
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/esri/dijit/css/Popup.css">
-        <link rel="stylesheet" type="text/css" href="css/Autocomplete.css">
+        <link rel="stylesheet" type="text/css" href="css/Autocomplete2.css">
         <style type="text/css">
             html, body, #map {
                 height:100%;
@@ -40,7 +40,7 @@
             };
         </script>
         <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1"></script>
-        <script type="text/javascript" src="Autocomplete.js"></script>
+        <script type="text/javascript" src="Autocomplete2.js"></script>
         <script type="text/javascript">
             dojo.require("dijit.dijit"); // optimize: load dijit layer
             dojo.require("dijit.layout.BorderContainer");
@@ -82,6 +82,32 @@
                     // autocomplete with all common options set. Only map is required.
                     autocomplete = new esri.dijit.Autocomplete({
                         theme: 'esriAutocomplete', // Used to add a class to style the autocomplete
+                        placeholder: 'Find address or place',
+                        resetTitle: 'Clear Location',
+                        zoomLevel: 6,
+                        locators:[
+                            {
+                                url:'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
+                                name:'World'
+                            },
+                            {
+                                url:'http://janani2k8:6080/arcgis/rest/services/SussexComposite/GeocodeServer',
+                                name:'Sussex 911'
+                            },
+                            {
+                                url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
+                                name: 'IHS_Composite Dexter'
+                            },
+                            {
+                                url: 'http://janani2k8:6080/arcgis/rest/services/IHS_Composite/GeocodeServer',
+                                name: 'IHS_Composite Janani'
+                            }
+                        ],
+                        maxLocations: 3,
+                        minCharacters: 3,
+                        useBoundingBox: false, // don't search within current extent
+                        hideDelay: 6000,
+                        searchDelay: 300,
                         map: map
                     }, dojo.byId('search'));
 					autocomplete.startup();
