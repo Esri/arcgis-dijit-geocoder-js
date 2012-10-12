@@ -19,7 +19,8 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this.value = '';
         this.placeholder = '';
         this.resetTitle = '';
-        this.noResultsText = 'No Results';
+        this.noResultsText = 'No results';
+        this.toggleLocatorTitle = 'Change locator';
         // flavor
         this.theme = '';
         // results holder
@@ -55,6 +56,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this._locatorHeaderClass = 'esriAcHeader';
 		this._locatorMenuClass = 'esriAcMenu';
 		this._locatorMenuArrowClass = 'esriAcMenuArrow';
+		this._locatorSelectedClass = 'esriAcSelected';
 		this._autoCompleteClearClass = 'esriAcClearFloat';
         // keys
         this._submitKey = 13;
@@ -104,12 +106,12 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     _changeLocator: function (value) {
         this.activeLocator = value;
         this._updateActiveLocator();
+        this._createLocatorMenu();
     },
 
     // change active locator
     _updateActiveLocator: function () {
         this._hide();
-        this._inputKeyup();
     },
 
     // start widget
@@ -122,9 +124,10 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             this._setDelegations();
         }
     },
-	
-	
+
 	_showLocatorMenu: function(){
+	    this._hide();
+	    clearTimeout(this.hideTimer);
 		var container = dojo.query(this.containerNode);
 		// position and height of the search box
 		var position = dojo.position(container[0]);
@@ -136,32 +139,32 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 		container.addClass(this._autoCompleteActiveClass);
 		dojo.query(this.locatorMenuNode).style('display', 'block');
 	},
-	
-	_hideLocatorMenu: function(){
-		var container = dojo.query(this.containerNode);
-		// add class to container
-		container.removeClass(this._autoCompleteActiveClass);
+
+	_hideLocatorMenu: function(removeClass){
+	   if(removeClass){
+    		var container = dojo.query(this.containerNode);
+    		// add class to container
+    		container.removeClass(this._autoCompleteActiveClass);
+		}
 		dojo.query(this.locatorMenuNode).style('display', 'none');
 	},
-	
-	
+
 	_toggleLocatorMenu: function(){
 		var display = dojo.query(this.locatorMenuNode).style('display');
 		// node of the search box container
 		if(display[0] === 'block'){
-			this._hideLocatorMenu();
+			this._hideLocatorMenu(true);
 		}
 		else{
 			this._showLocatorMenu();
 		}
 	},
-	
+
 	// create menu for changing active locator
     _createLocatorMenu: function () {
         if (this.locators.length > 1) {
             if (this.locatorMenuNode) {
 				var html = '';
-				html += '<div class="esriAcHeader">Locators</div>';
 				html += '<ul>';
 				// for each result
 				for (var i = 0; i < this.locators.length; i++) {
@@ -174,6 +177,9 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 					} else {
 						layerClass += this._resultsItemEvenClass;
 					}
+					if(i === this.activeLocator){
+                        layerClass += ' ' + this._locatorSelectedClass;
+                    }
 					// create list item
 					html += '<li data-item="true" role="menuitem" tabindex="0" class="' + layerClass + '">' + this.locators[i].name  + '</li>';
 				}
@@ -240,6 +246,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 
     // check input box's status
     _checkStatus: function () {
+        this._hideLocatorMenu();
         // if input value is not empty
         if (this.value) {
             // set class and title
@@ -320,6 +327,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     },
 
     _showAll: function () {
+        this._hideLocatorMenu();
         // string to set
         var html = '';
 		html += '<div data-locator-results="' + this.activeLocator + '"">';
@@ -412,7 +420,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             // index of current item
             var currentIndex = dojo.indexOf(lists, this);
 			instance._changeLocator(currentIndex);
-			instance._hideLocatorMenu();
+			instance._hideLocatorMenu(true);
         });
         instance.delegations.push(locatorMenuClick);
     },

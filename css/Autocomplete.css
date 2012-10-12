@@ -1,8 +1,14 @@
+.esriAcClearFloat{
+	clear: both;
+	display: block;
+	overflow: hidden;
+	visibility: hidden;
+	width: 0;
+	height: 0;
+}
+
 .esriAutocomplete .esriAc {
-    width: 212px;
-    position: relative;
     display: inline-block;
-    vertical-align: middle;
     font-size: 12px;
     line-height: 16px;
     font-weight: normal;
@@ -41,12 +47,11 @@
     font-weight: normal;
     margin: 0;
     padding: 5px 0;
-    position: relative;
-    left: 26px;
-    top: 0;
+    float:left;
     color: #333;
     background: none;
     width: 160px;
+	margin:0 5px 0 5px;
 }
 
 .esriAutocomplete .esriAc input:focus {
@@ -55,13 +60,11 @@
 
 .esriAutocomplete .esriAc .esriAcSearch {
     outline: 0;
-    position: absolute;
-    left: 5px;
-    top: 50%;
-    margin: -8px 0 0 0;
+    float:left;
     width: 16px;
     height: 16px;
     z-index: 2;
+	margin:5px 0 5px 5px;
     overflow: hidden;
     cursor: pointer;
     background: url(../images/search.png) no-repeat;
@@ -73,15 +76,12 @@
 
 .esriAutocomplete .esriAc .esriAcClear {
     outline: 0;
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    margin: -8px 0 0 0;
+    float:left;
     width: 16px;
     height: 16px;
     z-index: 2;
     overflow: hidden;
-    display: none;
+	margin:5px 5px 5px 0;
 }
 
 .esriAutocomplete .esriAc .esriAcClearActive {
@@ -98,7 +98,7 @@
     z-index: 99;
     position: absolute;
     left: 0;
-    margin: 0 0 0 1px;
+    margin: -1px 0 0 1px;
     padding: 0;
     background: #fff;
     font-size: 14px;
@@ -130,17 +130,16 @@
     color: #ccc;
 }
 
-.esriAutocomplete .esriAcResults ul {
+.esriAutocomplete  ul {
     margin:0;
     padding: 0;
     list-style: none;
 }
 
-.esriAutocomplete .esriAcResults .esriAcItem {
+.esriAutocomplete .esriAcItem {
     padding: 4px 10px;
     cursor: pointer;
     outline: 0;
-    width: 270px;
     height: 16px;
     white-space: nowrap;
     overflow: hidden;
@@ -148,15 +147,23 @@
     -o-text-overflow: ellipsis;
 }
 
-.esriAutocomplete .esriAcResults .even {
+.esriAutocomplete .esriAcResults .esriAcItem {
+	width: 270px;
+}
+
+.esriAutocomplete .esriAcMenu .esriAcItem {
+	width: 210px;
+}
+
+.esriAutocomplete  .even {
     background-color: whiteSmoke;
 }
 
-.esriAutocomplete .esriAcResults .esriAcItem:hover, .esriAutocomplete .esriAcResults .even:focus, .esriAutocomplete .esriAcResults .odd:focus {
+.esriAutocomplete .esriAcItem:hover, .esriAutocomplete .even:focus, .esriAutocomplete .odd:focus {
     color: #fff;
     background-color: #007ac2;
 }
 
-.esriAutocomplete .esriAcResults .esriAcItem .esriAcPartial {
+.esriAutocomplete .esriAcItem .esriAcPartial {
     font-weight: bold;
 }

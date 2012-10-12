@@ -1,0 +1,249 @@
+__NOTOC__
+__NOEDITSECTION__
+{{#css:/custom/jsapi.css}}
+
+Print widget provides a ready-to-use widget to print maps. PrintTask class allows users to consume print service by using API.
+
+== Class esri.tasks.PrintTask ==
+
+=== Constructor ===
+
+{| class="gmaps"
+|-
+! Constructor
+! Description
+|-
+| class="code" | esri.tasks.PrintTask(url);
+| The export web map task URL.
+|}
+
+=== Properties ===
+
+{| class="gmaps"
+|-
+! Name
+! Description
+|-
+| url
+| The export web map task URL.
+|}
+
+=== Methods ===
+
+{| class="gmaps"
+|-
+! Method
+! Return Value
+! Description
+|-
+| class="code" | execute(printParameters, callback?, errback?)
+| dojo.Deferred
+| Sends a request to the print service. On completion, the onComplete event is fired and the optional callback function is invoked.
+|}
+
+=== Events ===
+
+{| class="gmaps"
+|-
+! Event
+! Description
+|-
+| class="code" | onComplete(result)
+| Fires when the print finishes. The result is a json object, including a property "url", which is the printout url.
+|-
+| class="code" | onError(error)
+| Fires when an error occurs when executing the task.
+|}
+
+
+----
+=== esri.tasks.PrintParameters ===
+
+=== Constructor ===
+{| class="gmaps"
+|-
+! Constructor
+! Description
+|-
+| class="code" | esri.tasks.PrintParameters();
+| The constructor takes no parameters.
+|}
+
+=== Properties ===
+{| class="gmaps"
+|-
+! Name
+! Type
+! Description
+|-
+| map
+| esri.map
+| The map will be printed.
+|-
+| template
+| esri.tasks.PrintTemplate
+| Defines the template for printing.
+|}
+
+
+----
+=== esri.tasks.PrintTemplate===
+It's almost the same as PrintParameters in the PrintTask, except it doesn't require map since it's already part of the constructor of the print widget.
+
+=== Constructor ===
+{| class="gmaps"
+|-
+! Constructor
+! Description
+|-
+| class="code" | esri.tasks.PrintTemplate();
+| The constructor takes no parameters.
+|}
+
+=== Properties ===
+{| class="gmaps"
+|-
+! Name
+! Type
+! Description
+|-
+| label
+| String
+| The label will show on the print button.
+|-
+| format
+| String
+| Format of printout. It support PDF, PNG32, PNG8, JPG, GIF, EPS, SVG, SVGZ.
+|-
+| layout
+| String
+| Predefined layout of printout. By default, print service provides some out-of-the-box templates which include MAP_ONLY, A3 Landscape, A3 Portrait, A4 Landscape, A4 Portrait, Letter ANSI A Landscape, Letter ANSI A Portrait, Tabloid ANSI B Landscape, Tabloid ANSI B Portrait. Server administrator can add more templates to the print service.
+|-
+| exportOptions
+| Object
+| When the layoutTemplate is "MAP_ONLY", exportOptions is required. The structure is {width: number, height: number, dpi: number}
+|-
+| layoutOptions
+| Object
+| Defines the elements of the layout.
+  {
+    titleText: string,
+    authorText: string,
+    copyrightText: string,
+    scalebarUnit: <"Miles", "Kilometers", "Meters", "Feet">,
+    legendLayers: array of strings, which is the ids of the layer. e.g. ["layer1", "graphicsLayer3"]
+  }
+  Note: when legendLayers is not specified, it implies all operational layers will be present in the legend. If users don't want to include any layers to the legend, they just need to set legendLayers as an empty array [].
+|-
+| preserveScale
+| Boolean
+| Indicates the printout respects the scale or extent. By default, it's true.
+|}
+
+----
+
+== Print Widget ==
+Without being specified any templates, it's a simple button with the default settings. If the url of the printout is from the same domain as the application, it will pop up the print out in a new browser window or tab. If the url is from a different domain, the print button/combobutton will be hidden and a hyperlink will show up. By clicking the link, it opens the printout and the widget will show the print button/combobutton again and hide the link.
+=== Constructor ===
+{| class="gmaps"
+|-
+! new esri.dijit.Print( params, srcNodeRef )
+{| class="gmaps" style="width:auto;"
+|-
+! Name
+! Optional?
+! Description
+|-
+| class="code" | <string>url
+| class="code" | Required
+| export web map tasks URL. e.g. http://spritle:6080/arcgis/rest/services/Utilities/ExportWebMap/GPServer/Export Web Map Task
+|-
+| class="code" | <Object>map
+| class="code" | Required
+| map to be printed.
+|-
+| class="code" | <array of esri.tasks.PrintTemplate>templates
+| class="code" | Optional
+| user-defined templates. If it's not specified, the print widget is a button with a default template which is "MAP_ONLY" with the settings of width:800px, height:1100px and dpi:96. If the array only has one template, the print widget will be a button. If there are more than one templates included, the widget will be a combobutton with dropdown to show more templates.
+|}
+|}
+
+=== Methods ===
+
+{| class="gmaps"
+|-
+! Method
+! Return Value
+! Description
+|-
+| class="code" | startup()
+| none
+| start the widget.
+|-
+| class="code" | destroy()
+| none
+| destroy the widget.
+|-
+| class="code" | show()
+| none
+| show the widget.
+|-
+| class="code" | hide()
+| none
+| hide the widget.
+|}
+
+
+=== Events ===
+{| class="gmaps"
+|-
+! Events
+! Description
+|-
+| class="code" | onPrintStart()
+| Fires when request sent to print service.
+|-
+| class="code" | onPrintComplete(value)
+| Fires when the print GP job is succeeded. The value object contains the url of the printed iamge as {"url": printoutUrl}.
+|-
+| class="code" | onError(err)
+| Fires when errors occur. The error object is forwarded from the print GP service.
+|}
+
+=== CSS ===
+
+{| class="gmaps"
+|-
+! Name
+! Description
+|-
+| .esriPrint
+| Defines the print widget parent div. Such as padding, background and so on.
+|-
+| .esriPrintButton
+| Defines the CSS of the print button, such as font, color and so on.
+|-
+| .esriPrintout
+| Defines the CSS of the hyperlink of the printout.
+|}
+
+
+== Samples ==
+''' Print Widget ''' <br/>
+http://jhuang7/localjsapi/test/print/print_widget.html <br/>
+''' Print Task ''' <br/>
+http://jhuang7/localjsapi/test/print/uc_print.html <br/>
+''' Print secured layers ''' <br/>
+http://jhuang7/localjsapi/test/print/security.html <br/>
+''' All kinds of layers testing '''<br/>
+http://jhuang7/localjsapi/test/print/tiledlayer.html <br/>
+''' DynamicMapServiceLayer with layerDefinition and timeOptions '''<br/>
+http://jhuang7/localjsapi/test/print/layerdefinition.html <br/>
+''' Selected features in featureLayer '''<br/>
+http://jhuang7/localjsapi/test/print/selectionobjects_featurelayer.html <br/>
+''' Selection only mode featurelayer ''' <br/>
+http://jhuang7/localjsapi/test/print/selection_mode.html <br/>
+''' MapImageLayer ''' <br/>
+http://jhuang7/localjsapi/test/print/imagelayer.html <br/>
+''' Renderer ''' <br/>
+http://jhuang7/localjsapi/test/print/featurelayer.html <br/>

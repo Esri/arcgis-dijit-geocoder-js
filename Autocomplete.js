@@ -19,7 +19,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this.value = '';
         this.placeholder = '';
         this.resetTitle = '';
-        this.noResultsText = 'No Results';
+        this.noResultsText = 'No results';
         // flavor
         this.theme = '';
         // results holder
@@ -52,6 +52,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this._clearButtonClass = 'esriAcClear';
         this._clearButtonActiveClass = 'esriAcClearActive';
         this._locatorHeaderClass = 'esriAcHeader';
+        this._autoCompleteClearClass = 'esriAcClearFloat';
         // keys
         this._submitKey = 13;
         this._previousKey = 38;

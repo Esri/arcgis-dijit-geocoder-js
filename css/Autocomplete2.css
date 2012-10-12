@@ -6,14 +6,14 @@
 	width: 0;
 	height: 0;
 }
-	
+
 .esriAutocomplete .esriAcMenu{
 	display:none;
     z-index: 99;
 	width:230px;
     position: absolute;
     left: 0;
-    margin: 0 0 0 1px;
+    margin: -1px 0 0 1px;
     padding: 0;
     background: #fff;
     font-size: 14px;
@@ -38,6 +38,11 @@
 	cursor:pointer;
 }
 
+.esriAcSelected{
+    background-image:url(http://png-1.findicons.com/files/icons/2232/wireframe_mono/16/checkmark.png);
+    background-repeat: no-repeat;
+    background-position: right center;
+}
 
 .esriAutocomplete .esriAc {
     display: inline-block;
@@ -130,7 +135,7 @@
     z-index: 99;
     position: absolute;
     left: 0;
-    margin: 0 0 0 1px;
+    margin: -1px 0 0 1px;
     padding: 0;
     background: #fff;
     font-size: 14px;
@@ -150,11 +155,6 @@
     height: 16px;
     padding:4px 10px;
     width: 270px;
-}
-
-.esriAutocomplete .esriAcHeader{
-    padding:4px 10px;
-    background:#ccc;
 }
 
 .esriAutocomplete .esriAcNoResults{
