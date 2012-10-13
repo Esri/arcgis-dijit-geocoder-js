@@ -1,16 +1,7 @@
-.esriAcClearFloat{
-	clear: both;
-	display: block;
-	overflow: hidden;
-	visibility: hidden;
-	width: 0;
-	height: 0;
-}
-
-.esriAutocomplete .esriAcMenu{
-	display:none;
+.esriAutocomplete .esriAcMenu {
+    display: none;
     z-index: 99;
-	width:230px;
+    width: 230px;
     position: absolute;
     left: 0;
     margin: -1px 0 0 1px;
@@ -28,18 +19,18 @@
     border-bottom-right-radius: 2px;
 }
 
-.esriAcMenuArrow{
-	display:block;
-	float:left;
-	width:16px;
-	height:16px;
-	background: url(http://png.findicons.com/files/icons/1588/farm_fresh_web/16/bullet_arrow_down.png) left center no-repeat;
-	margin:5px 0 5px 0;
-	cursor:pointer;
+.esriAcMenuArrow {
+    display: block;
+    float: left;
+    width: 16px;
+    height: 16px;
+    background: url(http://png.findicons.com/files/icons/1588/farm_fresh_web/16/bullet_arrow_down.png) left center no-repeat;
+    margin: 5px 0 5px 0;
+    cursor: pointer;
 }
 
-.esriAcSelected{
-    background-image:url(http://png-1.findicons.com/files/icons/2232/wireframe_mono/16/checkmark.png);
+.esriAcSelected {
+    background-image: url(http://png-1.findicons.com/files/icons/2232/wireframe_mono/16/checkmark.png);
     background-repeat: no-repeat;
     background-position: right center;
 }
@@ -84,11 +75,11 @@
     font-weight: normal;
     margin: 0;
     padding: 5px 0;
-    float:left;
+    float: left;
     color: #333;
     background: none;
     width: 160px;
-	margin:0 5px 0 5px;
+    margin: 0 5px 0 5px;
 }
 
 .esriAutocomplete .esriAc input:focus {
@@ -97,11 +88,11 @@
 
 .esriAutocomplete .esriAc .esriAcSearch {
     outline: 0;
-    float:left;
+    float: left;
     width: 16px;
     height: 16px;
     z-index: 2;
-	margin:5px 0 5px 5px;
+    margin: 5px 0 5px 5px;
     overflow: hidden;
     cursor: pointer;
     background: url(../images/search.png) no-repeat;
@@ -111,23 +102,27 @@
     opacity: 0.75;
 }
 
-.esriAutocomplete .esriAc .esriAcClear {
+.esriAutocomplete .esriAc .esriAcReset {
     outline: 0;
-    float:left;
+    float: left;
     width: 16px;
     height: 16px;
     z-index: 2;
     overflow: hidden;
-	margin:5px 5px 5px 0;
+    margin: 5px 5px 5px 0;
 }
 
-.esriAutocomplete .esriAc .esriAcClearActive {
+.esriAutocomplete .esriAc .esriAcResetActive {
     display: block;
     background: url(../images/reset.png) no-repeat;
     cursor: pointer;
 }
 
-.esriAutocomplete .esriAc .esriAcClear:hover, .esriAutocomplete .esriAc .esriAcClear:focus {
+.esriAutocomplete .esriAc .esriAcLoading {
+    background: url(../images/ajax-loader.gif) center center no-repeat;
+}
+
+.esriAutocomplete .esriAc .esriAcReset:hover, .esriAutocomplete .esriAc .esriAcReset:focus {
     opacity: 0.75;
 }
 
@@ -150,25 +145,13 @@
     border-bottom-right-radius: 2px;
 }
 
-.esriAutocomplete .esriAcResultsLoading{
-    background: url(../images/ajax-loader.gif) center center no-repeat;
-    height: 16px;
-    padding:4px 10px;
-    width: 270px;
-}
-
-.esriAutocomplete .esriAcNoResults{
-    padding: 4px 10px;
-    color: #ccc;
-}
-
 .esriAutocomplete  ul {
-    margin:0;
+    margin: 0;
     padding: 0;
     list-style: none;
 }
 
-.esriAutocomplete .esriAcItem {
+.esriAutocomplete .esriAcResult {
     padding: 4px 10px;
     cursor: pointer;
     outline: 0;
@@ -179,23 +162,32 @@
     -o-text-overflow: ellipsis;
 }
 
-.esriAutocomplete .esriAcResults .esriAcItem {
-	width: 270px;
+.esriAutocomplete .esriAcResults .esriAcResult {
+    width: 270px;
 }
 
-.esriAutocomplete .esriAcMenu .esriAcItem {
-	width: 210px;
+.esriAutocomplete .esriAcMenu .esriAcResult {
+    width: 210px;
 }
 
-.esriAutocomplete  .even {
+.esriAutocomplete  .esriAcResultEven {
     background-color: whiteSmoke;
 }
 
-.esriAutocomplete .esriAcItem:hover, .esriAutocomplete .even:focus, .esriAutocomplete .odd:focus {
+.esriAutocomplete .esriAcResult:hover, .esriAutocomplete .esriAcResultEven:focus, .esriAutocomplete .esriAcResultOdd:focus {
     color: #fff;
     background-color: #007ac2;
 }
 
-.esriAutocomplete .esriAcItem .esriAcPartial {
+.esriAutocomplete .esriAcResult .esriAcResultPartial {
     font-weight: bold;
+}
+
+.esriAutocomplete  .esriAcClearFloat {
+    clear: both;
+    display: block;
+    overflow: hidden;
+    visibility: hidden;
+    width: 0;
+    height: 0;
 }

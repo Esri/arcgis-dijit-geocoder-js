@@ -1,249 +1,300 @@
 __NOTOC__
 __NOEDITSECTION__
+
 {{#css:/custom/jsapi.css}}
 
-Print widget provides a ready-to-use widget to print maps. PrintTask class allows users to consume print service by using API.
+== class esri.dijit.Autocomplete ==
+<div style="font-family: consolas, monospace;">
+dojo.require("esri.dijit.Autocomplete");<br/>
+defined in esri/dijit/Autocomplete.js
+</div>
 
-== Class esri.tasks.PrintTask ==
+Autocomplete widget provides a ready-to-use widget to locate results from a locator.
+This dijit lets users ...
 
-=== Constructor ===
-
-{| class="gmaps"
-|-
-! Constructor
-! Description
-|-
-| class="code" | esri.tasks.PrintTask(url);
-| The export web map task URL.
-|}
-
-=== Properties ===
-
-{| class="gmaps"
-|-
-! Name
-! Description
-|-
-| url
-| The export web map task URL.
-|}
-
-=== Methods ===
-
-{| class="gmaps"
-|-
-! Method
-! Return Value
-! Description
-|-
-| class="code" | execute(printParameters, callback?, errback?)
-| dojo.Deferred
-| Sends a request to the print service. On completion, the onComplete event is fired and the optional callback function is invoked.
-|}
-
-=== Events ===
-
-{| class="gmaps"
-|-
-! Event
-! Description
-|-
-| class="code" | onComplete(result)
-| Fires when the print finishes. The result is a json object, including a property "url", which is the printout url.
-|-
-| class="code" | onError(error)
-| Fires when an error occurs when executing the task.
-|}
-
-
-----
-=== esri.tasks.PrintParameters ===
+=== Class hierarchy ===
+<pre style="background-color: white; border: none;">
+             +------------------------------+
+             ¦            Object            ¦
+             +------------------------------+
+                  &Delta;                   &Delta;
+                  |                   |
+                  |                   |
+         +----------------+  +--------------------+
+         ¦  dijit._Widget ¦  ¦  dijit._Templated  ¦
+         +----------------+  +--------------------+
+                  &Delta;                   &Delta;
+                  |                   |
+                  |                   |
+             +------------------------------+
+             ¦  esri.dijit.Autocomplete  ¦
+             +------------------------------+
+</pre>
 
 === Constructor ===
+
 {| class="gmaps"
 |-
-! Constructor
-! Description
+! new esri.dijit.Autocomplete ( params, srcNodeRef )
 |-
-| class="code" | esri.tasks.PrintParameters();
-| The constructor takes no parameters.
-|}
-
-=== Properties ===
-{| class="gmaps"
-|-
-! Name
-! Type
-! Description
-|-
-| map
-| esri.map
-| The map will be printed.
-|-
-| template
-| esri.tasks.PrintTemplate
-| Defines the template for printing.
-|}
-
-
-----
-=== esri.tasks.PrintTemplate===
-It's almost the same as PrintParameters in the PrintTask, except it doesn't require map since it's already part of the constructor of the print widget.
-
-=== Constructor ===
-{| class="gmaps"
-|-
-! Constructor
-! Description
-|-
-| class="code" | esri.tasks.PrintTemplate();
-| The constructor takes no parameters.
-|}
-
-=== Properties ===
-{| class="gmaps"
-|-
-! Name
-! Type
-! Description
-|-
-| label
-| String
-| The label will show on the print button.
-|-
-| format
-| String
-| Format of printout. It support PDF, PNG32, PNG8, JPG, GIF, EPS, SVG, SVGZ.
-|-
-| layout
-| String
-| Predefined layout of printout. By default, print service provides some out-of-the-box templates which include MAP_ONLY, A3 Landscape, A3 Portrait, A4 Landscape, A4 Portrait, Letter ANSI A Landscape, Letter ANSI A Portrait, Tabloid ANSI B Landscape, Tabloid ANSI B Portrait. Server administrator can add more templates to the print service.
-|-
-| exportOptions
-| Object
-| When the layoutTemplate is "MAP_ONLY", exportOptions is required. The structure is {width: number, height: number, dpi: number}
-|-
-| layoutOptions
-| Object
-| Defines the elements of the layout.
-  {
-    titleText: string,
-    authorText: string,
-    copyrightText: string,
-    scalebarUnit: <"Miles", "Kilometers", "Meters", "Feet">,
-    legendLayers: array of strings, which is the ids of the layer. e.g. ["layer1", "graphicsLayer3"]
-  }
-  Note: when legendLayers is not specified, it implies all operational layers will be present in the legend. If users don't want to include any layers to the legend, they just need to set legendLayers as an empty array [].
-|-
-| preserveScale
-| Boolean
-| Indicates the printout respects the scale or extent. By default, it's true.
-|}
-
-----
-
-== Print Widget ==
-Without being specified any templates, it's a simple button with the default settings. If the url of the printout is from the same domain as the application, it will pop up the print out in a new browser window or tab. If the url is from a different domain, the print button/combobutton will be hidden and a hyperlink will show up. By clicking the link, it opens the printout and the widget will show the print button/combobutton again and hide the link.
-=== Constructor ===
-{| class="gmaps"
-|-
-! new esri.dijit.Print( params, srcNodeRef )
+| Creates a new Autocomplete dijit using the given DOM node.<br/>
+<b>Parameters:</b><br/>
 {| class="gmaps" style="width:auto;"
 |-
 ! Name
-! Optional?
+! Type
 ! Description
 |-
-| class="code" | <string>url
-| class="code" | Required
-| export web map tasks URL. e.g. http://spritle:6080/arcgis/rest/services/Utilities/ExportWebMap/GPServer/Export Web Map Task
+| class="code" | params
+| class="code" | Object
+| Various parameters to configure this dijit. See the list below for details.
 |-
-| class="code" | <Object>map
-| class="code" | Required
-| map to be printed.
+| class="code" | srcNodeRef
+| class="code" | DOMNode | String
+| Reference or id of a HTML element that this dijit is rendered into. This parameter is always required.
+|}
+<br/>
+The following parameters are supported:
+{| class="gmaps" style="width:auto;"
 |-
-| class="code" | <array of esri.tasks.PrintTemplate>templates
-| class="code" | Optional
-| user-defined templates. If it's not specified, the print widget is a button with a default template which is "MAP_ONLY" with the settings of width:800px, height:1100px and dpi:96. If the array only has one template, the print widget will be a button. If there are more than one templates included, the widget will be a combobutton with dropdown to show more templates.
+! Name
+! Type
+! Description
+|-
+| class="code" | map
+| class="code" | [http://resources.esri.com/help/9.3/arcgisserver/apis/javascript/arcgis/help/jsapi_start.htm#jsapi/map.htm Map]
+| Map object that this dijit is associated with. This parameter is always required.
+|-
+| class="code" | locators
+| class="code" | Array
+| Required. Defines the elements of the layout.
+  [
+    {
+        url: string,
+        name: string,
+    },
+    {
+        url: string,
+        name: string,
+    }
+  ]
+|
+|-
+| class="code" | theme
+| class="code" | String
+| Optional. Adds the theme class to the container node of the widget for styling. Default: 'esriAutocomplete'.
+|-
+| class="code" | placeholder
+| class="code" | String
+| Optional. Placeholder text shown in the search input field. Default: 'Find address or place'.
+|-
+| class="code" | resetTitle
+| class="code" | String
+| Optional. Title attribute for the button that clears the input field. Default: 'Clear Location'.
+|-
+| class="code" | zoomLevel
+| class="code" | Number
+| Optional. Level of detail to zoom the map into if the locator doesn't return an extent. Default: 12.
+|-
+| class="code" | maxLocations
+| class="code" | Number
+| Optional. Maxiumum number of results to return in the autocomplete. Default: 6.
+|-
+| class="code" | minCharacters
+| class="code" | Number
+| Optional. Minimum amount of characters required to be entered into the search field before querying for autocomplete results. Default: 3.
+|-
+| class="code" | hideDelay
+| class="code" | Number
+| Optional. Number of milliseconds before automaticly hiding the autocomplete results. Default: 6000.
+|-
+| class="code" | searchDelay
+| class="code" | Number
+| Optional. Number of milliseconds before querying for autocomplete results. Default: 300.
+|-
+| class="code" | useBoundingBox
+| class="code" | Boolean
+| Optional. Only searches for results that are withihn the current map's extent. Default: false.
 |}
+
 |}
+
+
+=== Properties ===
+
+{| class="gmaps" style="width:auto;"
+|-
+! Property
+! Type
+! Description
+
+|-
+| class="code" | value
+| class="code" | String
+| Current value of the Autocomplete input textbox
+|-
+| class="code" | activeLocator
+| class="code" | Number
+| Current locator index to search by default. Defaults to 0 on init.
+|}
+
 
 === Methods ===
 
 {| class="gmaps"
 |-
-! Method
+! Methods
 ! Return Value
 ! Description
 |-
 | class="code" | startup()
-| none
-| start the widget.
+| class="code" | none
+| Finalizes the creation of this dijit. This method should be called after the constructor for this dijit is called and before letting the users interact with it.
 |-
 | class="code" | destroy()
-| none
-| destroy the widget.
+| class="code" | none
+| Releases all resources used by the dijit. This method should be called when an instance of this dijit is no longer needed in your application.
 |-
-| class="code" | show()
-| none
-| show the widget.
+| class="code" | getResults()
+| class="code" | none
+| Returns the last results from an autocomplete or search.
+|-
+| class="code" | clear()
+| class="code" | none
+| Clears any value currently set in the autocomplete.
 |-
 | class="code" | hide()
-| none
-| hide the widget.
+| class="code" | none
+| Hides any autocomplete results that may be showing.
 |}
 
-
-=== Events ===
-{| class="gmaps"
-|-
-! Events
-! Description
-|-
-| class="code" | onPrintStart()
-| Fires when request sent to print service.
-|-
-| class="code" | onPrintComplete(value)
-| Fires when the print GP job is succeeded. The value object contains the url of the printed iamge as {"url": printoutUrl}.
-|-
-| class="code" | onError(err)
-| Fires when errors occur. The error object is forwarded from the print GP service.
-|}
-
-=== CSS ===
+=== Events===
 
 {| class="gmaps"
 |-
-! Name
+! Event
+! Return Value
 ! Description
 |-
-| .esriPrint
-| Defines the print widget parent div. Such as padding, background and so on.
+| class="code" | onLocate
+| class="code" | String
+| Event is fired when a result has been selected, the submit button is pressed or enter key is fired.
 |-
-| .esriPrintButton
-| Defines the CSS of the print button, such as font, color and so on.
+| class="code" | onAutoComplete
+| class="code" | String
+| Event is fired when autocomplete has started.
 |-
-| .esriPrintout
-| Defines the CSS of the hyperlink of the printout.
+| class="code" | onAutoCompleteResults
+| class="code" | String
+| Event is fired when there results are returned from an autocomplete.
 |}
 
 
-== Samples ==
-''' Print Widget ''' <br/>
-http://jhuang7/localjsapi/test/print/print_widget.html <br/>
-''' Print Task ''' <br/>
-http://jhuang7/localjsapi/test/print/uc_print.html <br/>
-''' Print secured layers ''' <br/>
-http://jhuang7/localjsapi/test/print/security.html <br/>
-''' All kinds of layers testing '''<br/>
-http://jhuang7/localjsapi/test/print/tiledlayer.html <br/>
-''' DynamicMapServiceLayer with layerDefinition and timeOptions '''<br/>
-http://jhuang7/localjsapi/test/print/layerdefinition.html <br/>
-''' Selected features in featureLayer '''<br/>
-http://jhuang7/localjsapi/test/print/selectionobjects_featurelayer.html <br/>
-''' Selection only mode featurelayer ''' <br/>
-http://jhuang7/localjsapi/test/print/selection_mode.html <br/>
-''' MapImageLayer ''' <br/>
-http://jhuang7/localjsapi/test/print/imagelayer.html <br/>
-''' Renderer ''' <br/>
-http://jhuang7/localjsapi/test/print/featurelayer.html <br/>
+=== CSS Classes ===
+
+The following table lists the CSS class names defined by the basemap gallery to refer to the DOM nodes that it creates. These class names can be used to customize the look and feel of this widget in your application.
+
+{| class="gmaps"
+|-
+! Class Name
+! Description
+|-
+| class="code" | esriAc
+| Represents a node where an instance of the autocomplete widget is rendered.
+|-
+| class="code" | esriAcActive
+| This class is applied to the esriAc node when the autocomplete results menu is currently active.
+|-
+| class="code" | esriAcNoResults
+| Represents the currently selected gallery item node containing a thumbnail and a label.
+|-
+| class="code" | esriAcResults
+| Represents a node that contains a thumbnail image.
+|-
+| class="code" | esriAcResultsLoading
+| Represents a node that contains a thumbnail image.
+|-
+| class="code" | esriAcItem
+| Represents a node that contains a thumbnail image.
+|-
+| class="code" | even
+| Represents a node that contains a thumbnail image.
+|-
+| class="code" | odd
+| Represents a node that contains a thumbnail image.
+|-
+| class="code" | esriAcPartial
+| Represents a node that contains a thumbnail image.
+|-
+| class="code" | esriAcSearch
+| Represents a node that contains a thumbnail image.
+|-
+| class="code" | esriAcClear
+| Represents a node that contains a thumbnail image.
+|-
+| class="code" | esriAcClearActive
+| Represents a node that contains a thumbnail image.
+|-
+| class="code" | esriAcHeader
+| Represents a node that contains a thumbnail image.
+|-
+| class="code" | esriAcClearFloat
+| Represents a node that contains a label.
+|}
+
+=== Usage ===
+
+==== Create the dijit with default parameters ====
+<pre style="border: none;">
+ var autocomplete = new esri.dijit.Autocomplete({ map: map }, "autoCompleteDiv");
+ autocomplete.startup();
+
+ HTML:
+
+ <div id="map"></div>
+ <div id="autoCompleteDiv" style="position: absolute; z-index: 2; top: 20px; left: 100px;"></div>
+</pre>
+
+When the dijit is created in this fashion none of the Bing maps will show up in the basemap gallery.
+
+==== Create the dijit with custom parameters ====
+<pre style="border: none;">
+
+    var autocomplete = new esri.dijit.Autocomplete({
+        theme: 'esriAutocomplete', // Used to add a class to style the autocomplete
+        placeholder: 'Find address or place',
+        resetTitle: 'Clear Location',
+        zoomLevel: 6,
+        locators:[
+            {
+                url:'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
+                name:'World'
+            },
+            {
+                url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
+                name: 'IHS_Composite'
+            }
+        ],
+        maxLocations: 3,
+        minCharacters: 3,
+        useBoundingBox: false, // don't search within current extent
+        hideDelay: 6000,
+        searchDelay: 300,
+        map: map
+    }, dojo.byId('search'));
+    autocomplete.startup();
+
+
+ HTML:
+
+ <div id="map"></div>
+ <div id="search" style="position: absolute; z-index: 2; top: 20px; left: 100px;"></div>
+</pre>
+
+
+=== Samples ===
+
+http://webninja.esri.com/git/Autocomplete-Widget/index.html <br/>
+http://webninja.esri.com/git/Autocomplete-Widget/index2.html
+
+

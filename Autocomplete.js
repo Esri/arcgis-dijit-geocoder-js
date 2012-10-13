@@ -21,7 +21,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this.resetTitle = '';
         this.noResultsText = 'No results';
         // flavor
-        this.theme = '';
+        this.theme = 'esriAutocomplete';
         // results holder
         this.results = [];
         // default locator index
@@ -37,13 +37,13 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this.hideDelay = 6000; // Hide autocomplete that's been active for this long
         this.searchDelay = 300; // Delay before doing the autocomplete query. To avoid being too chatty.
         this.zoomLevel = 12;
-        this.locateFunction = 'findAddressCandidates';
+        this._locateFunction = 'findAddressCandidates';
         // css classes
         this._autoCompleteClass = 'esriAc';
         this._autoCompleteActiveClass = 'esriAcActive';
         this._noResultsClass = 'esriAcNoResults';
-        this._resultsLoadingClass = 'esriAcResultsLoading';
         this._resultsContainerClass = 'esriAcResults';
+        this._resultsLoadingClass = 'esriAcResultsLoading';
         this._resultsItemClass = 'esriAcItem';
         this._resultsItemEvenClass = 'even';
         this._resultsItemOddClass = 'odd';
@@ -183,10 +183,12 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     // clear auto hide timer and reset it
     _resetHideTimer: function () {
         var instance = this;
-        clearTimeout(instance.hideTimer);
-        instance.hideTimer = setTimeout(function () {
-            instance._hide();
-        }, instance.hideDelay);
+        if(instance.hideDelay){
+            clearTimeout(instance.hideTimer);
+            instance.hideTimer = setTimeout(function () {
+                instance._hide();
+            }, instance.hideDelay);
+        }
     },
 
     _insertLocatorResults: function (results, locatorIndex) {
@@ -396,11 +398,17 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             // hide autocomplete
             instance._hide();
         } else if (alength >= (instance.minCharacters)) {
-            // set timer for showing
-            instance.showTimer = setTimeout(function () {
+            if(instance.searchDelay){
+                // set timer for showing
+                instance.showTimer = setTimeout(function () {
+                    // query then show autocomplete
+                    instance._showAll();
+                }, instance.searchDelay);
+            }
+            else{
                 // query then show autocomplete
                 instance._showAll();
-            }, instance.searchDelay);
+            }
         } else {
             // hide autocomplete
             instance._hide();
@@ -483,7 +491,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             }
             // send request
             var requestHandle = esri.request({
-                url: instance.locators[activeLocator].url + '/' + instance.locateFunction,
+                url: instance.locators[activeLocator].url + '/' + instance._locateFunction,
                 content: queryContent,
                 handleAs: 'json',
                 callbackParamName: 'callback',

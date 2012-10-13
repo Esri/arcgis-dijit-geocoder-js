@@ -13,70 +13,153 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     templatePath: "templates/Autocomplete2.html",
     widgetsInTemplate: false,
 
-    // default settings
-    setDefaults: function () {
-        // text values which could be set for each locale
-        this.value = '';
-        this.placeholder = '';
-        this.resetTitle = '';
-        this.noResultsText = 'No results';
-        this.toggleLocatorTitle = 'Change locator';
-        // flavor
-        this.theme = '';
-        // results holder
-        this.results = [];
-        // default locator index
-        this.activeLocator = 0;
-        // locators
-        this.locators = [{
-            url: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
-            name: 'World'
-        }];
-        this.maxLocations = 3; // Maximum result locations to return
-        this.minCharacters = 1; // Minimum amount of characters before searching
-        this.useBoundingBox = false; // Contain searches within bounding box
-        this.hideDelay = 6000; // Hide autocomplete that's been active for this long
-        this.searchDelay = 300; // Delay before doing the autocomplete query. To avoid being too chatty.
-        this.zoomLevel = 12;
-        this.locateFunction = 'findAddressCandidates';
-        // css classes
-        this._autoCompleteClass = 'esriAc';
-        this._autoCompleteActiveClass = 'esriAcActive';
-        this._noResultsClass = 'esriAcNoResults';
-        this._resultsLoadingClass = 'esriAcResultsLoading';
-        this._resultsContainerClass = 'esriAcResults';
-        this._resultsItemClass = 'esriAcItem';
-        this._resultsItemEvenClass = 'even';
-        this._resultsItemOddClass = 'odd';
-        this._resultsPartialMatchClass = 'esriAcPartial';
-        this._searchButtonClass = 'esriAcSearch';
-        this._clearButtonClass = 'esriAcClear';
-        this._clearButtonActiveClass = 'esriAcClearActive';
-        this._locatorMenuClass = 'esriAcLocatorMenu';
-        this._locatorHeaderClass = 'esriAcHeader';
-		this._locatorMenuClass = 'esriAcMenu';
-		this._locatorMenuArrowClass = 'esriAcMenuArrow';
-		this._locatorSelectedClass = 'esriAcSelected';
-		this._autoCompleteClearClass = 'esriAcClearFloat';
-        // keys
-        this._submitKey = 13;
-        this._previousKey = 38;
-        this._nextKey = 40;
-        this._cancelKey = 27;
-    },
-
     // init
     constructor: function (options, srcRefNode) {
         // set default settings
-        this.setDefaults();
+        this._setPublicDefaults();
         // mix in settings and defaults
         dojo.safeMixin(this, options);
+        // private variables
+        this._setPrivateVars();
         // watch updates of public properties and update the widget accordingly
         this.watch("value", this._updateValue);
         this.watch("placeholder", this._updatePlaceholder);
         this.watch("resetTitle", this._updateResetTitle);
         this.watch("theme", this._updateTheme);
         this.watch("activeLocator", this._updateActiveLocator);
+        this.watch("locators", this._createLocatorMenu);
+    },
+
+    // start widget
+    startup: function () {
+        // if all required options are set
+        if (this.domNode && this.map) {
+            if(this.value){
+                this._checkStatus();
+            }
+            this._setMenuPositions();
+            // setup connections
+            this._setDelegations();
+        }
+    },
+
+    // post create widget function
+    postCreate: function () {
+        this._createLocatorMenu();
+    },
+
+    // destroy widget
+    destroy: function () {
+        var instance = this;
+        // remove html
+        dojo.empty(this.domNode);
+        // if delegations
+        if (instance.delegations) {
+            // disconnect all events
+            for (var i = 0; i < instance.delegations.length; i++) {
+                dojo.disconnect(instance.delegations[i]);
+            }
+        }
+    },
+
+    /* ---------------- */
+    /* Public Functions */
+    /* ---------------- */
+
+    // called after search
+    onLocate: function (result) {},
+
+    // called on AC Init
+    onAutocomplete: function () {},
+
+    // called on AC Results
+    onAutocompleteResults: function (results, locatorIndex) {},
+
+    // return results
+    getResults: function () {
+        return this.results;
+    },
+
+    // clear autocomplete address
+    clear: function () {
+        this._clearAddress();
+    },
+
+    // hide results
+    hide: function () {
+        this._hide();
+    },
+
+    /* ---------------- */
+    /* Private Functions */
+    /* ---------------- */
+
+    // default settings
+    _setPublicDefaults: function () {
+        // locators
+        this.locators = [{
+            url: location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
+            name: 'World'
+        }];
+        // Value of input
+        this.value                          = '';
+        // Language
+        this.placeholder                    = '';
+        this.resetTitle                     = '';
+        this.toggleLocatorTitle             = '';
+        // Theme
+        this.theme                          = 'esriAutocomplete';       // flavor
+        // Options
+        this.activeLocator                  = 0;                        // default locator index
+        this.maxLocations                   = 6;                        // Maximum result locations to return
+        this.minCharacters                  = 3;                        // Minimum amount of characters before searching
+        this.useBoundingBox                 = false;                    // Contain searches within bounding box
+        this.hideDelay                      = 6000;                     // Hide autocomplete that's been active for this long
+        this.searchDelay                    = 300;                      // Delay before doing the autocomplete query. To avoid being too chatty.
+        this.zoomLevel                      = 12;
+    },
+
+    _setPrivateVars: function(){
+        // results holder
+        this.results = [];
+        // Private
+        this._locateFunction                = 'findAddressCandidates';
+        // css classes
+        this._autoCompleteClass             = 'esriAc';
+        this._autoCompleteActiveClass       = 'esriAcActive';
+        this._loadingClass                  = 'esriAcLoading';
+        this._resultsContainerClass         = 'esriAcResults';
+        this._resultsItemClass              = 'esriAcResult';
+        this._resultsItemEvenClass          = 'esriAcResultEven';
+        this._resultsItemOddClass           = 'esriAcResultOdd';
+        this._resultsPartialMatchClass      = 'esriAcResultPartial';
+        this._searchButtonClass             = 'esriAcSearch';
+        this._clearButtonClass              = 'esriAcReset';
+        this._clearButtonActiveClass        = 'esriAcResetActive';
+		this._locatorMenuClass              = 'esriAcMenu';
+		this._locatorMenuArrowClass         = 'esriAcMenuArrow';
+		this._locatorSelectedClass          = 'esriAcSelected';
+		this._autoCompleteClearClass        = 'esriAcClearFloat';
+        // keys
+        this._submitKey                     = 13;
+        this._previousKey                   = 38;
+        this._nextKey                       = 40;
+        this._cancelKey                     = 27;
+        this._tabKey                        = 9;
+        this._shiftKey                      = 16;
+    },
+
+    _setMenuPositions: function(){
+        var container = dojo.query(this.containerNode);
+        // position and height of the search box
+        var position = dojo.position(container[0]);
+        // set params
+        var params = {
+            'top': position.h + 'px'
+        };
+        // position the autocomplete
+        dojo.query(this.locatorMenuNode).style(params);
+        dojo.query(this.resultsNode).style(params);
     },
 
     // update value of text box
@@ -114,32 +197,29 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this._hide();
     },
 
-    // start widget
-    startup: function () {
-        // if all required options are set
-        if (this.domNode && this.map) {
-            // check searchbox status
-            this._checkStatus();
-            // setup connections
-            this._setDelegations();
-        }
+    // show loading spinner
+    _showLoading: function () {
+        dojo.query(this.clearNode).addClass(this._loadingClass);
     },
 
+    // hide loading spinner
+    _hideLoading: function () {
+        dojo.query(this.clearNode).removeClass(this._loadingClass);
+    },
+
+    // show locator selection menu
 	_showLocatorMenu: function(){
-	    this._hide();
-	    clearTimeout(this.hideTimer);
-		var container = dojo.query(this.containerNode);
-		// position and height of the search box
-		var position = dojo.position(container[0]);
-		// position the autocomplete
-		dojo.query(this.locatorMenuNode).style({
-			'top': position.h + 'px'
-		});
-		// add class to container
-		container.addClass(this._autoCompleteActiveClass);
-		dojo.query(this.locatorMenuNode).style('display', 'block');
+        // clear timer
+        clearTimeout(this.hideTimer);
+        // container node
+        var container = dojo.query(this.containerNode);
+        // add class to container
+        container.addClass(this._autoCompleteActiveClass);
+        // display menu node
+        dojo.query(this.locatorMenuNode).style('display', 'block');
 	},
 
+	// hide locator selection menu
 	_hideLocatorMenu: function(removeClass){
 	   if(removeClass){
     		var container = dojo.query(this.containerNode);
@@ -149,9 +229,10 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 		dojo.query(this.locatorMenuNode).style('display', 'none');
 	},
 
+	// toggle locator selection menu
 	_toggleLocatorMenu: function(){
+	   this._hide();
 		var display = dojo.query(this.locatorMenuNode).style('display');
-		// node of the search box container
 		if(display[0] === 'block'){
 			this._hideLocatorMenu(true);
 		}
@@ -190,51 +271,9 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         }
     },
 
-    // post create widget function
-    postCreate: function () {
-        this._createLocatorMenu();
-    },
-
-    // called after search
-    onLocate: function (results) {},
-
-    // called on AC Init
-    onAutoComplete: function () {},
-
-    // called on AC Results
-    onAutoCompleteResults: function (results, locatorIndex) {},
-
-    // return results
-    getResults: function () {
-        return this.results;
-    },
-
-    // clear autocomplete address
-    clear: function () {
-        this._clearAddress();
-    },
-
-    // destroy widget
-    destroy: function () {
-        var instance = this;
-        // remove html
-        dojo.empty(this.domNode);
-        // if delegations
-        if (instance.delegations) {
-            // disconnect all events
-            for (var i = 0; i < instance.delegations.length; i++) {
-                dojo.disconnect(instance.delegations[i]);
-            }
-        }
-    },
-
-    // hide results
-    hide: function () {
-        this._hide();
-    },
-
     // clear the input box
     _clearAddress: function () {
+        // hide locator menu
 		this._hideLocatorMenu();
         // empty input value
         dojo.query(this.inputNode).attr('value', '');
@@ -246,6 +285,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 
     // check input box's status
     _checkStatus: function () {
+        // hide locator menu
         this._hideLocatorMenu();
         // if input value is not empty
         if (this.value) {
@@ -260,10 +300,12 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     // clear auto hide timer and reset it
     _resetHideTimer: function () {
         var instance = this;
-        clearTimeout(instance.hideTimer);
-        instance.hideTimer = setTimeout(function () {
-            instance._hide();
-        }, instance.hideDelay);
+        if(instance.hideDelay){
+            clearTimeout(instance.hideTimer);
+            instance.hideTimer = setTimeout(function () {
+                instance._hide();
+            }, instance.hideDelay);
+        }
     },
 
     _insertLocatorResults: function (results, locatorIndex) {
@@ -272,7 +314,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         // set canidates
         var candidates = results.candidates;
         // set results
-        this.results[locatorIndex] = results;
+        this.results = results;
         // string to set
         var html = '';
         // if results and result node
@@ -298,49 +340,36 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             }
             // close list
             html += '</ul>';
-        } else {
-            html += '<div class="' + this._noResultsClass + '">' + this.noResultsText + '</div>';
+            // insert HTML
+            if(this.resultsNode){
+                this.resultsNode.innerHTML = html;
+            }
+            // hide loading
+            this._hideLoading();
+            // show!
+            this._show();
+            // autocomplete results
+            this.onAutocompleteResults(results, locatorIndex);
         }
-        var node = dojo.query('[data-locator-results="' + locatorIndex + '"]', this.resultsNode)[0];
-        // set HTML
-        if (node) {
-            node.innerHTML = html;
-        }
-        // autocomplete results
-        this.onAutoCompleteResults(results, locatorIndex);
     },
 
     _show: function () {
         // node of the search box container
         var container = dojo.query(this.containerNode);
-        // position and height of the search box
-        var position = dojo.position(container[0]);
-        // position the autocomplete
-        dojo.query(this.resultsNode).style({
-            'top': position.h + 'px'
-        });
         // add class to container
         container.addClass(this._autoCompleteActiveClass);
         // clear hide timer
         this._resetHideTimer();
+        // show node
         dojo.query(this.resultsNode).style('display', 'block');
     },
 
-    _showAll: function () {
+    _autoLocate: function () {
         this._hideLocatorMenu();
-        // string to set
-        var html = '';
-		html += '<div data-locator-results="' + this.activeLocator + '"">';
-		html += '<div class="' + this._resultsLoadingClass + '"></div>';
-		html += '</div>';
-        // set HTML
-        this.resultsNode.innerHTML = html;
 		// query active locator
-		this._query(this.activeLocator, this._insertLocatorResults);
-        // show!
-        this._show();
+		this._query(this._insertLocatorResults);
         // call autocomplete event
-        this.onAutoComplete();
+        this.onAutocomplete();
     },
 
     // set up connections
@@ -387,23 +416,27 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                 // set current text var
                 instance.value = locTxt;
                 // Locate
-                instance._locate(instance.results[locatorIndex], resultIndex);
+                instance._locate(instance.results, resultIndex);
                 // hide autocomplete
                 instance._hide();
             } else if (event.type === 'keyup' && event.keyCode === instance._previousKey) { // Up arrow key
                 // go to previous item
                 newIndex = currentIndex - 1;
                 if (newIndex < 0) {
-                    newIndex = lists.length - 1;
+                    instance.inputNode.focus();
                 }
-                lists[newIndex].focus();
+                else{
+                    lists[newIndex].focus();
+                }
             } else if (event.type === 'keyup' && event.keyCode === instance._nextKey) { //Down arrow key
                 // go to next item
                 newIndex = currentIndex + 1;
                 if (newIndex >= lists.length) {
-                    newIndex = 0;
+                    instance.inputNode.focus();
                 }
-                lists[newIndex].focus();
+                else{
+                    lists[newIndex].focus();
+                }
             } else if (event.keyCode === instance._cancelKey) { // esc key
                 // clear timers
                 clearTimeout(instance.hideTimer);
@@ -445,7 +478,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         // if enter key was pushed
         if (event && event.keyCode === instance._submitKey) {
             // query then Locate
-            instance._query(instance.activeLocator, instance._locate);
+            instance._query(instance._locate);
             // hide autocomplete
             instance._hide();
             // if up arrow pushed
@@ -473,13 +506,25 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             clearTimeout(instance.showTimer);
             // hide autocomplete
             instance._hide();
-        } else if (alength >= (instance.minCharacters)) {
-            // set timer for showing
-            instance.showTimer = setTimeout(function () {
+        }
+        else if(event && event.keyCode === instance._tabKey || event.keyCode === instance._shiftKey){
+            // do nothing
+        }
+        else if (alength >= (instance.minCharacters) && event && event.keyCode !== instance._tabKey) {
+            if(instance.searchDelay){
+                // set timer for showing
+                instance.showTimer = setTimeout(function () {
+                    // query then show autocomplete
+                    instance._autoLocate();
+                }, instance.searchDelay);
+            }
+            else{
                 // query then show autocomplete
-                instance._showAll();
-            }, instance.searchDelay);
-        } else {
+                instance._autoLocate();
+            }
+        }
+        // tab key
+        else {
             // hide autocomplete
             instance._hide();
         }
@@ -491,7 +536,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         var instance = this;
         if (event.type === 'click' || (event.type === 'keyup' && event.keyCode === instance._submitKey)) {
             // query and then Locate
-            instance._query(instance.activeLocator, instance._locate);
+            instance._query(instance._locate);
             // hide autocomplete
             instance._hide();
         }
@@ -500,12 +545,12 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     _inputClick: function () {
         var instance = this;
         // if input value is empty
-        if (!this.inputNode.value) {
+        if (!instance.value) {
             // clear address
             instance._clearAddress();
+            // hide autocomplete
+            instance._hide();
         }
-        // hide autocomplete
-        instance._hide();
         // check status of text box
         instance._checkStatus();
     },
@@ -517,6 +562,8 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             instance._hide();
             // clear address
             instance._clearAddress();
+            // hide loading
+			instance._hideLoading();
         }
     },
 
@@ -531,10 +578,12 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     },
 
     // query for results and then execute a function
-    _query: function (activeLocator, callback) {
+    _query: function (callback) {
         var instance = this;
         // if query isn't empty
         if (instance.value) {
+            // show loading spinner
+            instance._showLoading();
             // Query object
             var queryContent = {
                 "SingleLine": instance.value,
@@ -561,7 +610,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             }
             // send request
             var requestHandle = esri.request({
-                url: instance.locators[activeLocator].url + '/' + instance.locateFunction,
+                url: instance.locators[instance.activeLocator].url + '/' + instance._locateFunction,
                 content: queryContent,
                 handleAs: 'json',
                 callbackParamName: 'callback',
@@ -569,16 +618,55 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                 load: function (data) {
                     if (typeof callback === 'function') {
                         // call callback function
-                        callback.call(instance, data, activeLocator);
+                        callback.call(instance, data, instance.activeLocator);
                     }
                 },
                 error: function () {
                     if (typeof callback === 'function') {
                         // call callback function
-                        callback.call(instance, null, activeLocator);
+                        callback.call(instance, null, instance.activeLocator);
                     }
                 }
             });
+        }
+    },
+
+    _locateResult: function(result){
+        // this
+        var instance = this;
+        // if result has attributes
+        if (result) {
+            var extent;
+            if (result.attributes && result.attributes.hasOwnProperty('Xmin') && result.attributes.hasOwnProperty('Ymin') && result.attributes.hasOwnProperty('Xmax') && result.attributes.hasOwnProperty('Ymax')) {
+                // if result has extent attributes
+                // new extent
+                extent = new esri.geometry.Extent({
+                    "xmin": result.attributes.Xmin,
+                    "ymin": result.attributes.Ymin,
+                    "xmax": result.attributes.Xmax,
+                    "ymax": result.attributes.Ymax,
+                    "spatialReference": instance.map.spatialReference
+                });
+                // set map extent to location
+                instance.map.setExtent(esri.geometry.geographicToWebMercator(extent));
+            } else if (result.attributes && result.attributes.hasOwnProperty('westLon') && result.attributes.hasOwnProperty('southLat') && result.attributes.hasOwnProperty('eastLon') && result.attributes.hasOwnProperty('northLat')) {
+                // result has lat/lon extent attributes
+                // new extent
+                extent = new esri.geometry.Extent({
+                    "xmin": result.attributes.westLon,
+                    "ymin": result.attributes.southLat,
+                    "xmax": result.attributes.eastLon,
+                    "ymax": result.attributes.northLat,
+                    "spatialReference": instance.map.spatialReference
+                });
+                // set map extent to location
+                instance.map.setExtent(esri.geometry.geographicToWebMercator(extent));
+            } else {
+                // use point
+                instance.map.centerAndZoom(result.location, instance.zoomLevel);
+            }
+            // on search call
+            instance.onLocate(result);
         }
     },
 
@@ -586,56 +674,26 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     _locate: function (results, resultNumber) {
         // this
         var instance = this;
+        // save results
+        instance.results = results;
+        // candidates
         var candidates = results.candidates;
         // if we have results
-        if (results && candidates.length > 0) {
+        if (candidates.length > 0) {
             // selected result
-            var numResult = 0;
-            // if it's not zero
-            if (resultNumber) {
-                numResult = resultNumber;
-            }
-            // if result has attributes
-            if (candidates[numResult].attributes) {
-                var extent;
-                if (
-                candidates[numResult].attributes.hasOwnProperty('Xmin') && candidates[numResult].attributes.hasOwnProperty('Ymin') && candidates[numResult].attributes.hasOwnProperty('Xmax') && candidates[numResult].attributes.hasOwnProperty('Ymax')) {
-                    // if result has extent attributes
-                    // new extent
-                    extent = new esri.geometry.Extent({
-                        "xmin": candidates[numResult].attributes.Xmin,
-                        "ymin": candidates[numResult].attributes.Ymin,
-                        "xmax": candidates[numResult].attributes.Xmax,
-                        "ymax": candidates[numResult].attributes.Ymax,
-                        "spatialReference": results.spatialReference
-                    });
-                    // set map extent to location
-                    instance.map.setExtent(esri.geometry.geographicToWebMercator(extent));
-                } else if (
-                candidates[numResult].attributes.hasOwnProperty('westLon') && candidates[numResult].attributes.hasOwnProperty('southLat') && candidates[numResult].attributes.hasOwnProperty('eastLon') && candidates[numResult].attributes.hasOwnProperty('northLat')) {
-                    // result has lat/lon extent attributes
-                    // new extent
-                    extent = new esri.geometry.Extent({
-                        "xmin": candidates[numResult].attributes.westLon,
-                        "ymin": candidates[numResult].attributes.southLat,
-                        "xmax": candidates[numResult].attributes.eastLon,
-                        "ymax": candidates[numResult].attributes.northLat,
-                        "spatialReference": results.spatialReference
-                    });
-                    // set map extent to location
-                    instance.map.setExtent(esri.geometry.geographicToWebMercator(extent));
-                } else {
-                    // use point
-                    instance.map.centerAndZoom(candidates[numResult].location, instance.zoomLevel);
-                }
-            }
+            var numResult = resultNumber || 0;
+            // result object
+            var result = candidates[numResult];
+            // locate result
+            instance._locateResult(result);
         } else {
             // clear address box
             instance._clearAddress();
         }
         // hide autocomplete
         instance._hide();
-        // on search call
-        instance.onLocate(results);
+        // hide loading spinner
+        instance._hideLoading();
     }
+
 });
