@@ -50,7 +50,7 @@
             dojo.require("esri.arcgis.utils");
 
 
-            var map, autocomplete;
+            var map;
 
             function init() {
                 esri.config.defaults.io.proxyUrl = "/arcgisserver/apis/javascript/proxy/proxy.ashx";
@@ -80,12 +80,13 @@
                     dojo.connect(window, "onresize", resizeMap);
 
                     // autocomplete with all common options set. Only map is required.
-                    autocomplete = new esri.dijit.Autocomplete({
+                    var autocomplete = new esri.dijit.Autocomplete({
                         theme: 'esriAutocomplete', // Used to add a class to style the autocomplete
                         placeholder: 'Find address or place',
                         resetTitle: 'Clear Location',
-                        zoomLevel: 6,
-                        locators:[
+                        toggleLocatorTitle: 'Change locator',
+                        zoom: 6,
+                        geocoder:[
                             {
                                 url:'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
                                 name:'World'
@@ -95,9 +96,10 @@
                                 name: 'IHS_Composite'
                             }
                         ],
-                        maxLocations: 3,
+                        //geocoder: 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
+                        maxLocations: 6,
                         minCharacters: 3,
-                        useBoundingBox: false, // don't search within current extent
+                        searchExtent: map.extent,
                         hideDelay: 6000,
                         searchDelay: 300,
                         map: map
@@ -123,7 +125,6 @@
 
     <body class="soria">
         <div id="search"></div>
-        <div id="search2"></div>
         <div id="map"></div>
     </body>
 

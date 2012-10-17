@@ -13,7 +13,7 @@
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dojox/grid/resources/Grid.css">
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dojox/grid/resources/SoriaGrid.css">
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/esri/dijit/css/Popup.css">
-        <link rel="stylesheet" type="text/css" href="css/Autocomplete2.css">
+        <link rel="stylesheet" type="text/css" href="css/Autocomplete.css">
         <style type="text/css">
             html, body, #map {
                 height:100%;
@@ -40,7 +40,7 @@
             };
         </script>
         <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1"></script>
-        <script type="text/javascript" src="Autocomplete2.js"></script>
+        <script type="text/javascript" src="Autocomplete.js"></script>
         <script type="text/javascript">
             dojo.require("dijit.dijit"); // optimize: load dijit layer
             dojo.require("dijit.layout.BorderContainer");
@@ -50,7 +50,7 @@
             dojo.require("esri.arcgis.utils");
 
 
-            var map;
+            var map, autocomplete;
 
             function init() {
                 esri.config.defaults.io.proxyUrl = "/arcgisserver/apis/javascript/proxy/proxy.ashx";
@@ -80,11 +80,10 @@
                     dojo.connect(window, "onresize", resizeMap);
 
                     // autocomplete with all common options set. Only map is required.
-                    var autocomplete = new esri.dijit.Autocomplete({
+                    autocomplete = new esri.dijit.Autocomplete({
                         theme: 'esriAutocomplete', // Used to add a class to style the autocomplete
                         placeholder: 'Find address or place',
                         resetTitle: 'Clear Location',
-                        toggleLocatorTitle: 'Change locator',
                         zoomLevel: 6,
                         locators:[
                             {
@@ -96,9 +95,9 @@
                                 name: 'IHS_Composite'
                             }
                         ],
-                        maxLocations: 6,
+                        maxLocations: 3,
                         minCharacters: 3,
-                        searchExtent: map.extent,
+                        useBoundingBox: false, // don't search within current extent
                         hideDelay: 6000,
                         searchDelay: 300,
                         map: map
@@ -124,6 +123,7 @@
 
     <body class="soria">
         <div id="search"></div>
+        <div id="search2"></div>
         <div id="map"></div>
     </body>
 
