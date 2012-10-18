@@ -1,8 +1,8 @@
 <div class="${theme}">
 	<div class="${_autoCompleteClass}" data-dojo-attach-point="containerNode" role="presentation">
-		<div tabindex="0" class="${_searchButtonClass}" title="${placeholder}" data-dojo-attach-point="submitNode" data-dojo-attach-event="ondijitclick:_submitSearch" role="menuitem"></div>
-		<div title="${toggleGeocoderTitle}" class="${_geocoderMenuArrowClass}" data-dojo-attach-point="geocoderMenuArrowNode" role="presentation" data-dojo-attach-point="inputNode" data-dojo-attach-event="ondijitclick:_toggleGeocoderMenu"></div>
-		<input tabindex="0" placeholder="${placeholder}" title="${placeholder}" value="${value}" autocomplete="off" type="text" data-dojo-attach-point="inputNode" data-dojo-attach-event="ondijitclick:_inputClick" role="textbox">
+		<div title="${i18n.Autocomplete.main.searchButtonTitle}" tabindex="0" class="${_searchButtonClass}" title="${_placeholder}" data-dojo-attach-point="submitNode" data-dojo-attach-event="ondijitclick:_submitSearch" role="menuitem"></div>
+		<div title="${i18n.Autocomplete.main.geocoderMenuButtonTitle}" class="${_geocoderMenuArrowClass}" data-dojo-attach-point="geocoderMenuArrowNode" role="presentation" data-dojo-attach-point="inputNode" data-dojo-attach-event="ondijitclick:_toggleGeocoderMenu"></div>
+		<input tabindex="0" placeholder="${_placeholder}" title="${_placeholder}" value="${value}" autocomplete="off" type="text" data-dojo-attach-point="inputNode" data-dojo-attach-event="ondijitclick:_inputClick" role="textbox">
 		<div tabindex="0" class="${_clearButtonClass}" data-dojo-attach-point="clearNode" data-dojo-attach-event="ondijitclick:_clearAutocomplete" role="menuitem"></div>
 		<div class="${_autoCompleteClearClass}"></div>
 	</div>

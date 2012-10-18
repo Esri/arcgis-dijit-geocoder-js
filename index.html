@@ -35,8 +35,18 @@
             }
         </style>
         <script type="text/javascript">
+            // host path regular expression
+            var pathRegex = new RegExp(/\/[^\/]+$/);
+            var locationPath = location.pathname.replace(pathRegex, '');
+
+            // Dojo Config
             var dojoConfig = {
-                parseOnLoad: true
+                //locale: "ar",
+                parseOnLoad: true,
+                packages: [{
+                    name: "esriTemplate",
+                    location: locationPath
+                }]
             };
         </script>
         <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1"></script>
@@ -82,25 +92,23 @@
                     // autocomplete with all common options set. Only map is required.
                     var autocomplete = new esri.dijit.Autocomplete({
                         theme: 'esriAutocomplete', // Used to add a class to style the autocomplete
-                        placeholder: 'Find address or place',
-                        resetTitle: 'Clear Location',
-                        toggleLocatorTitle: 'Change locator',
-                        zoom: 6,
                         geocoder:[
                             {
                                 url:'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
-                                name:'World'
+                                name:'World Geocode Server',
+                                placeholder: 'Hello World'
                             },
                             {
                                 url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
-                                name: 'IHS_Composite'
+                                name: 'IHS Composite',
+                                placeholder: 'IHS Search',
+                                outFields:'',
+                                sourceCountry: '',
+                                prefix:'',
+                                postfix: '',
+                                searchExtent: map.extent,
                             }
                         ],
-                        maxLocations: 6,
-                        minCharacters: 3,
-                        searchExtent: map.extent,
-                        hideDelay: 6000,
-                        searchDelay: 300,
                         map: map
                     }, dojo.byId('search'));
 					autocomplete.startup();

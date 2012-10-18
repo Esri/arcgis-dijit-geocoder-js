@@ -47,6 +47,7 @@
     color: #333;
     background: none;
     margin: 0 5px 0 5px;
+    width:150px;
 }
 
 .esriAutocomplete .esriAc input:focus {
