@@ -18,7 +18,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     // init
     constructor: function (options, srcRefNode) {
         // Esri global locator
-        this._esriWorldGeocoder = location.protocol + '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer';
+        this._esriWorldGeocoder = '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer';
         // set default settings
         this._setPublicDefaults();
         // mix in settings and defaults
@@ -111,7 +111,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         // geocoder
         this.geocoder = [
             {
-                url: this._esriWorldGeocoder,
+                url: location.protocol + this._esriWorldGeocoder,
                 name: 'World Geocode Server',
                 placeholder: 'Find Address or Place',
                 zoom: 12
@@ -128,7 +128,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this.maxLocations = 6; // Maximum result locations to return
         this.minCharacters = 3; // Minimum amount of characters before searching
         this.hideDelay = 6000; // Hide autocomplete that's been active for this long
-        this.searchDelay = 300; // Delay before doing the autocomplete query. To avoid being too chatty.
+        this.searchDelay = 350; // Delay before doing the autocomplete query. To avoid being too chatty.
         this.geocoderMenu = true;
     },
 
@@ -311,14 +311,16 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     },
 
     // insert results HTML and show
-    _insertGeocoderResults: function (results, currentGeocoder) {
+    _insertGeocoderResults: function (results) {
         // reset timer
         this._resetHideTimer();
         // set results
         this.results = results;
+        // current geocoder
+        var currentGeocoder = this.getActiveGeocoder();
         // field that holds address name
         var addressFieldName;
-        //
+        // if using esri geocoder
         if(this._isEsriGeocoder(currentGeocoder)){
             addressFieldName = 'name';
         }
@@ -592,7 +594,8 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     },
 
     _isEsriGeocoder: function(geocoder){
-        if(geocoder && geocoder.url === this._esriWorldGeocoder){
+        // if geocoder string is matched in url
+        if(geocoder && geocoder.url.indexOf(this._esriWorldGeocoder) !== -1){
             return true;
         }
         return false;
@@ -632,7 +635,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             if(this._isEsriGeocoder(currentGeocoder)){
                 // Query object
                 params = {
-                    "text": this.value,
+                    "text": singleLine,
                     "outSR": this.map.spatialReference.wkid,
                     "f": "json"
                 };
@@ -663,7 +666,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                     load: function (response) {
                         if (typeof callback === 'function') {
                             // call callback function
-                            callback.call(instance, response.locations, currentGeocoder);
+                            callback.call(instance, response.locations);
                         }
                     }
                 });
@@ -687,12 +690,12 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                 this._geocoder.addressToLocations(params, function (response) {
                     if (typeof callback === 'function') {
                         // call callback function
-                        callback.call(instance, response, currentGeocoder);
+                        callback.call(instance, response);
                     }
                 }, function (response) {
                     if (typeof callback === 'function') {
                         // call callback function
-                        callback.call(instance, response, currentGeocoder);
+                        callback.call(instance, response);
                     }
                 });
             }
@@ -703,46 +706,23 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     _locateResult: function (result) {
         // if result has attributes
         if (result) {
-            var extent;
-            console.log(result);
             // new locator
             if(result.hasOwnProperty('extent')){
-                console.log('yes');
-                extent = result.extent;
+                // create extent
+                var extent = new esri.geometry.Extent(result.extent);
                 // set map extent to location
                 this.map.setExtent(extent);
             }
-            else if (result.attributes && result.attributes.hasOwnProperty('Xmin') && result.attributes.hasOwnProperty('Ymin') && result.attributes.hasOwnProperty('Xmax') && result.attributes.hasOwnProperty('Ymax')) {
-                // if result has extent attributes
-                // new extent
-                extent = new esri.geometry.Extent({
-                    "xmin": result.attributes.Xmin,
-                    "ymin": result.attributes.Ymin,
-                    "xmax": result.attributes.Xmax,
-                    "ymax": result.attributes.Ymax,
-                    "spatialReference": this.map.spatialReference
-                });
-                // set map extent to location
-                this.map.setExtent(esri.geometry.geographicToWebMercator(extent));
-            } else if (result.attributes && result.attributes.hasOwnProperty('westLon') && result.attributes.hasOwnProperty('southLat') && result.attributes.hasOwnProperty('eastLon') && result.attributes.hasOwnProperty('northLat')) {
-                // result has lat/lon extent attributes
-                // new extent
-                extent = new esri.geometry.Extent({
-                    "xmin": result.attributes.westLon,
-                    "ymin": result.attributes.southLat,
-                    "xmax": result.attributes.eastLon,
-                    "ymax": result.attributes.northLat,
-                    "spatialReference": this.map.spatialReference
-                });
-                // set map extent to location
-                this.map.setExtent(esri.geometry.geographicToWebMercator(extent));
-            } else {
+            else {
+                // get active geocoder object
                 var currentGeocoder = this.getActiveGeocoder();
+                // if zoom set in geocodoer object
                 if(currentGeocoder.zoom){
-                    // use point
+                    // use point and zoom
                     this.map.centerAndZoom(result.location, currentGeocoder.zoom);
                 }
                 else{
+                    // use point
                     this.map.centerAt(result.location);
                 }
             }
