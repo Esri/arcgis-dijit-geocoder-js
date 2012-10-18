@@ -162,9 +162,11 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this._clearButtonClass = 'esriAcReset';
         this._clearButtonActiveClass = 'esriAcResetActive';
         this._geocoderMenuClass = 'esriAcMenu';
+        this._geocoderMenuHeaderClass = 'esriAcMenuHeader';
         this._geocoderMenuActiveClass = 'esriAcMenuActive';
         this._geocoderMenuArrowClass = 'esriAcMenuArrow';
         this._geocoderSelectedClass = 'esriAcSelected';
+        this._geocoderSelectedCheckClass = 'esriAcSelectedCheck';
         this._autoCompleteClearClass = 'esriAcClearFloat';
         // keys
         this._enterKey = 13;
@@ -260,6 +262,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         if (this.geocoder.length > 1 && typeof this.geocoder !== 'string') {
             if (this.geocoderMenuNode) {
                 var html = '';
+                html += '<div class="' + this._geocoderMenuHeaderClass + '">' + this.i18n.Autocomplete.main.geocoderMenuHeader + '</div>';
                 html += '<ul>';
                 // for each result
                 for (var i = 0; i < this.geocoder.length; i++) {
@@ -278,7 +281,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                     // geocoder name
                     var geocoderName = this.geocoder[i].name || 'Untitled geocoder';
                     // create list item
-                    html += '<li data-item="true" role="menuitem" tabindex="0" class="' + layerClass + '">' + geocoderName + '</li>';
+                    html += '<li data-item="true" role="menuitem" tabindex="0" class="' + layerClass + '"><span class="' + this._geocoderSelectedCheckClass + '"></span>' + geocoderName + '</li>';
                 }
                 // close list
                 html += '</ul>';

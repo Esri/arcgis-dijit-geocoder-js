@@ -4,7 +4,8 @@ define({
         	"main": {
                 "clearButtonTitle": "Clear Search",
                 "searchButtonTitle": "Search",
-                "geocoderMenuButtonTitle": "Change Geocoder"
+                "geocoderMenuButtonTitle": "Change Geocoder",
+                "geocoderMenuHeader":"Select geocoder to search"
             }
         }
     }),
