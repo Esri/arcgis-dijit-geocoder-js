@@ -70,6 +70,19 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     },
 
     /* ---------------- */
+    /* Public Events */
+    /* ---------------- */
+
+    // called after search has been selected
+    onSelect: function (result) {},
+
+    // called on AC Init
+    onStart: function () {},
+
+    // called on AC Results
+    onResults: function (results) {},
+
+    /* ---------------- */
     /* Public Functions */
     /* ---------------- */
 
@@ -80,15 +93,6 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         }
         return {};
     },
-
-    // called after search has been selected
-    onSelect: function (result) {},
-
-    // called on AC Init
-    onStart: function () {},
-
-    // called on AC Results
-    onResults: function (results) {},
 
     // clear the input box
     clear: function () {
