@@ -5,7 +5,8 @@ define({
                 "clearButtonTitle": "Clear Search",
                 "searchButtonTitle": "Search",
                 "geocoderMenuButtonTitle": "Change Geocoder",
-                "geocoderMenuHeader": "Select geocoder"
+                "geocoderMenuHeader": "Select geocoder",
+				"geocoderMenuCloseTitle":"Close Menu"
             },
             "geocoder": {
                 "esriWorldGeocoderTitle": "Esri World Geocoder",
