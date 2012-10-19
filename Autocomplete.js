@@ -17,8 +17,6 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 
     // init
     constructor: function (options, srcRefNode) {
-        // Esri global locator
-        this._esriWorldGeocoder = '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer';
         // set default settings
         this._setPublicDefaults();
         // mix in settings and defaults
@@ -41,7 +39,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                 this._checkStatus();
             }
             // if only 1 geocoder, destroy arrow node
-            if (this.geocoderMenu && (this.geocoder.length < 2 || typeof this.geocoder === 'string')) {
+            if (this.geocoderMenu && (this._geocoder.length < 2)) {
                 dojo.destroy(this.geocoderMenuArrowNode);
             }
             // set positions for menus
@@ -88,8 +86,8 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 
     // returns current locator object
     getActiveGeocoder: function () {
-        if (this.geocoder && this.geocoder[this.activeGeocoderIndex]) {
-            return this.geocoder[this.activeGeocoderIndex];
+        if (this._geocoder && this._geocoder[this.activeGeocoderIndex]) {
+            return this._geocoder[this.activeGeocoderIndex];
         }
         return {};
     },
@@ -127,13 +125,10 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     _setPublicDefaults: function () {
         // Language
         this.i18n = dojo.i18n.getLocalization("esriTemplate", "template");
-        // geocoder
-        this.geocoder = [{
-            url: location.protocol + this._esriWorldGeocoder,
-            name: this.i18n.Autocomplete.geocoder.esriWorldGeocoderTitle,
-            placeholder: this.i18n.Autocomplete.geocoder.defaultPlaceholder,
-            zoom: 12
-        }];
+        // use esri geocoder
+        this.esriGeocoder = true;
+        // public geocoder
+        this.geocoder = null;
         // Value of input
         this.value = '';
         // Theme
@@ -148,16 +143,39 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 
     // set variables that aren't to be modified
     _setPrivateVars: function () {
+        // geocoder holder
+        this._geocoder = [];
+        // Esri global locator
+        this._esriWorldGeocoder = '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer';
         // results holder
         this.results = [];
+        // if esri geocoder enabled
+        if (this.esriGeocoder) {
+            // add it to geocoder array
+            this._geocoder.push({
+                url: location.protocol + this._esriWorldGeocoder,
+                name: this.i18n.Autocomplete.geocoder.esriWorldGeocoderTitle,
+                placeholder: this.i18n.Autocomplete.geocoder.defaultPlaceholder,
+                zoom: 12
+            });
+        }
         // set geocoder to array if string
         if (typeof this.geocoder === 'string') {
-            this.geocoder = [{
+            this._geocoder.push({
                 url: this.geocoder,
                 name: this.i18n.Autocomplete.geocoder.untitledGeocoder,
                 placeholder: this.i18n.Autocomplete.geocoder.defaultPlaceholder
-            }];
+            });
+        } else { // geocoder is an object. hopefully an array!
+            // for each array item
+            for (var i = 0; i < this.geocoder.length; i++) {
+                // add to private geocoder object
+                this._geocoder.push(this.geocoder[i]);
+            }
         }
+        // update geocoder public property
+        this.geocoder = this._geocoder;
+        // current geocoder
         var currentGeocoder = this.getActiveGeocoder();
         // default place holder text
         this._placeholder = currentGeocoder.placeholder || '';
@@ -305,12 +323,12 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
 
     // create menu for changing active geocoder
     _insertGeocoderMenuItems: function () {
-        if (this.geocoder.length > 1 && typeof this.geocoder !== 'string') {
+        if (this._geocoder.length > 1) {
             if (this.geocoderMenuInsertNode) {
                 var html = '';
                 html += '<ul role="presentation">';
                 // for each result
-                for (var i = 0; i < this.geocoder.length; i++) {
+                for (var i = 0; i < this._geocoder.length; i++) {
                     // set layer class
                     var layerClass = this._resultsItemClass + ' ';
                     // if it's odd
@@ -324,7 +342,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                         layerClass += ' ' + this._geocoderSelectedClass;
                     }
                     // geocoder name
-                    var geocoderName = this.geocoder[i].name || this.i18n.Autocomplete.geocoder.untitledGeocoder;
+                    var geocoderName = this._geocoder[i].name || this.i18n.Autocomplete.geocoder.untitledGeocoder;
                     // create list item
                     html += '<li data-item="true" role="menuitem" tabindex="0" class="' + layerClass + '">';
                     html += '<div class="' + this._geocoderSelectedCheckClass + '"></div>';
@@ -337,6 +355,8 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                 this.geocoderMenuInsertNode.innerHTML = html;
             }
         }
+        // set public geocoder
+        this.geocoder = this._geocoder;
     },
 
     // check input box's status

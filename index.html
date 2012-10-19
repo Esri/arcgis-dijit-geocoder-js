@@ -95,16 +95,10 @@
                         theme: 'esriAutocomplete', // Used to add a class to style the autocomplete
                         geocoder:[
                             {
-                                url:'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
-                                name:'World Geocode Server',
-                                placeholder: 'Hello World'
-                            },
-                            {
                                 url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
                                 name: 'IHS Composite',
                                 placeholder: 'IHS Search',
                                 outFields:'*',
-                                sourceCountry: '',
                                 prefix:'',
                                 postfix: '',
                                 searchExtent: map.extent,

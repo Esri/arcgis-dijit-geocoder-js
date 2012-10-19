@@ -10,7 +10,35 @@ defined in esri/dijit/Autocomplete.js
 </div>
 
 Autocomplete widget provides a ready-to-use widget to locate results from a locator.
-This dijit lets users ...
+
+Changes:
+
+    Localized the 3 labels for clearing results, submitting results and geocoder menu button.
+    Moved placeholder to geolocator object.
+    Moved outFields to geolocator object.
+    Moved searchExtent to geolocator object.
+    Added prefix to geolocator object.
+    Added postfix to geolocator object.
+    Renamed "onAutocomplete" method to "onStart".
+    Renamed "onSearch" method to "onSelect".
+    Removed unnecessary clear function.
+    Renamed "activeGeolocator" property to "activeGeolocatorIndex"
+    Added public method "getActiveGeocoder" to return active geocoder object.
+    Removed hideDelay
+    Added Aria support
+    Added "esriGeocoder" property
+
+Todo:
+
+    Convert to AMD
+    Local cache prototype?
+    RTL css styles
+    Add sourceCountry?
+
+In Progress:
+
+    Graphics request
+
 
 === Class hierarchy ===
 <pre style="background-color: white; border: none;">
@@ -62,20 +90,32 @@ The following parameters are supported:
 ! Description
 |-
 | class="code" | map
-| class="code" | [http://resources.esri.com/help/9.3/arcgisserver/apis/javascript/arcgis/help/jsapi_start.htm#jsapi/map.htm Map]
+| class="code" | Map
 | Map object that this dijit is associated with. This parameter is always required.
 |-
-| class="code" | locators
-| class="code" | Array
+| class="code" | geocoder
+| class="code" | Array or String
 | Required. Defines the elements of the layout.
   [
     {
-        url: string,
-        name: string,
+        url: <String> Required, // URL of the geocoder
+        name: <String> Required, // Name of the geocoder
+        placeholder: <String> Optional, // Input box placeholder text
+        outFields: <String> Optional, // Out fields
+        prefix: <String> Optional, // prepended to the search string
+        postfix: <String> Optional, // appended to the search string
+        searchExtent: <Extent> Optional, // constrain search to specified extent
+        zoom: <Number> Optional // If specified, zooms to this level when geocoding
     },
     {
-        url: string,
-        name: string,
+        url: <String> Required, // URL of the geocoder
+        name: <String> Required, // Name of the geocoder
+        placeholder: <String> Optional, // Input box placeholder text
+        outFields: <String> Optional, // Out fields
+        prefix: <String> Optional, // prepended to the search string
+        postfix: <String> Optional, // appended to the search string
+        searchExtent: <Extent> Optional, // constrain search to specified extent
+        zoom: <Number> Optional // If specified, zooms to this level when geocoding
     }
   ]
 |
@@ -83,18 +123,6 @@ The following parameters are supported:
 | class="code" | theme
 | class="code" | String
 | Optional. Adds the theme class to the container node of the widget for styling. Default: 'esriAutocomplete'.
-|-
-| class="code" | placeholder
-| class="code" | String
-| Optional. Placeholder text shown in the search input field. Default: 'Find address or place'.
-|-
-| class="code" | resetTitle
-| class="code" | String
-| Optional. Title attribute for the button that clears the input field. Default: 'Clear Location'.
-|-
-| class="code" | zoomLevel
-| class="code" | Number
-| Optional. Level of detail to zoom the map into if the locator doesn't return an extent. Default: 12.
 |-
 | class="code" | maxLocations
 | class="code" | Number
@@ -104,17 +132,17 @@ The following parameters are supported:
 | class="code" | Number
 | Optional. Minimum amount of characters required to be entered into the search field before querying for autocomplete results. Default: 3.
 |-
-| class="code" | hideDelay
-| class="code" | Number
-| Optional. Number of milliseconds before automaticly hiding the autocomplete results. Default: 6000.
-|-
 | class="code" | searchDelay
 | class="code" | Number
-| Optional. Number of milliseconds before querying for autocomplete results. Default: 300.
+| Optional. Number of milliseconds before querying for autocomplete results. Default: 350.
 |-
-| class="code" | useBoundingBox
+| class="code" | geocoderMenu
 | class="code" | Boolean
-| Optional. Only searches for results that are withihn the current map's extent. Default: false.
+| Optional. If set false, the geolocator menu will not be shown when more than 1 geocoder is set. Default: true.
+|-
+| class="code" | esriGeocoder
+| class="code" | Boolean
+| Optional. If set false, the esri world geolocator will be disabled. Default: true.
 |}
 
 |}
@@ -133,9 +161,37 @@ The following parameters are supported:
 | class="code" | String
 | Current value of the Autocomplete input textbox
 |-
-| class="code" | activeLocator
+| class="code" | activeGeocoderIndex
 | class="code" | Number
 | Current locator index to search by default. Defaults to 0 on init.
+|-
+| class="code" | results
+| class="code" | Array
+| Current results from autocomplete or select. default. Defaults to empty array.
+|-
+| class="code" | geocoder
+| class="code" | Array
+| List of geocoders for widget.
+|-
+| class="code" | theme
+| class="code" | String
+| Current theme class being used.
+|-
+| class="code" | maxLocations
+| class="code" | Number
+| Maximum locations to display in the results menu.
+|-
+| class="code" | minCharacters
+| class="code" | Number
+| Minimum characters required before query is performed.
+|-
+| class="code" | searchDelay
+| class="code" | Number
+| Delay before each keyUp calls for query to be performed.
+|-
+| class="code" | geocoderMenu
+| class="code" | Boolean
+| Whether or not the geocoder menu is enabled.
 |}
 
 
@@ -155,9 +211,9 @@ The following parameters are supported:
 | class="code" | none
 | Releases all resources used by the dijit. This method should be called when an instance of this dijit is no longer needed in your application.
 |-
-| class="code" | getResults()
-| class="code" | none
-| Returns the last results from an autocomplete or search.
+| class="code" | getActiveGeocoder()
+| class="code" | Object
+| Returns the currently active geocoder object.
 |-
 | class="code" | clear()
 | class="code" | none
@@ -165,7 +221,14 @@ The following parameters are supported:
 |-
 | class="code" | hide()
 | class="code" | none
-| Hides any autocomplete results that may be showing.
+| Hides the autocomplete widget.
+
+|-
+| class="code" | show()
+| class="code" | none
+| Shows the autocomplete widget.
+
+
 |}
 
 === Events===
@@ -176,17 +239,17 @@ The following parameters are supported:
 ! Return Value
 ! Description
 |-
-| class="code" | onLocate
-| class="code" | String
-| Event is fired when a result has been selected, the submit button is pressed or enter key is fired.
+| class="code" | onSelect
+| class="code" | Object
+| Event is fired when a result has been selected, the submit button is pressed or enter key is fired. Returns the result object.
 |-
-| class="code" | onAutoComplete
-| class="code" | String
+| class="code" | onStart
+| class="code" | none
 | Event is fired when autocomplete has started.
 |-
-| class="code" | onAutoCompleteResults
-| class="code" | String
-| Event is fired when there results are returned from an autocomplete.
+| class="code" | onResults
+| class="code" | Array
+| Event is fired when there results are returned from an autocomplete and an array of objects is returned.
 |}
 
 
@@ -205,41 +268,56 @@ The following table lists the CSS class names defined by the basemap gallery to 
 | class="code" | esriAcActive
 | This class is applied to the esriAc node when the autocomplete results menu is currently active.
 |-
-| class="code" | esriAcNoResults
-| Represents the currently selected gallery item node containing a thumbnail and a label.
+| class="code" | esriAcLoading
+| Shows loading spinner inside of textbox container
 |-
 | class="code" | esriAcResults
-| Represents a node that contains a thumbnail image.
+| Results menu container
 |-
-| class="code" | esriAcResultsLoading
-| Represents a node that contains a thumbnail image.
+| class="code" | esriAcResult
+| Result item
 |-
-| class="code" | esriAcItem
-| Represents a node that contains a thumbnail image.
+| class="code" | esriAcResultEven
+| Even result item
 |-
-| class="code" | even
-| Represents a node that contains a thumbnail image.
+| class="code" | esriAcResultOdd
+| Odd result item
 |-
-| class="code" | odd
-| Represents a node that contains a thumbnail image.
-|-
-| class="code" | esriAcPartial
-| Represents a node that contains a thumbnail image.
+| class="code" | esriAcResultPartial
+| Partially matched text inside result item
 |-
 | class="code" | esriAcSearch
-| Represents a node that contains a thumbnail image.
+| Search button
 |-
-| class="code" | esriAcClear
-| Represents a node that contains a thumbnail image.
+| class="code" | esriAcReset
+| Reset button
 |-
-| class="code" | esriAcClearActive
-| Represents a node that contains a thumbnail image.
+| class="code" | esriAcResetActive
+| Shown when search box is populated and reset button is visible
 |-
-| class="code" | esriAcHeader
-| Represents a node that contains a thumbnail image.
+| class="code" | esriAcMenu
+| Geocoder menu
+|-
+| class="code" | esriAcMenuHeader
+| Geocoder menu header
+|-
+| class="code" | esriAcMenuClose
+| Geocoder menu close button
+|-
+| class="code" | esriAcMenuActive
+| Shown when geocoder menu is shown
+|-
+| class="code" | esriAcMenuArrow
+| Button to show goeocoder menu inside the textbox container node
+|-
+| class="code" | esriAcSelected
+| Geocoder item that is currently being used
+|-
+| class="code" | esriAcSelectedCheck
+| Checkmark node for currently selected geocoder item
 |-
 | class="code" | esriAcClearFloat
-| Represents a node that contains a label.
+| Class to clear float within nodes
 |}
 
 === Usage ===
@@ -255,31 +333,33 @@ The following table lists the CSS class names defined by the basemap gallery to 
  <div id="autoCompleteDiv" style="position: absolute; z-index: 2; top: 20px; left: 100px;"></div>
 </pre>
 
-When the dijit is created in this fashion none of the Bing maps will show up in the basemap gallery.
 
 ==== Create the dijit with custom parameters ====
 <pre style="border: none;">
 
     var autocomplete = new esri.dijit.Autocomplete({
         theme: 'esriAutocomplete', // Used to add a class to style the autocomplete
-        placeholder: 'Find address or place',
-        resetTitle: 'Clear Location',
-        zoomLevel: 6,
-        locators:[
+        geocoder:[
             {
                 url:'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
-                name:'World'
+                name:'World Geocoder',
+                placeholder: 'Search'
             },
             {
                 url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
-                name: 'IHS_Composite'
+                name: 'IHS_Composite',
+                placeholder: 'Search 2',
+                outFields: '*',
+                preFix: 'shell',
+                postFix 'station',
+                searchExtent: map.extent,
+                zoom: 12
             }
         ],
-        maxLocations: 3,
+        maxLocations: 6,
         minCharacters: 3,
-        useBoundingBox: false, // don't search within current extent
-        hideDelay: 6000,
-        searchDelay: 300,
+        searchDelay: 350,
+        esriGeocoder: true,
         map: map
     }, dojo.byId('search'));
     autocomplete.startup();
@@ -294,7 +374,4 @@ When the dijit is created in this fashion none of the Bing maps will show up in 
 
 === Samples ===
 
-http://webninja.esri.com/git/Autocomplete-Widget/index.html <br/>
-http://webninja.esri.com/git/Autocomplete-Widget/index2.html
-
-
+http://webninja.esri.com/git/Autocomplete-Widget/index.html
