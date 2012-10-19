@@ -61,6 +61,7 @@
 
 
             var map;
+            var autocomplete;
 
             function init() {
                 esri.config.defaults.io.proxyUrl = "/arcgisserver/apis/javascript/proxy/proxy.ashx";
@@ -90,7 +91,7 @@
                     dojo.connect(window, "onresize", resizeMap);
 
                     // autocomplete with all common options set. Only map is required.
-                    var autocomplete = new esri.dijit.Autocomplete({
+                    autocomplete = new esri.dijit.Autocomplete({
                         theme: 'esriAutocomplete', // Used to add a class to style the autocomplete
                         geocoder:[
                             {
@@ -102,7 +103,7 @@
                                 url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
                                 name: 'IHS Composite',
                                 placeholder: 'IHS Search',
-                                outFields:'',
+                                outFields:'*',
                                 sourceCountry: '',
                                 prefix:'',
                                 postfix: '',

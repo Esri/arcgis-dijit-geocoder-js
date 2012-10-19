@@ -106,6 +106,11 @@
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
     border-radius: 3px;
+    outline: 0;
+}
+
+.esriAutocomplete .esriAc .esriAcMenuArrow:hover, .esriAutocomplete .esriAc .esriAcMenuArrow:focus {
+    opacity: 0.75;
 }
 
 .esriAutocomplete .esriAcMenuActive .esriAcMenuArrow {
@@ -191,6 +196,20 @@
 	background:#ccc;
 	color:#000;
 	font-weight: bold;
+}
+
+.esriAutocomplete .esriAcMenu .esriAcMenuClose{
+    display:block;
+    float: right;
+    width:16px;
+    height: 16px;
+    background: url(../images/reset.png) no-repeat;
+    cursor: pointer;
+    outline: 0;
+}
+
+.esriAutocomplete .esriAcMenu .esriAcMenuClose:hover, .esriAutocomplete .esriAcMenu .esriAcMenuClose:focus{
+    opacity: 0.75;
 }
 
 .esriAutocomplete .esriAcMenu .esriAcSelectedCheck {

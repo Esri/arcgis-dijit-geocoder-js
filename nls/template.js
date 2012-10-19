@@ -5,7 +5,12 @@ define({
                 "clearButtonTitle": "Clear Search",
                 "searchButtonTitle": "Search",
                 "geocoderMenuButtonTitle": "Change Geocoder",
-                "geocoderMenuHeader":"Select geocoder to search"
+                "geocoderMenuHeader": "Select geocoder"
+            },
+            "geocoder": {
+                "esriWorldGeocoderTitle": "Esri World Geocoder",
+                "defaultPlaceholder": "Find Address or Place",
+                "untitledGeocoder": "Untitled geocoder"
             }
         }
     }),
