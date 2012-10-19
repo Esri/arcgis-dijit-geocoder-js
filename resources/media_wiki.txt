@@ -9,7 +9,7 @@ dojo.require("esri.dijit.Autocomplete");<br/>
 defined in esri/dijit/Autocomplete.js
 </div>
 
-Autocomplete widget provides a ready-to-use widget to locate results from a locator.
+Autocomplete widget provides a ready-to-use widget to locate results from a geocoder.
 
 Changes:
 
@@ -340,11 +340,6 @@ The following table lists the CSS class names defined by the basemap gallery to 
     var autocomplete = new esri.dijit.Autocomplete({
         theme: 'esriAutocomplete', // Used to add a class to style the autocomplete
         geocoder:[
-            {
-                url:'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
-                name:'World Geocoder',
-                placeholder: 'Search'
-            },
             {
                 url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
                 name: 'IHS_Composite',
