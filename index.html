@@ -13,7 +13,7 @@
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dojox/grid/resources/Grid.css">
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dojox/grid/resources/SoriaGrid.css">
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/esri/dijit/css/Popup.css">
-        <link rel="stylesheet" type="text/css" href="css/Autocomplete.css">
+        <link rel="stylesheet" type="text/css" href="css/Geocoder.css">
         <style type="text/css">
             html, body, #map {
                 height:100%;
@@ -50,7 +50,7 @@
             };
         </script>
         <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1"></script>
-        <script type="text/javascript" src="Autocomplete.js"></script>
+        <script type="text/javascript" src="Geocoder.js"></script>
         <script type="text/javascript">
             dojo.require("dijit.dijit"); // optimize: load dijit layer
             dojo.require("dijit.layout.BorderContainer");
@@ -61,7 +61,7 @@
 
 
             var map;
-            var autocomplete;
+            var Geocoder;
 
             function init() {
                 esri.config.defaults.io.proxyUrl = "/arcgisserver/apis/javascript/proxy/proxy.ashx";
@@ -90,8 +90,8 @@
                     dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
                     dojo.connect(window, "onresize", resizeMap);
 
-                    // autocomplete with all common options set. Only map is required.
-                    autocomplete = new esri.dijit.Autocomplete({
+                    // Geocoder with all common options set. Only map is required.
+                    Geocoder = new esri.dijit.Geocoder({
                         geocoder:[
                             {
                                 url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
@@ -105,7 +105,7 @@
                         ],
                         map: map
                     }, dojo.byId('search'));
-					autocomplete.startup();
+					Geocoder.startup();
 
                 });
                 mapDeferred.addErrback(function (error) {

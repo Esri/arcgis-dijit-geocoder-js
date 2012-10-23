@@ -1,6 +1,6 @@
 define({
     "root": ({
-        "Autocomplete": {
+        "Geocoder": {
         	"main": {
                 "clearButtonTitle": "Clear Search",
                 "searchButtonTitle": "Search",

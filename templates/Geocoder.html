@@ -1,0 +1,18 @@
+<div class="${theme}" role="presentation">
+	<div class="${_GeocoderClass}" data-dojo-attach-point="containerNode" role="presentation">
+		<div title="${i18n.Geocoder.main.searchButtonTitle}" tabindex="0" class="${_searchButtonClass}" title="${_placeholder}" data-dojo-attach-point="submitNode" data-dojo-attach-event="ondijitclick:_submit" role="button"></div>
+		<div aria-haspopup="true" id="${id}_menu_button" title="${i18n.Geocoder.main.geocoderMenuButtonTitle}" tabindex="0" class="${_geocoderMenuArrowClass}" data-dojo-attach-point="geocoderMenuArrowNode" role="button" aria-expanded="false" data-dojo-attach-event="ondijitclick:_toggleGeolocatorMenu"></div>
+		<input aria-haspopup="true" id="${id}_input" tabindex="0" placeholder="${_placeholder}" title="${_placeholder}" value="${value}" Geocoder="off" type="text" data-dojo-attach-point="inputNode" data-dojo-attach-event="ondijitclick:_inputClick" role="textbox">
+		<div tabindex="0" class="${_clearButtonClass}" data-dojo-attach-point="clearNode" data-dojo-attach-event="ondijitclick:clear" role="button"></div>
+		<div class="${_GeocoderClearClass}" role="presentation"></div>
+	</div>
+	<div class="${_resultsContainerClass}" data-dojo-attach-point="resultsNode" aria-labelledby="${id}_input" role="menu" aria-hidden="true"></div>
+	<div class="${_geocoderMenuClass}" data-dojo-attach-point="geocoderMenuNode" role="presentation">
+		<div class="${_geocoderMenuHeaderClass}">
+			${i18n.Geocoder.main.geocoderMenuHeader}
+			<div role="button" data-dojo-attach-point="geocoderMenuCloseNode" data-dojo-attach-event="ondijitclick:_hideGeolocatorMenu" title="${i18n.Geocoder.main.geocoderMenuCloseTitle}" tabindex="0" class="${_geocoderMenuCloseClass}"></div>
+			<div class="${_GeocoderClearClass}" role="presentation"></div>
+		</div>
+		<div data-dojo-attach-point="geocoderMenuInsertNode" aria-labelledby="${id}_menu_button" role="menu" aria-hidden="true"></div>
+	</div>
+</div>

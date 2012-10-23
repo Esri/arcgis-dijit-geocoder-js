@@ -1,4 +1,4 @@
-dojo.provide("esri.dijit.Autocomplete");
+dojo.provide("esri.dijit.Geocoder");
 
 // dependencies
 dojo.require("dijit._Widget");
@@ -10,9 +10,9 @@ dojo.require("esri.tasks.locator");
 dojo.requireLocalization("esriTemplate", "template");
 
 // define the widget
-dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
+dojo.declare("esri.dijit.Geocoder", [dijit._Widget, dijit._Templated], {
 
-    templatePath: "templates/Autocomplete.html",
+    templatePath: "templates/Geocoder.html",
     widgetsInTemplate: false,
 
     // init
@@ -135,7 +135,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         // Value of input
         this.value = '';
         // Theme
-        this.theme = 'esriAutocomplete'; // flavor
+        this.theme = 'esriGeocoder'; // flavor
         // Options
         this.activeGeocoderIndex = 0; // default geocoder index
         this.maxLocations = 6; // Maximum result locations to return
@@ -157,8 +157,8 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             // add it to geocoder array
             this._geocoder.push({
                 url: location.protocol + this._esriWorldGeocoder,
-                name: this.i18n.Autocomplete.geocoder.esriWorldGeocoderTitle,
-                placeholder: this.i18n.Autocomplete.geocoder.defaultPlaceholder,
+                name: this.i18n.Geocoder.geocoder.esriWorldGeocoderTitle,
+                placeholder: this.i18n.Geocoder.geocoder.defaultPlaceholder,
                 zoom: 12
             });
         }
@@ -166,8 +166,8 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         if (typeof this.geocoder === 'string') {
             this._geocoder.push({
                 url: this.geocoder,
-                name: this.i18n.Autocomplete.geocoder.untitledGeocoder,
-                placeholder: this.i18n.Autocomplete.geocoder.defaultPlaceholder
+                name: this.i18n.Geocoder.geocoder.untitledGeocoder,
+                placeholder: this.i18n.Geocoder.geocoder.defaultPlaceholder
             });
         } else { // geocoder is an object. hopefully an array!
             // for each array item
@@ -183,8 +183,8 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         // default place holder text
         this._placeholder = this.activeGeocoder.placeholder || '';
         // css classes
-        this._autoCompleteClass = 'esriAc';
-        this._autoCompleteActiveClass = 'esriAcActive';
+        this._GeocoderClass = 'esriAc';
+        this._GeocoderActiveClass = 'esriAcActive';
         this._loadingClass = 'esriAcLoading';
         this._resultsContainerClass = 'esriAcResults';
         this._resultsItemClass = 'esriAcResult';
@@ -201,7 +201,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this._geocoderMenuArrowClass = 'esriAcMenuArrow';
         this._geocoderSelectedClass = 'esriAcSelected';
         this._geocoderSelectedCheckClass = 'esriAcSelectedCheck';
-        this._autoCompleteClearClass = 'esriAcClearFloat';
+        this._GeocoderClearClass = 'esriAcClearFloat';
         // keys
         this._enterKey = 13;
         this._escKey = 27;
@@ -302,7 +302,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         // node of the search box container
         var container = dojo.query(this.containerNode);
         // add class to container
-        container.addClass(this._autoCompleteActiveClass);
+        container.addClass(this._GeocoderActiveClass);
         // show node
         dojo.query(this.resultsNode).style('display', 'block');
         // aria
@@ -314,7 +314,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         // hide
         dojo.query(this.resultsNode).style('display', 'none');
         // add class to container
-        dojo.query(this.containerNode).removeClass(this._autoCompleteActiveClass);
+        dojo.query(this.containerNode).removeClass(this._GeocoderActiveClass);
         // aria
         dojo.query(this.resultsNode).attr('aria-hidden', 'true');
     },
@@ -346,12 +346,12 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                         layerClass += ' ' + this._geocoderSelectedClass;
                     }
                     // geocoder name
-                    var geocoderName = this._geocoder[i].name || this.i18n.Autocomplete.geocoder.untitledGeocoder;
+                    var geocoderName = this._geocoder[i].name || this.i18n.Geocoder.geocoder.untitledGeocoder;
                     // create list item
                     html += '<li data-item="true" role="menuitem" tabindex="0" class="' + layerClass + '">';
                     html += '<div class="' + this._geocoderSelectedCheckClass + '"></div>';
                     html += geocoderName;
-                    html += '<div class="' + this._autoCompleteClearClass + '"></div>';
+                    html += '<div class="' + this._GeocoderClearClass + '"></div>';
                     html += '</li>';
                 }
                 // close list
@@ -368,7 +368,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         // if input value is not empty
         if (this.value) {
             // set class and title
-            dojo.query(this.clearNode).addClass(this._clearButtonActiveClass).attr('title', this.i18n.Autocomplete.main.clearButtonTitle);
+            dojo.query(this.clearNode).addClass(this._clearButtonActiveClass).attr('title', this.i18n.Geocoder.main.clearButtonTitle);
         } else {
             // clear address
             this.clear();
