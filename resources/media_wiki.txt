@@ -14,7 +14,6 @@ Geocoder widget provides a ready-to-use widget to locate results from a geocoder
 Changes:
 
     10/16:
-
     Localized the 3 labels for clearing results, submitting results and geocoder menu button.
     Moved placeholder to geolocator object.
     Moved outFields to geolocator object.
@@ -31,7 +30,6 @@ Changes:
     Added "esriGeocoder" property
 
     10/23:
-
     Removed getActiveGeocoder
     Added activeGeocoder property
 
