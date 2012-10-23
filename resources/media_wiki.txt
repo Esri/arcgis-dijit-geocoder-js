@@ -28,6 +28,12 @@ Changes:
     Added Aria support
     Added "esriGeocoder" property
 
+    -------------
+
+    Removed getActiveGeocoder
+    Added activeGeocoder property
+
+
 Todo:
 
     Convert to AMD
@@ -161,6 +167,10 @@ The following parameters are supported:
 | class="code" | String
 | Current value of the Autocomplete input textbox
 |-
+| class="code" | activeGeocoder
+| class="code" | Object
+| Currently selected locator object.
+|-
 | class="code" | activeGeocoderIndex
 | class="code" | Number
 | Current locator index to search by default. Defaults to 0 on init.
@@ -210,10 +220,6 @@ The following parameters are supported:
 | class="code" | destroy()
 | class="code" | none
 | Releases all resources used by the dijit. This method should be called when an instance of this dijit is no longer needed in your application.
-|-
-| class="code" | getActiveGeocoder()
-| class="code" | Object
-| Returns the currently active geocoder object.
 |-
 | class="code" | clear()
 | class="code" | none
@@ -370,3 +376,5 @@ The following table lists the CSS class names defined by the basemap gallery to 
 === Samples ===
 
 http://webninja.esri.com/git/Autocomplete-Widget/index.html
+
+http://webninja.esri.com/git/Autocomplete-Widget/_old/index.html

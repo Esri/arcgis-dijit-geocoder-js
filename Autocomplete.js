@@ -26,6 +26,7 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         // watch updates of public properties and update the widget accordingly
         this.watch("value", this._updateValue);
         this.watch("theme", this._updateTheme);
+        this.watch("activeGeocoder", this._setActiveGeocoder);
         this.watch("activeGeocoderIndex", this._changeGeocoder);
         this.watch("geocoder", this._insertGeocoderMenuItems);
     },
@@ -84,14 +85,6 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     /* Public Functions */
     /* ---------------- */
 
-    // returns current locator object
-    getActiveGeocoder: function () {
-        if (this._geocoder && this._geocoder[this.activeGeocoderIndex]) {
-            return this._geocoder[this.activeGeocoderIndex];
-        }
-        return {};
-    },
-
     // clear the input box
     clear: function () {
         // empty input value
@@ -120,6 +113,16 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     /* ---------------- */
     /* Private Functions */
     /* ---------------- */
+
+    // sets current locator object
+    _setActiveGeocoder: function () {
+        if (this._geocoder && this._geocoder[this.activeGeocoderIndex]) {
+            this.activeGeocoder = this._geocoder[this.activeGeocoderIndex];
+        }
+        else{
+            this.activeGeocoder = {};
+        }
+    },
 
     // default settings
     _setPublicDefaults: function () {
@@ -175,10 +178,10 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         }
         // update geocoder public property
         this.geocoder = this._geocoder;
-        // current geocoder
-        var currentGeocoder = this.getActiveGeocoder();
+        // set geocoder object
+        this._setActiveGeocoder();
         // default place holder text
-        this._placeholder = currentGeocoder.placeholder || '';
+        this._placeholder = this.activeGeocoder.placeholder || '';
         // css classes
         this._autoCompleteClass = 'esriAc';
         this._autoCompleteActiveClass = 'esriAcActive';
@@ -238,8 +241,9 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
     // change active geocoder
     _changeGeocoder: function (attr, oldVal, newVal) {
         this.activeGeocoderIndex = newVal;
-        var currentGeocoder = this.getActiveGeocoder();
-        var placeholder = currentGeocoder.placeholder || '';
+        // set geocoder object
+        this._setActiveGeocoder();
+        var placeholder = this.activeGeocoder.placeholder || '';
         this._hideMenus();
         dojo.query(this.inputNode).attr('placeholder', placeholder);
         dojo.query(this.inputNode).attr('title', placeholder);
@@ -377,12 +381,10 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
         this._hideGeolocatorMenu();
         // set results
         this.results = results;
-        // current geocoder
-        var currentGeocoder = this.getActiveGeocoder();
         // field that holds address name
         var addressFieldName;
         // if using esri geocoder
-        if (this._isEsriGeocoder(currentGeocoder)) {
+        if (this._isEsriGeocoder(this.activeGeocoder)) {
             addressFieldName = 'name';
         } else {
             // set results
@@ -658,30 +660,28 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
             this._hideGeolocatorMenu();
             // show loading spinner
             this._showLoading();
-            // current geocoder
-            var currentGeocoder = this.getActiveGeocoder();
             // query parameters
             var params;
             // Fields
-            var outFields = currentGeocoder.outFields || '';
+            var outFields = this.activeGeocoder.outFields || '';
             // single line query
             var singleLine = '';
             // instance
             var instance = this;
             // query prefix
-            if (currentGeocoder.prefix) {
-                singleLine += currentGeocoder.prefix;
+            if (this.activeGeocoder.prefix) {
+                singleLine += this.activeGeocoder.prefix;
                 singleLine += ' ';
             }
             // query value
             singleLine += this.value;
             // query postfix
-            if (currentGeocoder.postfix) {
+            if (this.activeGeocoder.postfix) {
                 singleLine += ' ';
-                singleLine += currentGeocoder.postfix;
+                singleLine += this.activeGeocoder.postfix;
             }
             // if we can use the find function
-            if (this._isEsriGeocoder(currentGeocoder)) {
+            if (this._isEsriGeocoder(this.activeGeocoder)) {
                 // Query object
                 params = {
                     "text": singleLine,
@@ -697,21 +697,21 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                     params.maxLocations = this.maxLocations;
                 }
                 // local results only
-                if (currentGeocoder.searchExtent) {
+                if (this.activeGeocoder.searchExtent) {
                     var bbox = {
-                        "xmin": currentGeocoder.searchExtent.xmin,
-                        "ymin": currentGeocoder.searchExtent.ymin,
-                        "xmax": currentGeocoder.searchExtent.xmax,
-                        "ymax": currentGeocoder.searchExtent.ymax,
+                        "xmin": this.activeGeocoder.searchExtent.xmin,
+                        "ymin": this.activeGeocoder.searchExtent.ymin,
+                        "xmax": this.activeGeocoder.searchExtent.xmax,
+                        "ymax": this.activeGeocoder.searchExtent.ymax,
                         "spatialReference": {
-                            "wkid": currentGeocoder.searchExtent.spatialReference.wkid
+                            "wkid": this.activeGeocoder.searchExtent.spatialReference.wkid
                         }
                     };
                     params.bbox = dojo.toJson(bbox);
                 }
                 // send request
                 var requestHandle = esri.request({
-                    url: currentGeocoder.url + '/find',
+                    url: this.activeGeocoder.url + '/find',
                     content: params,
                     handleAs: 'json',
                     callbackParamName: 'callback',
@@ -735,11 +735,11 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                     params.outFields = [outFields];
                 }
                 // within extent
-                if (currentGeocoder.searchExtent) {
-                    params.searchExtent = currentGeocoder.searchExtent;
+                if (this.activeGeocoder.searchExtent) {
+                    params.searchExtent = this.activeGeocoder.searchExtent;
                 }
                 // Geocoder
-                this._geocoder = new esri.tasks.Locator(currentGeocoder.url);
+                this._geocoder = new esri.tasks.Locator(this.activeGeocoder.url);
                 this._geocoder.outSpatialReference = this.map.spatialReference;
                 // query for location
                 this._geocoder.addressToLocations(params, function (response) {
@@ -768,12 +768,10 @@ dojo.declare("esri.dijit.Autocomplete", [dijit._Widget, dijit._Templated], {
                 // set map extent to location
                 this.map.setExtent(extent);
             } else {
-                // get active geocoder object
-                var currentGeocoder = this.getActiveGeocoder();
                 // if zoom set in geocodoer object
-                if (currentGeocoder.zoom) {
+                if (this.activeGeocoder.zoom) {
                     // use point and zoom
-                    this.map.centerAndZoom(result.location, currentGeocoder.zoom);
+                    this.map.centerAndZoom(result.location, this.activeGeocoder.zoom);
                 } else {
                     // use point
                     this.map.centerAt(result.location);
