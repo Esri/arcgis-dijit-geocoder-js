@@ -135,7 +135,7 @@ dojo.declare("esri.dijit.Geocoder", [dijit._Widget, dijit._Templated], {
         // Value of input
         this.value = '';
         // Theme
-        this.theme = 'esriGeocoder'; // flavor
+        this.theme = 'esriTheme'; // flavor
         // Options
         this.activeGeocoderIndex = 0; // default geocoder index
         this.maxLocations = 6; // Maximum result locations to return
@@ -183,25 +183,25 @@ dojo.declare("esri.dijit.Geocoder", [dijit._Widget, dijit._Templated], {
         // default place holder text
         this._placeholder = this.activeGeocoder.placeholder || '';
         // css classes
-        this._GeocoderClass = 'esriAc';
-        this._GeocoderActiveClass = 'esriAcActive';
-        this._loadingClass = 'esriAcLoading';
-        this._resultsContainerClass = 'esriAcResults';
-        this._resultsItemClass = 'esriAcResult';
-        this._resultsItemEvenClass = 'esriAcResultEven';
-        this._resultsItemOddClass = 'esriAcResultOdd';
-        this._resultsPartialMatchClass = 'esriAcResultPartial';
-        this._searchButtonClass = 'esriAcSearch';
-        this._clearButtonClass = 'esriAcReset';
-        this._clearButtonActiveClass = 'esriAcResetActive';
-        this._geocoderMenuClass = 'esriAcMenu';
-        this._geocoderMenuHeaderClass = 'esriAcMenuHeader';
-        this._geocoderMenuCloseClass = 'esriAcMenuClose';
-        this._activeMenuClass = 'esriAcMenuActive';
-        this._geocoderMenuArrowClass = 'esriAcMenuArrow';
-        this._geocoderSelectedClass = 'esriAcSelected';
-        this._geocoderSelectedCheckClass = 'esriAcSelectedCheck';
-        this._GeocoderClearClass = 'esriAcClearFloat';
+        this._GeocoderClass = 'esriGeocoder';
+        this._GeocoderActiveClass = 'esriGeocoderActive';
+        this._loadingClass = 'esriGeocoderLoading';
+        this._resultsContainerClass = 'esriGeocoderResults';
+        this._resultsItemClass = 'esriGeocoderResult';
+        this._resultsItemEvenClass = 'esriGeocoderResultEven';
+        this._resultsItemOddClass = 'esriGeocoderResultOdd';
+        this._resultsPartialMatchClass = 'esriGeocoderResultPartial';
+        this._searchButtonClass = 'esriGeocoderSearch';
+        this._clearButtonClass = 'esriGeocoderReset';
+        this._clearButtonActiveClass = 'esriGeocoderResetActive';
+        this._geocoderMenuClass = 'esriGeocoderMenu';
+        this._geocoderMenuHeaderClass = 'esriGeocoderMenuHeader';
+        this._geocoderMenuCloseClass = 'esriGeocoderMenuClose';
+        this._activeMenuClass = 'esriGeocoderMenuActive';
+        this._geocoderMenuArrowClass = 'esriGeocoderMenuArrow';
+        this._geocoderSelectedClass = 'esriGeocoderSelected';
+        this._geocoderSelectedCheckClass = 'esriGeocoderSelectedCheck';
+        this._GeocoderClearClass = 'esriGeocoderClearFloat';
         // keys
         this._enterKey = 13;
         this._escKey = 27;

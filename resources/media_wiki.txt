@@ -268,61 +268,61 @@ The following table lists the CSS class names defined by the basemap gallery to 
 ! Class Name
 ! Description
 |-
-| class="code" | esriAc
+| class="code" | esriGeocoder
 | Represents a node where an instance of the widget is rendered.
 |-
-| class="code" | esriAcActive
-| This class is applied to the esriAc node when the results menu is currently active.
+| class="code" | esriGeocoderActive
+| This class is applied to the widget node when the results menu is currently active.
 |-
-| class="code" | esriAcLoading
+| class="code" | esriGeocoderLoading
 | Shows loading spinner inside of textbox container
 |-
-| class="code" | esriAcResults
+| class="code" | esriGeocoderResults
 | Results menu container
 |-
-| class="code" | esriAcResult
+| class="code" | esriGeocoderResult
 | Result item
 |-
-| class="code" | esriAcResultEven
+| class="code" | esriGeocoderResultEven
 | Even result item
 |-
-| class="code" | esriAcResultOdd
+| class="code" | esriGeocoderResultOdd
 | Odd result item
 |-
-| class="code" | esriAcResultPartial
+| class="code" | esriGeocoderResultPartial
 | Partially matched text inside result item
 |-
-| class="code" | esriAcSearch
+| class="code" | esriGeocoderSearch
 | Search button
 |-
-| class="code" | esriAcReset
+| class="code" | esriGeocoderReset
 | Reset button
 |-
-| class="code" | esriAcResetActive
+| class="code" | esriGeocoderResetActive
 | Shown when search box is populated and reset button is visible
 |-
-| class="code" | esriAcMenu
+| class="code" | esriGeocoderMenu
 | Geocoder menu
 |-
-| class="code" | esriAcMenuHeader
+| class="code" | esriGeocoderMenuHeader
 | Geocoder menu header
 |-
-| class="code" | esriAcMenuClose
+| class="code" | esriGeocoderMenuClose
 | Geocoder menu close button
 |-
-| class="code" | esriAcMenuActive
+| class="code" | esriGeocoderMenuActive
 | Shown when geocoder menu is shown
 |-
-| class="code" | esriAcMenuArrow
+| class="code" | esriGeocoderMenuArrow
 | Button to show goeocoder menu inside the textbox container node
 |-
-| class="code" | esriAcSelected
+| class="code" | esriGeocoderSelected
 | Geocoder item that is currently being used
 |-
-| class="code" | esriAcSelectedCheck
+| class="code" | esriGeocoderSelectedCheck
 | Checkmark node for currently selected geocoder item
 |-
-| class="code" | esriAcClearFloat
+| class="code" | esriGeocoderClearFloat
 | Class to clear float within nodes
 |}
 
