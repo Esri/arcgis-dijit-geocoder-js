@@ -33,6 +33,9 @@ Changes:
     Removed getActiveGeocoder
     Added activeGeocoder property
 
+    10/24:
+    Renamed css classes
+
 
 Todo:
 
@@ -128,7 +131,7 @@ The following parameters are supported:
 |-
 | class="code" | theme
 | class="code" | String
-| Optional. Adds the theme class to the container node of the widget for styling. Default: 'esriGeocoder'.
+| Optional. Adds the theme class to the container node of the widget for styling. Default: 'esriTheme'.
 |-
 | class="code" | maxLocations
 | class="code" | Number
@@ -344,7 +347,7 @@ The following table lists the CSS class names defined by the basemap gallery to 
 <pre style="border: none;">
 
     var Geocoder = new esri.dijit.Geocoder({
-        theme: 'esriGeocoder', // Used to add a class to style the widget
+        theme: 'esriTheme', // Used to add a class to style the widget
         geocoder:[
             {
                 url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
@@ -378,3 +381,9 @@ The following table lists the CSS class names defined by the basemap gallery to 
 http://webninja.esri.com/git/Autocomplete-Widget/index.html
 
 http://webninja.esri.com/git/Autocomplete-Widget/_old/index.html
+
+
+=== Code ===
+
+https://github.com/ArcGIS/Autocomplete-Widget
+
