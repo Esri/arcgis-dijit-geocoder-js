@@ -40,7 +40,7 @@ dojo.declare("esri.dijit.Geocoder", [dijit._Widget, dijit._Templated], {
                 this._checkStatus();
             }
             // if only 1 geocoder, destroy arrow node
-            if (this.geocoderMenu && (this._geocoder && this._geocoder.length < 2)) {
+            if (this.geocoderMenu && (this._geocoder.length < 2)) {
                 dojo.destroy(this.geocoderMenuArrowNode);
             }
             // set positions for menus
@@ -170,10 +170,12 @@ dojo.declare("esri.dijit.Geocoder", [dijit._Widget, dijit._Templated], {
                 placeholder: this.i18n.Geocoder.geocoder.defaultPlaceholder
             });
         } else { // geocoder is an object. hopefully an array!
-            // for each array item
-            for (var i = 0; i < this.geocoder.length; i++) {
-                // add to private geocoder object
-                this._geocoder.push(this.geocoder[i]);
+            if(this.geocoder){
+                // for each array item
+                for (var i = 0; i < this.geocoder.length; i++) {
+                    // add to private geocoder object
+                    this._geocoder.push(this.geocoder[i]);
+                }
             }
         }
         // update geocoder public property
