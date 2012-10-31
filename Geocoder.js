@@ -40,7 +40,7 @@ dojo.declare("esri.dijit.Geocoder", [dijit._Widget, dijit._Templated], {
                 this._checkStatus();
             }
             // if only 1 geocoder, destroy arrow node
-            if (this.geocoderMenu && (this._geocoder.length < 2)) {
+            if (this.geocoderMenu && (this._geocoder && this._geocoder.length < 2)) {
                 dojo.destroy(this.geocoderMenuArrowNode);
             }
             // set positions for menus
