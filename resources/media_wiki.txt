@@ -380,6 +380,8 @@ The following table lists the CSS class names defined by the basemap gallery to 
 
 http://webninja.esri.com/git/Autocomplete-Widget/index.html
 
+http://webninja.esri.com/git/Autocomplete-Widget/default.html
+
 http://webninja.esri.com/git/Autocomplete-Widget/_old/index.html
 
 
