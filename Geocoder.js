@@ -682,16 +682,14 @@ dojo.declare("esri.dijit.Geocoder", [dijit._Widget, dijit._Templated], {
             }
             // if we can use the find function
             if (this._isEsriGeocoder(this.activeGeocoder)) {
-
-                var test = esri.geometry.webMercatorToGeographic(this.map.extent.getCenter());
-                console.log(test);
-
+                //var test = esri.geometry.webMercatorToGeographic(this.map.extent.getCenter());
+                //console.log(test);
                 // Query object
                 params = {
                     "text": singleLine,
                     "outSR": this.map.spatialReference.wkid,
-                    location: test.x + ',' + test.y,
-                    distance: 3000,
+                    //location: test.x + ',' + test.y,
+                    //distance: 3000,
                     "f": "json"
                 };
                 // if outfields
