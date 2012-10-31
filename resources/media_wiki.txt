@@ -47,6 +47,7 @@ Todo:
 In Progress:
 
     Graphics request
+    http://creativedev/comps/G55931_Autocomplete-Widget/index.php?index=1
 
 
 === Class hierarchy ===

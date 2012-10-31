@@ -232,3 +232,195 @@
     width: 0;
     height: 0;
 }
+
+.arcgis ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.arcgis .esriGeocoder {
+    display: block;
+	width:100%;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: normal;
+    margin: 0;
+    border: 1px solid #444;
+    background: #fff;
+}
+
+.arcgis .esriGeocoderActive, .arcgis .esriGeocoderMenuActive {
+    border-bottom: 0;
+}
+
+.arcgis .esriGeocoder input {
+    outline: 0;
+    display: block;
+    border: 0;
+    border-collapse: collapse;
+    vertical-align: middle;
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: normal;
+    margin: 0;
+    padding: 5px 0;
+    float: left;
+    color: #333;
+    background: none;
+    margin: 0 5px 0 5px;
+    width:150px;
+}
+
+.arcgis .esriGeocoder input:focus {
+    color: #333;
+}
+
+.arcgis .esriGeocoder .esriGeocoderSearch {
+    outline: 0;
+    float: right;
+    width: 16px;
+    height: 16px;
+    z-index: 2;
+    margin: 5px 5px 5px 0;
+    overflow: hidden;
+    cursor: pointer;
+    background: url(../images/search.png) no-repeat;
+}
+
+.arcgis .esriGeocoder .esriGeocoderSearch:hover, .arcgis .esriGeocoder .esriGeocoderSearch:focus {
+    opacity: 0.75;
+}
+
+.arcgis .esriGeocoder .esriGeocoderReset {
+    outline: 0;
+    float: right;
+    width: 16px;
+    height: 16px;
+    z-index: 2;
+    overflow: hidden;
+    margin: 5px 5px 5px 0;
+}
+
+.arcgis .esriGeocoder .esriGeocoderResetActive {
+    display: block;
+    background: url(../images/reset.png) no-repeat;
+    cursor: pointer;
+}
+
+.arcgis .esriGeocoder .esriGeocoderLoading {
+    background: url(../images/ajax-loader.gif) center center no-repeat;
+}
+
+.arcgis .esriGeocoder .esriGeocoderReset:hover, .arcgis .esriGeocoder .esriGeocoderReset:focus {
+    opacity: 0.75;
+}
+
+.arcgis .esriGeocoder .esriGeocoderMenuArrow {
+    display: block;
+    float: right;
+    width: 16px;
+    height: 16px;
+    background:url(../images/bullet_arrow_down.png) left center no-repeat;
+    margin: 5px 5px 5px 0;
+    cursor: pointer;
+    outline: 0;
+}
+
+.arcgis .esriGeocoder .esriGeocoderMenuArrow:hover, .arcgis .esriGeocoder .esriGeocoderMenuArrow:focus {
+    opacity: 0.75;
+}
+
+.arcgis .esriGeocoderResults {
+    z-index: 99;
+	width:100%;
+    position: absolute;
+    left: 0;
+    margin: -1px 0 0 0;
+    border: 1px solid #444;
+    border-top:0;
+    padding: 0;
+    background: #fff;
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.arcgis .esriGeocoderResult {
+    padding: 4px 10px;
+	display:block;
+    cursor: pointer;
+    outline: 0;
+    height: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+}
+
+.arcgis .esriGeocoderResult:hover, .arcgis .esriGeocoderResultEven:focus, .arcgis .esriGeocoderResultOdd:focus {
+    background-color: #d9e7fa;
+}
+
+.arcgis .esriGeocoderResult .esriGeocoderResultPartial {
+    font-weight: bold;
+}
+
+.arcgis .esriGeocoderMenu {
+    display: none;
+	width:100%;
+    z-index: 99;
+    position: absolute;
+    left: 0;
+    margin: -1px 0 0 0;
+    padding: 0;
+    background: #fff;
+    border:1px solid #444;
+    border-top:0;
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.arcgis .esriGeocoderMenu .esriGeocoderMenuHeader{
+    padding: 0 0 5px 0;
+    margin:10px 10px 5px 10px;
+	display:block;
+	height: 16px;
+	border-bottom:1px solid #444;
+	color:#000;
+	font-weight: bold;
+}
+
+.arcgis .esriGeocoderMenu .esriGeocoderMenuClose{
+    display:block;
+    float: right;
+    width:16px;
+    height: 16px;
+    background: url(http://d3w50ib5d2uy0g.cloudfront.net/cdn/2018/images/close.gif) no-repeat;
+    cursor: pointer;
+    outline: 0;
+}
+
+.arcgis .esriGeocoderMenu .esriGeocoderMenuClose:hover, .arcgis .esriGeocoderMenu .esriGeocoderMenuClose:focus{
+    opacity: 0.75;
+}
+
+.arcgis .esriGeocoderMenu .esriGeocoderSelectedCheck {
+    width:16px;
+    height: 16px;
+    display: block;
+	float:right;
+    margin-left: 5px;
+}
+
+.arcgis .esriGeocoderMenu .esriGeocoderSelected .esriGeocoderSelectedCheck {
+    background:url(../images/tick_circle.png) no-repeat 0 0;
+}
+
+.esriGeocoder  .esriGeocoderClearFloat {
+    clear: both;
+    display: block;
+    overflow: hidden;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+}
