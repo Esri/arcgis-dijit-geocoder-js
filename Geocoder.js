@@ -130,6 +130,8 @@ dojo.declare("esri.dijit.Geocoder", [dijit._Widget, dijit._Templated], {
         this.i18n = dojo.i18n.getLocalization("esriTemplate", "template");
         // use esri geocoder
         this.esriGeocoder = true;
+        // Geocoder country
+        this.esriGeocoderCountry = 'USA';
         // public geocoder
         this.geocoder = null;
         // Value of input
@@ -652,6 +654,18 @@ dojo.declare("esri.dijit.Geocoder", [dijit._Widget, dijit._Templated], {
         return false;
     },
 
+    _getRadius: function () {
+        var extent = this.map.extent;
+        // get length of extent in meters
+        var meters = esri.geometry.getLength(new esri.geometry.Point(extent.xmin, extent.ymin, map.spatialReference), new esri.geometry.Point(extent.xmax, extent.ymin, map.spatialReference));
+        // get radius
+        var radius = meters / 2;
+        // round radius
+        var rounded = Math.round(radius, 0);
+        // return result
+        return rounded;
+    },
+
     // query for results and then execute a function
     _query: function (callback) {
         // if query isn't empty
@@ -684,14 +698,14 @@ dojo.declare("esri.dijit.Geocoder", [dijit._Widget, dijit._Templated], {
             }
             // if we can use the find function
             if (this._isEsriGeocoder(this.activeGeocoder)) {
-                //var test = esri.geometry.webMercatorToGeographic(this.map.extent.getCenter());
-                //console.log(test);
+                // get geographic center point
+                var centerPoint = esri.geometry.webMercatorToGeographic(this.map.extent.getCenter());
                 // Query object
                 params = {
                     "text": singleLine,
                     "outSR": this.map.spatialReference.wkid,
-                    //location: test.x + ',' + test.y,
-                    //distance: 3000,
+                    "location": Math.round(centerPoint.x * 100)/100 + ',' + Math.round(centerPoint.y * 100)/100,
+                    "distance": this._getRadius(),
                     "f": "json"
                 };
                 // if outfields
@@ -701,6 +715,10 @@ dojo.declare("esri.dijit.Geocoder", [dijit._Widget, dijit._Templated], {
                 // if max locations set
                 if (this.maxLocations) {
                     params.maxLocations = this.maxLocations;
+                }
+                // Esri Geocoder country
+                if(this.esriGeocoderCountry){
+                    params.sourceCountry = this.esriGeocoderCountry;
                 }
                 // local results only
                 if (this.activeGeocoder.searchExtent) {
