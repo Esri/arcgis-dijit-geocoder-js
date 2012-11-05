@@ -39,11 +39,15 @@ Changes:
     11/2:
     Added esriGeocoderCountry for Esri geocoder faster results.
 
+    11/5:
+    Added 'autocomplete' property to disable result menu.
+    Converted to AMD.
+
 
 Todo:
 
-    Convert to AMD
     RTL css styles
+    Have code reviewed. Any other public methods? Do I need to add RTL class to domNode or is that handled by soemthing else?
 
 In Progress:
 
