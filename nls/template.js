@@ -6,12 +6,12 @@ define({
                 "searchButtonTitle": "Search",
                 "geocoderMenuButtonTitle": "Change Geocoder",
                 "geocoderMenuHeader": "Select geocoder",
-				"geocoderMenuCloseTitle":"Close Menu"
+				"geocoderMenuCloseTitle":"Close Menu",
+				"untitledGeocoder": "Untitled geocoder"
             },
-            "geocoder": {
-                "esriWorldGeocoderTitle": "Esri World Geocoder",
-                "defaultPlaceholder": "Find Address or Place",
-                "untitledGeocoder": "Untitled geocoder"
+            "esri": {
+                "title": "Esri World Geocoder",
+                "placeholder": "Find Address or Place"
             }
         }
     }),

@@ -141,6 +141,10 @@ The following parameters are supported:
 | class="code" | Boolean
 | Optional. If set false, the geolocator menu will not be shown when more than 1 geocoder is set. Default: true.
 |-
+| class="code" | autocomplete
+| class="code" | Boolean
+| Optional. If set false, the geolocator will not show the autocomplte menu. Default: true.
+|-
 | class="code" | esriGeocoder
 | class="code" | Boolean
 | Optional. If set false, the esri world geolocator will be disabled. Default: true.
@@ -201,6 +205,10 @@ The following parameters are supported:
 | class="code" | geocoderMenu
 | class="code" | Boolean
 | Whether or not the geocoder menu is enabled.
+|-
+| class="code" | autocomplete
+| class="code" | Boolean
+| Whether or not the autocomplete menu is enabled.
 |}
 
 
@@ -360,6 +368,7 @@ The following table lists the CSS class names defined by the basemap gallery to 
         minCharacters: 3,
         searchDelay: 350,
         esriGeocoder: true,
+        autocomplete: true,
         map: map
     }, dojo.byId('search'));
     Geocoder.startup();
