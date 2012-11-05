@@ -391,8 +391,6 @@ http://webninja.esri.com/git/Autocomplete-Widget/index.html
 
 http://webninja.esri.com/git/Autocomplete-Widget/default.html
 
-http://webninja.esri.com/git/Autocomplete-Widget/_old/index.html
-
 
 === Code ===
 
