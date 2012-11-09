@@ -10,11 +10,11 @@ require([
 		"dojo/query",
 		"dojo/dom-geometry",
 		"dojo/_base/json",
-		"dojo/i18n!./nls/template.js",
+		"dojo/i18n!../src/js/esri/nls/jsapi.js",
 		"dojo/dom-construct",
-		"esri/tasks/Locator",
+		"esri/tasks/locator",
 		"dojo/keys",
-		"dojo/text!./templates/Geocoder.html",
+		"dojo/text!../src/js/esri/dijit/templates/Geocoder.html",
 		"dojo/uacss"
 	], function (declare, parser, ready, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin, on, array, query, domGeom, json, i18n, domConstruct, locator, keys, template) {
     declare("esri.dijit.Geocoder", [_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
@@ -163,8 +163,8 @@ require([
                 // add it to geocoder array
                 this._geocoder.push({
                     url: location.protocol + this._esriGeocoder,
-                    name: i18n.Geocoder.esri.title,
-                    placeholder: i18n.Geocoder.esri.placeholder,
+                    name: i18n.widgets.Geocoder.esri.title,
+                    placeholder: i18n.widgets.Geocoder.esri.placeholder,
                     zoom: 12
                 });
             }
@@ -173,8 +173,8 @@ require([
                 if (typeof this.geocoder === 'string') {
                     this._geocoder.push({
                         url: this.geocoder,
-                        name: i18n.Geocoder.main.untitledGeocoder,
-                        placeholder: i18n.Geocoder.esri.placeholder
+                        name: i18n.widgets.Geocoder.main.untitledGeocoder,
+                        placeholder: i18n.widgets.Geocoder.esri.placeholder
                     });
                 } else { // geocoder is an object. hopefully an array!
                     // for each array item
@@ -354,7 +354,7 @@ require([
 						layerClass += ' ' + this._geocoderSelectedClass;
 					}
 					// geocoder name
-					var geocoderName = this._geocoder[i].name || i18n.Geocoder.main.untitledGeocoder;
+					var geocoderName = this._geocoder[i].name || i18n.widgets.Geocoder.main.untitledGeocoder;
 					// create list item
 					html += '<li data-item="true" role="menuitem" tabindex="0" class="' + layerClass + '">';
 					html += '<div class="' + this._geocoderSelectedCheckClass + '"></div>';
@@ -378,7 +378,7 @@ require([
             // if input value is not empty
             if (this.value) {
                 // set class and title
-                query(this.clearNode).addClass(this._clearButtonActiveClass).attr('title', i18n.Geocoder.main.clearButtonTitle);
+                query(this.clearNode).addClass(this._clearButtonActiveClass).attr('title', i18n.widgets.Geocoder.main.clearButtonTitle);
             } else {
                 // clear address
                 this.clear();
