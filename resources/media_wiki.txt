@@ -43,10 +43,13 @@ Changes:
     Added 'autocomplete' property to disable result menu.
     Converted to AMD.
 
+    11/8:
+    RTL CSS completed.
+    Should there be another theme option?
+
 
 Todo:
 
-    RTL css styles
     Have code reviewed. Any other public methods? Do I need to add RTL class to domNode or is that handled by soemthing else?
 
 In Progress:
@@ -281,6 +284,9 @@ The following table lists the CSS class names defined by the basemap gallery to 
 |-
 | class="code" | esriGeocoder
 | Represents a node where an instance of the widget is rendered.
+|-
+| class="code" | esriGeocoderIcon
+| Represents an icon node.
 |-
 | class="code" | esriGeocoderActive
 | This class is applied to the widget node when the results menu is currently active.

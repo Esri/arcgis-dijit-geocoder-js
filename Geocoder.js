@@ -14,7 +14,8 @@ require([
 		"dojo/dom-construct",
 		"esri/tasks/Locator",
 		"dojo/keys",
-		"dojo/text!./templates/Geocoder.html"
+		"dojo/text!./templates/Geocoder.html",
+		"dojo/uacss"
 	], function (declare, parser, ready, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin, on, array, query, domGeom, json, i18n, domConstruct, locator, keys, template) {
     declare("esri.dijit.Geocoder", [_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
 
@@ -140,7 +141,7 @@ require([
             // Value of input
             this.value = '';
             // Theme
-            this.theme = 'esriTheme'; // flavor
+            this.theme = 'arcgisTheme'; // flavor
             // Options
             this.activeGeocoderIndex = 0; // default geocoder index
             this.maxLocations = 6; // Maximum result locations to return
@@ -191,7 +192,7 @@ require([
         _setPrivateVars: function () {
             this._i18n = i18n;
             // Esri global locator
-            this._esriGeocoder = '//geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer';
+            this._esriGeocoder = '//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer';
             // Set up geocoders
             this._setPrivateGeocoder();
             // results holder
@@ -200,6 +201,7 @@ require([
             this._placeholder = this.activeGeocoder.placeholder || '';
             // css classes
             this._GeocoderClass = 'esriGeocoder';
+            this._GeocoderIconClass = 'esriGeocoderIcon';
             this._GeocoderActiveClass = 'esriGeocoderActive';
             this._loadingClass = 'esriGeocoderLoading';
             this._resultsContainerClass = 'esriGeocoderResults';
