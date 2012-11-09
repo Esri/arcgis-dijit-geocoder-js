@@ -63,7 +63,7 @@
 }
 
 .arcgisTheme .esriGeocoder .esriGeocoderLoading {
-    background: url(../images/ajax-loader.gif) center center no-repeat;
+    background: url(../images/loading.gif) center center no-repeat;
 }
 
 .arcgisTheme .esriGeocoder .esriGeocoderReset:hover, .arcgisTheme .esriGeocoder .esriGeocoderReset:focus {
