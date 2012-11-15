@@ -112,7 +112,7 @@ The following parameters are supported:
 | Map object that this dijit is associated with. This parameter is always required.
 |-
 | class="code" | geocoder
-| class="code" | Array or String
+| class="code" | Array
 | Optional. Defines geocoders to be used. These will be used alongside the esriGeocoder if "esriGeocoder" is true.
   [
     {

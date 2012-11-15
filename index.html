@@ -92,15 +92,19 @@
                     Geocoder = new esri.dijit.Geocoder({
                         geocoder:[
                             {
-                                url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
-                                name: 'IHS Composite',
-                                placeholder: 'IHS Search',
+                                url: 'http://tasks.arcgis.com/ArcGIS/rest/services/WorldLocator/GeocodeServer',
+                                name: 'Geocoder 2',
+                                placeholder: 'Geocode production',
                                 outFields:'*',
                                 prefix:'',
                                 postfix: '',
                                 searchExtent: map.extent,
                             }
                         ],
+                        esriGeocoder: {
+                            placeholder: 'My Placeholder',
+                            name: 'ArcGIS World Geocoder'
+                        },
                         map: map
                     }, dojo.byId('search'));
 					Geocoder.startup();
