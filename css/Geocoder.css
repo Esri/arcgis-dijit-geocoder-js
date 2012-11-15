@@ -50,7 +50,7 @@
 
 .arcgisTheme .esriGeocoder .esriGeocoderSearch {
     cursor: pointer;
-    background: url(../images/search.png) no-repeat;
+    background: url(../images/geocoder.png) no-repeat 0 0;
 }
 
 .arcgisTheme .esriGeocoder .esriGeocoderSearch:hover, .arcgisTheme .esriGeocoder .esriGeocoderSearch:focus {
@@ -59,7 +59,7 @@
 
 .arcgisTheme .esriGeocoder .esriGeocoderResetActive {
     cursor: pointer;
-    background: url(../images/reset.png) no-repeat;
+    background: url(../images/geocoder.png) no-repeat -48px 0;
 }
 
 .arcgisTheme .esriGeocoder .esriGeocoderLoading {
@@ -72,7 +72,7 @@
 
 .arcgisTheme .esriGeocoder .esriGeocoderMenuArrow {
     cursor: pointer;
-    background: url(../images/bullet_arrow_down.png) left center no-repeat;
+    background: url(../images/geocoder.png) no-repeat -32px 0;
 }
 
 .arcgisTheme .esriGeocoder .esriGeocoderMenuArrow:hover, .arcgisTheme .esriGeocoder .esriGeocoderMenuArrow:focus {
@@ -143,7 +143,7 @@
     float: right;
     width: 16px;
     height: 16px;
-    background: url(http://d3w50ib5d2uy0g.cloudfront.net/cdn/2018/images/close.gif) no-repeat;
+    background: url(../images/geocoder.png) no-repeat -64px 0;
     cursor: pointer;
     outline: 0;
 }
@@ -170,7 +170,7 @@
 }
 
 .arcgisTheme .esriGeocoderMenu .esriGeocoderSelected .esriGeocoderSelectedCheck {
-    background: url(../images/tick_circle.png) no-repeat 0 0;
+    background: url(../images/geocoder.png) no-repeat -16px 0;
 }
 
 .arcgisTheme .esriGeocoderIcon {
