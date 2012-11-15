@@ -1,4 +1,22 @@
-require(["dojo/_base/declare", "dijit/_WidgetBase", "dijit/_OnDijitClickMixin", "dijit/_TemplatedMixin", "dojo/on", "dojo/query", "dojo/dom-geometry", "dojo/json", "dojo/i18n!./nls/jsapi.js", "dojo/dom-construct", "esri/tasks/locator", "dojo/keys", "dojo/text!./templates/Geocoder.html", "dojo/_base/Deferred", "dojo/uacss"], function (declare, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin, on, query, domGeom, JSON, i18n, domConstruct, locator, keys, template, Deferred) {
+require([
+        "dojo/_base/declare",
+        "dijit/_WidgetBase",
+        "dijit/_OnDijitClickMixin",
+        "dijit/_TemplatedMixin",
+        "dojo/on",
+        "dojo/query",
+        "dojo/dom-geometry",
+        "dojo/json",
+        "dojo/i18n!./nls/jsapi.js",
+        // "dojo/i18n!esri/nls/jsapi.js",
+        "dojo/dom-construct",
+        "esri/tasks/locator",
+        "dojo/keys",
+        "dojo/text!./templates/Geocoder.html",
+        // "dojo/text!esri/dijit/templates/Geocoder.html",
+        "dojo/_base/Deferred",
+        "dojo/uacss"
+    ], function (declare, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin, on, query, domGeom, JSON, i18n, domConstruct, locator, keys, template, Deferred) {
     declare("esri.dijit.Geocoder", [_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
         // Set template file HTML
         templateString: template,
