@@ -1,8 +1,8 @@
 <div class="${theme}" role="presentation">
 	<div class="${_GeocoderClass}" data-dojo-attach-point="containerNode" role="presentation">
-		<div title="${_i18n.widgets.Geocoder.main.searchButtonTitle}" tabindex="0" class="${_searchButtonClass} ${_GeocoderIconClass}" title="" data-dojo-attach-point="submitNode" data-dojo-attach-event="ondijitclick:_submit" role="button"></div>
+		<div title="${_i18n.widgets.Geocoder.main.searchButtonTitle}" tabindex="0" class="${_searchButtonClass} ${_GeocoderIconClass}" data-dojo-attach-point="submitNode" data-dojo-attach-event="ondijitclick:_submit" role="button"></div>
 		<div aria-haspopup="true" id="${id}_menu_button" title="${_i18n.widgets.Geocoder.main.geocoderMenuButtonTitle}" tabindex="0" class="${_geocoderMenuArrowClass} ${_GeocoderIconClass}" data-dojo-attach-point="geocoderMenuArrowNode" role="button" aria-expanded="false" data-dojo-attach-event="ondijitclick:_toggleGeolocatorMenu"></div>
-		<input aria-haspopup="true" id="${id}_input" tabindex="0" placeholder="" value="${value}" Geocoder="off" type="text" data-dojo-attach-point="inputNode" data-dojo-attach-event="ondijitclick:_inputClick" role="textbox">
+		<input aria-haspopup="true" id="${id}_input" tabindex="0" placeholder="" value="${value}" autocomplete="off" type="text" data-dojo-attach-point="inputNode" data-dojo-attach-event="ondijitclick:_inputClick" role="textbox">
 		<div tabindex="0" class="${_clearButtonClass} ${_GeocoderIconClass}" data-dojo-attach-point="clearNode" data-dojo-attach-event="ondijitclick:clear" role="button"></div>
 		<div class="${_GeocoderClearClass}" role="presentation"></div>
 	</div>

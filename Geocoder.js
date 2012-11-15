@@ -1,24 +1,7 @@
-require([
-    "dojo/_base/declare",
-    "dijit/_WidgetBase",
-    "dijit/_OnDijitClickMixin",
-    "dijit/_TemplatedMixin",
-    "dojo/on",
-    "dojo/query",
-    "dojo/dom-geometry",
-    "dojo/json",
-    "dojo/i18n!./nls/jsapi.js",
-    "dojo/dom-construct",
-    "esri/tasks/locator",
-    "dojo/keys",
-    "dojo/text!./templates/Geocoder.html",
-    "dojo/_base/Deferred",
-    "dojo/uacss"], function (declare, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin, on, query, domGeom, JSON, i18n, domConstruct, locator, keys, template, Deferred) {
+require(["dojo/_base/declare", "dijit/_WidgetBase", "dijit/_OnDijitClickMixin", "dijit/_TemplatedMixin", "dojo/on", "dojo/query", "dojo/dom-geometry", "dojo/json", "dojo/i18n!./nls/jsapi.js", "dojo/dom-construct", "esri/tasks/locator", "dojo/keys", "dojo/text!./templates/Geocoder.html", "dojo/_base/Deferred", "dojo/uacss"], function (declare, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin, on, query, domGeom, JSON, i18n, domConstruct, locator, keys, template, Deferred) {
     declare("esri.dijit.Geocoder", [_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
-
         // Set template file HTML
         templateString: template,
-
         // init
         constructor: function (options, srcRefNode) {
             // set default settings
@@ -35,7 +18,6 @@ require([
             this.watch("geocoder", this._updateGeocoder);
             this.watch("esriGeocoder", this._updateGeocoder);
         },
-
         // start widget
         startup: function () {
             // if all required options are set
@@ -52,7 +34,6 @@ require([
                 console.log('Map or domNode undefined.');
             }
         },
-
         // post create widget function
         postCreate: function () {
             // set widget ready
@@ -60,7 +41,6 @@ require([
             // build geocoder list
             this._updateGeocoder();
         },
-
         // destroy widget
         destroy: function () {
             // remove html
@@ -73,11 +53,9 @@ require([
                 }
             }
         },
-
         /* ---------------- */
         /* Public Events */
         /* ---------------- */
-
         // called after search has been selected
         onSelect: function (result) {
             // if result has attributes
@@ -100,7 +78,6 @@ require([
                 }
             }
         },
-
         // query for results and then execute a function
         onStart: function () {
             // create deferred
@@ -117,8 +94,8 @@ require([
                 var outFields = this.activeGeocoder.outFields || '';
                 // single line query
                 var singleLine = '';
-                // instance
-                var instance = this;
+                // _self
+                var _self = this;
                 // query prefix
                 if (this.activeGeocoder.prefix) {
                     singleLine += this.activeGeocoder.prefix;
@@ -138,10 +115,10 @@ require([
                     // Query object
                     params = {
                         "text": singleLine,
-                            "outSR": this.map.spatialReference.wkid,
-                            "location": Math.round(centerPoint.x * 1000) / 1000 + ',' + Math.round(centerPoint.y * 1000) / 1000,
-                            "distance": this._getRadius(),
-                            "f": "json"
+                        "outSR": this.map.spatialReference.wkid,
+                        "location": Math.round(centerPoint.x * 1000) / 1000 + ',' + Math.round(centerPoint.y * 1000) / 1000,
+                        "distance": this._getRadius(),
+                        "f": "json"
                     };
                     // if outfields
                     if (outFields) {
@@ -159,10 +136,10 @@ require([
                     if (this.activeGeocoder.searchExtent) {
                         var bbox = {
                             "xmin": this.activeGeocoder.searchExtent.xmin,
-                                "ymin": this.activeGeocoder.searchExtent.ymin,
-                                "xmax": this.activeGeocoder.searchExtent.xmax,
-                                "ymax": this.activeGeocoder.searchExtent.ymax,
-                                "spatialReference": {
+                            "ymin": this.activeGeocoder.searchExtent.ymin,
+                            "xmax": this.activeGeocoder.searchExtent.xmax,
+                            "ymax": this.activeGeocoder.searchExtent.ymax,
+                            "spatialReference": {
                                 "wkid": this.activeGeocoder.searchExtent.spatialReference.wkid
                             }
                         };
@@ -209,18 +186,17 @@ require([
             }
             return deferred;
         },
-
         // called on AC Results
         onResults: function (results) {
-            var instance = this;
+            var _self = this;
             // hide menu to toggle geocoder
-            instance._hideGeolocatorMenu();
+            _self._hideGeolocatorMenu();
             // set results
-            instance.results = results;
+            _self.results = results;
             // field that holds address name
             var addressFieldName;
             // if using esri geocoder
-            if (instance.activeGeocoder === instance._esriGeocoder) {
+            if (_self.activeGeocoder === _self._esriGeocoder) {
                 addressFieldName = 'name';
             } else {
                 // set results
@@ -229,9 +205,9 @@ require([
             // string to set
             var html = '';
             // if results and result node
-            if (results && results.length > 0 && instance.resultsNode) {
+            if (results && results.length > 0 && _self.resultsNode) {
                 // textbox value
-                var partialMatch = instance.value;
+                var partialMatch = _self.value;
                 // partial match highlight
                 var regex = new RegExp('(' + partialMatch + ')', 'gi');
                 html += '<ul role="presentation">';
@@ -242,33 +218,30 @@ require([
                     // if it's odd
                     if (i % 2 === 0) {
                         // set it to odd
-                        layerClass += instance._resultsItemOddClass;
+                        layerClass += _self._resultsItemOddClass;
                     } else {
-                        layerClass += instance._resultsItemEvenClass;
+                        layerClass += _self._resultsItemEvenClass;
                     }
                     // create list item
-                    html += '<li data-text="' + results[i][addressFieldName] + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + results[i][addressFieldName].replace(regex, '<strong class="' + instance._resultsPartialMatchClass + '">' + partialMatch + '</strong>') + '</li>';
+                    html += '<li data-text="' + results[i][addressFieldName] + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + results[i][addressFieldName].replace(regex, '<strong class="' + _self._resultsPartialMatchClass + '">' + partialMatch + '</strong>') + '</li>';
                 }
                 // close list
                 html += '</ul>';
                 // insert HTML
-                if (instance.resultsNode) {
-                    instance.resultsNode.innerHTML = html;
+                if (_self.resultsNode) {
+                    _self.resultsNode.innerHTML = html;
                 }
                 // hide loading
-                instance._hideLoading();
+                _self._hideLoading();
                 // show!
-                instance._showResultsMenu();
+                _self._showResultsMenu();
             }
         },
-		
-		// when geocoder selected
+        // when geocoder selected
         onGeocoderSelect: function (attr, oldVal, newVal) {},
-
         /* ---------------- */
         /* Public Functions */
         /* ---------------- */
-
         // clear the input box
         clear: function () {
             if (this.ready) {
@@ -288,25 +261,21 @@ require([
             // hide loading
             this._hideLoading();
         },
-
         // show widget
         show: function () {
             if (this.ready) {
                 query(this.domNode).style('display', 'block');
             }
         },
-
         // hide widget
         hide: function () {
             if (this.ready) {
                 query(this.domNode).style('display', 'none');
             }
         },
-
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */
-
         // default settings
         _setPublicDefaults: function () {
             // show autocomplete?
@@ -328,7 +297,6 @@ require([
             // Show geocoder menu if necessary
             this.geocoderMenu = true;
         },
-
         // set variables that aren't to be modified
         _setPrivateDefaults: function () {
             this._i18n = i18n;
@@ -356,8 +324,7 @@ require([
             this._geocoderSelectedCheckClass = 'esriGeocoderSelectedCheck';
             this._GeocoderClearClass = 'esriGeocoderClearFloat';
         },
-
-		// setup esri geocoder
+        // setup esri geocoder
         _setEsriGeocoder: function () {
             if (this.esriGeocoder) {
                 // if object defined for esri geocoder
@@ -380,15 +347,13 @@ require([
                 this.esriGeocoder = false;
             }
         },
-
         // sets current locator object
         _setActiveGeocoder: function () {
             // set current active geocoder object
-            this.activeGeocoder = this._geocoder[this.activeGeocoderIndex];
+            this.activeGeocoder = this._geocoders[this.activeGeocoderIndex];
             // update placeholder nodes
             this._updatePlaceholder();
         },
-
         // Combine and count all geocoders
         _setGeocoderList: function () {
             var geocoders = [];
@@ -398,10 +363,8 @@ require([
             if (this.geocoder && this.geocoder.length > 0) {
                 geocoders = geocoders.concat(this.geocoder);
             }
-            this._geocoder = geocoders;
-            this._geocoderCount = geocoders.length;
+            this._geocoders = geocoders;
         },
-
         // Update geocoder nodes
         _updateGeocoder: function () {
             this.activeGeocoderIndex = 0;
@@ -410,7 +373,6 @@ require([
             this._setActiveGeocoder();
             this._insertGeocoderMenuItems();
         },
-
         // Update placeholder nodes
         _updatePlaceholder: function () {
             if (this.ready) {
@@ -423,7 +385,6 @@ require([
                 query(this.submitNode).attr('title', this._placeholder);
             }
         },
-
         // set CSS position of menus
         _setMenuPositions: function () {
             if (this.ready) {
@@ -439,7 +400,6 @@ require([
                 query(this.resultsNode).style(params);
             }
         },
-
         // update value of text box
         _updateValue: function (attr, oldVal, newVal) {
             if (this.ready) {
@@ -447,14 +407,12 @@ require([
                 this._checkStatus();
             }
         },
-
         // update theme
         _updateTheme: function (attr, oldVal, newVal) {
             if (this.ready) {
                 query(this.domNode).removeClass(oldVal).addClass(newVal);
             }
         },
-
         // change active geocoder
         _setActiveGeocoderIndex: function (attr, oldVal, newVal) {
             this.activeGeocoderIndex = newVal;
@@ -464,21 +422,18 @@ require([
             this._insertGeocoderMenuItems();
             this.onGeocoderSelect(this.activeGeocoder, oldVal, newVal);
         },
-
         // show loading spinner
         _showLoading: function () {
             if (this.ready) {
                 query(this.clearNode).addClass(this._loadingClass);
             }
         },
-
         // hide loading spinner
         _hideLoading: function () {
             if (this.ready) {
                 query(this.clearNode).removeClass(this._loadingClass);
             }
         },
-
         // show geocoder selection menu
         _showGeolocatorMenu: function () {
             if (this.ready) {
@@ -493,7 +448,6 @@ require([
                 query(this.geocoderMenuArrowNode).attr('aria-expanded', 'true');
             }
         },
-
         // hide geocoder selection menu
         _hideGeolocatorMenu: function () {
             if (this.ready) {
@@ -507,7 +461,6 @@ require([
                 query(this.geocoderMenuArrowNode).attr('aria-expanded', 'false');
             }
         },
-
         // toggle geocoder selection menu
         _toggleGeolocatorMenu: function () {
             this._hideResultsMenu();
@@ -520,7 +473,6 @@ require([
                 }
             }
         },
-
         // show autolocate menu
         _showResultsMenu: function () {
             if (this.ready) {
@@ -534,7 +486,6 @@ require([
                 query(this.resultsNode).attr('aria-hidden', 'false');
             }
         },
-
         // hide the results menu
         _hideResultsMenu: function () {
             if (this.ready) {
@@ -546,21 +497,19 @@ require([
                 query(this.resultsNode).attr('aria-hidden', 'true');
             }
         },
-
         // hide both menus
         _hideMenus: function () {
             this._hideGeolocatorMenu();
             this._hideResultsMenu();
         },
-
         // create menu for changing active geocoder
         _insertGeocoderMenuItems: function () {
             if (this.ready) {
-                if (this.geocoderMenu && this._geocoderCount > 1) {
+                if (this.geocoderMenu && this._geocoders.length > 1) {
                     var html = '';
                     var layerClass = '';
                     html += '<ul role="presentation">';
-                    for (i = 0; i < this._geocoder.length; i++) {
+                    for (i = 0; i < this._geocoders.length; i++) {
                         // set layer class
                         layerClass = this._resultsItemClass + ' ';
                         // if it's odd
@@ -574,7 +523,7 @@ require([
                             layerClass += ' ' + this._geocoderSelectedClass;
                         }
                         // geocoder name
-                        var geocoderName = this._geocoder[i].name || i18n.widgets.Geocoder.main.untitledGeocoder;
+                        var geocoderName = this._geocoders[i].name || i18n.widgets.Geocoder.main.untitledGeocoder;
                         // create list item
                         html += '<li data-index="' + i + '" data-item="true" role="menuitem" tabindex="0" class="' + layerClass + '">';
                         html += '<div class="' + this._geocoderSelectedCheckClass + '"></div>';
@@ -594,7 +543,6 @@ require([
                 }
             }
         },
-
         // check input box's status
         _checkStatus: function () {
             if (this.ready) {
@@ -608,36 +556,35 @@ require([
                 }
             }
         },
-
         // set up connections
         _setDelegations: function () {
             // isntance of class
-            var instance = this;
+            var _self = this;
             // array of all connections
             this._delegations = [];
             // close on click
             var closeOnClick = on(document, "click", function (event) {
-                instance._hideResultsMenu(event);
+                _self._hideResultsMenu(event);
             });
             this._delegations.push(closeOnClick);
             // input key up
             var inputKeyUp = on(this.inputNode, "keyup", function (event) {
-                instance._inputKeyUp(event);
+                _self._inputKeyUp(event);
             });
             this._delegations.push(inputKeyUp);
             // input key down
             var inputKeyDown = on(this.inputNode, "keydown", function (event) {
-                instance._inputKeyDown(event);
+                _self._inputKeyDown(event);
             });
             this._delegations.push(inputKeyDown);
             // arrow key down
-            var geocoderMenuButtonKeyDown = on(this.geocoderMenuArrowNode, "keydown", instance._geocoderMenuButtonKeyDown());
+            var geocoderMenuButtonKeyDown = on(this.geocoderMenuArrowNode, "keydown", _self._geocoderMenuButtonKeyDown());
             this._delegations.push(geocoderMenuButtonKeyDown);
             // list item click
             var listClick = on(this.resultsNode, '[data-item="true"]:click, [data-item="true"]:keydown', function (event) {
-                clearTimeout(instance._queryTimer);
+                clearTimeout(_self._queryTimer);
                 // all items
-                var lists = query('[data-item="true"]', instance.resultsNode);
+                var lists = query('[data-item="true"]', _self.resultsNode);
                 // index of this list item
                 var resultIndex = parseInt(query(this).attr('data-index')[0], 10);
                 // input box text
@@ -646,18 +593,18 @@ require([
                 var newIndex;
                 if (event.type === 'click' || (event.type === 'keydown' && event.keyCode === keys.ENTER)) {
                     // set input text value to this text
-                    query(instance.inputNode).attr('value', locTxt);
+                    query(_self.inputNode).attr('value', locTxt);
                     // set current text var
-                    instance.value = locTxt;
+                    _self.value = locTxt;
                     // Locate
-                    instance._select(instance.results, resultIndex);
+                    _self._select(_self.results, resultIndex);
                     // hide menus
-                    instance._hideMenus();
+                    _self._hideMenus();
                 } else if (event.type === 'keydown' && event.keyCode === keys.UP_ARROW) {
                     // go to previous item
                     newIndex = resultIndex - 1;
                     if (newIndex < 0) {
-                        instance.inputNode.focus();
+                        _self.inputNode.focus();
                     } else {
                         lists[newIndex].focus();
                     }
@@ -665,34 +612,34 @@ require([
                     // go to next item
                     newIndex = resultIndex + 1;
                     if (newIndex >= lists.length) {
-                        instance.inputNode.focus();
+                        _self.inputNode.focus();
                     } else {
                         lists[newIndex].focus();
                     }
                 } else if (event.keyCode === keys.ESCAPE) { // esc key
                     // clear timer
-                    clearTimeout(instance._queryTimer);
+                    clearTimeout(_self._queryTimer);
                     // hide menus
-                    instance._hideMenus();
+                    _self._hideMenus();
                 }
             });
             this._delegations.push(listClick);
             // select geocoder item
             var geocoderMenuClick = on(this.geocoderMenuInsertNode, '[data-item="true"]:click, [data-item="true"]:keydown', function (event) {
                 // all items
-                var lists = query('[data-item="true"]', instance.geocoderMenuInsertNode);
+                var lists = query('[data-item="true"]', _self.geocoderMenuInsertNode);
                 // index of this list item
                 var resultIndex = parseInt(query(this).attr('data-index')[0], 10);
                 // next/previous index
                 var newIndex;
                 if (event.type === 'click' || (event.type === 'keydown' && event.keyCode === keys.ENTER)) {
-                    instance._setActiveGeocoderIndex(null, null, resultIndex);
-                    instance._hideGeolocatorMenu();
+                    _self._setActiveGeocoderIndex(null, null, resultIndex);
+                    _self._hideGeolocatorMenu();
                 } else if (event.type === 'keydown' && event.keyCode === keys.UP_ARROW) {
                     // go to previous item
                     newIndex = resultIndex - 1;
                     if (newIndex < 0) {
-                        instance.geocoderMenuArrowNode.focus();
+                        _self.geocoderMenuArrowNode.focus();
                     } else {
                         lists[newIndex].focus();
                     }
@@ -700,21 +647,20 @@ require([
                     // go to next item
                     newIndex = resultIndex + 1;
                     if (newIndex >= lists.length) {
-                        instance.geocoderMenuArrowNode.focus();
+                        _self.geocoderMenuArrowNode.focus();
                     } else {
                         lists[newIndex].focus();
                     }
                 } else if (event.keyCode === keys.ESCAPE) { // esc key
-                    instance._hideGeolocatorMenu();
+                    _self._hideGeolocatorMenu();
                 }
             });
             this._delegations.push(geocoderMenuClick);
         },
-
         // key up event on input box
         _inputKeyUp: function (event) {
             if (event) {
-                var instance = this;
+                var _self = this;
                 // Reset timer between keys
                 clearTimeout(this._queryTimer);
                 // get textbox value
@@ -735,7 +681,7 @@ require([
                 } else if (event && event.keyCode === keys.ENTER) { // if enter key was pushed
                     // query then Locate
                     this.onStart().then(function (results) {
-                        instance._select(results);
+                        _self._select(results);
                     });
                     // hide menus
                     this._hideMenus();
@@ -750,14 +696,14 @@ require([
                         // set timer for showing
                         this._queryTimer = setTimeout(function () {
                             // query then show
-                            instance.onStart().then(function (response) {
-                                instance.onResults(response);
+                            _self.onStart().then(function (response) {
+                                _self.onResults(response);
                             });
                         }, this.searchDelay);
                     } else {
                         // query then show
-                        instance.onStart().then(function (response) {
-                            instance.onResults(response);
+                        _self.onStart().then(function (response) {
+                            _self.onResults(response);
                         });
                     }
                 } else {
@@ -768,7 +714,6 @@ require([
                 this._checkStatus();
             }
         },
-
         // key down event on input box
         _inputKeyDown: function (event) {
             var lists = query('[data-item="true"]', this.resultsNode);
@@ -788,7 +733,6 @@ require([
                 }
             }
         },
-
         // geocoder menu arrow key down
         _geocoderMenuButtonKeyDown: function (event) {
             var lists = query('[data-item="true"]', this.geocoderMenuInsertNode);
@@ -810,18 +754,16 @@ require([
                 }
             }
         },
-
         // submit button selected
         _submit: function () {
-            var instance = this;
+            var _self = this;
             // query and then Locate
             this.onStart().then(function (results) {
-                instance._select(results);
+                _self._select(results);
             });
             // hide menus
             this._hideMenus();
         },
-
         // input box clicked
         _inputClick: function () {
             // hide geolocator switch
@@ -836,8 +778,7 @@ require([
             // check status of text box
             this._checkStatus();
         },
-
-		// calculate radius of extent
+        // calculate radius of extent
         _getRadius: function () {
             var extent = this.map.extent;
             // get length of extent in meters
@@ -847,7 +788,6 @@ require([
             // return rounded result
             return Math.round(radius * 1000) / 1000;
         },
-
         // go to a location
         _select: function (results, resultNumber) {
             // save results
@@ -869,6 +809,5 @@ require([
             // hide loading spinner
             this._hideLoading();
         }
-
     });
 });
