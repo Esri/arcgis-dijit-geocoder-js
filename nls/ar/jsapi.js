@@ -209,10 +209,7 @@ define({ root:
 			geocoderMenuCloseTitle:"Close Menu",
 			untitledGeocoder: "Untitled geocoder"
         },
-        esri: {
-            title: "Esri World Geocoder",
-            placeholder: "Find Address or Place"
-        }
+        esriGeocoderName: "Esri World Geocoder"
     },
     legend: {
       NLS_creatingLegend: "Creating legend",
