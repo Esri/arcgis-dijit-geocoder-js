@@ -261,7 +261,8 @@ require([
                 instance._showResultsMenu();
             }
         },
-
+		
+		// when geocoder selected
         onGeocoderSelect: function (attr, oldVal, newVal) {},
 
         /* ---------------- */
@@ -356,6 +357,7 @@ require([
             this._GeocoderClearClass = 'esriGeocoderClearFloat';
         },
 
+		// setup esri geocoder
         _setEsriGeocoder: function () {
             if (this.esriGeocoder) {
                 // if object defined for esri geocoder
@@ -835,6 +837,7 @@ require([
             this._checkStatus();
         },
 
+		// calculate radius of extent
         _getRadius: function () {
             var extent = this.map.extent;
             // get length of extent in meters
