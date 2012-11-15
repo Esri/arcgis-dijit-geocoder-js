@@ -11,50 +11,14 @@ defined in esri/dijit/Geocoder.js
 
 Geocoder widget provides a ready-to-use widget to locate results from a geocoder.
 
-Changes:
-
-    10/16:
-    Localized the 3 labels for clearing results, submitting results and geocoder menu button.
-    Moved placeholder to geolocator object.
-    Moved outFields to geolocator object.
-    Moved searchExtent to geolocator object.
-    Added prefix to geolocator object.
-    Added postfix to geolocator object.
-    Renamed "onAutocomplete" method to "onStart".
-    Renamed "onSearch" method to "onSelect".
-    Removed unnecessary clear function.
-    Renamed "activeGeolocator" property to "activeGeolocatorIndex"
-    Added public method "getActiveGeocoder" to return active geocoder object.
-    Removed hideDelay
-    Added Aria support
-    Added "esriGeocoder" property
-
-    10/23:
-    Removed getActiveGeocoder
-    Added activeGeocoder property
-
-    10/24:
-    Renamed css classes
-
-    11/2:
-    Added esriGeocoderCountry for Esri geocoder faster results.
-
-    11/5:
-    Added 'autocomplete' property to disable result menu.
-    Converted to AMD.
-
-    11/8:
-    RTL CSS completed.
-    Should there be another theme option?
-
 
 Todo:
 
-    Have code reviewed. Any other public methods? Do I need to add RTL class to domNode or is that handled by soemthing else?
+    Code review and testing.
+    Another theme?
 
-In Progress:
+Graphics Composition:
 
-    Graphics request
     http://creativedev/comps/G55931_Autocomplete-Widget/index.php?index=1
 
 
@@ -132,6 +96,10 @@ The following parameters are supported:
 | class="code" | String
 | Optional. Adds the theme class to the container node of the widget for styling. Default: 'esriTheme'.
 |-
+| class="code" | value
+| class="code" | String
+| Optional. Starts the geocoder with a default value. Default: ''.
+|-
 | class="code" | maxLocations
 | class="code" | Number
 | Optional. Maxiumum number of results to return in the widget. Default: 6.
@@ -150,15 +118,22 @@ The following parameters are supported:
 |-
 | class="code" | autocomplete
 | class="code" | Boolean
-| Optional. If set false, the geolocator will not show the autocomplte menu. Default: true.
+| Optional. If set false, the geolocator will not autocomplete results and show the menu. Default: true.
 |-
 | class="code" | esriGeocoder
-| class="code" | Boolean
-| Optional. If set false, the esri world geolocator will be disabled. Default: true.
-|-
-| class="code" | esriGeocoderCountry
-| class="code" | String
-| Optional. Country code to use for geocode searches. Default: 'USA'. http://geocode.arcgis.com/arcgis/index.html#/Service_coverage/02q000000005000000/
+| class="code" | Boolean or Object
+| Optional. If set false, the esri world geolocator will be disabled. Default: true. Can be configured if set as an object with the following properties:
+    {
+        name: <String> Required, // Name of the geocoder
+        placeholder: <String> Optional, // Input box placeholder text
+        outFields: <String> Optional, // Out fields
+        prefix: <String> Optional, // prepended to the search string
+        postfix: <String> Optional, // appended to the search string
+        searchExtent: <Extent> Optional, // constrain search to specified extent
+        sourceCountry: <String> Optional // Country code to use for geocode searches to improve performance. Default: 'USA'.
+    }
+
+	Country Codes: http://geocode.arcgis.com/arcgis/index.html#/Service_coverage/02q000000005000000/
 |}
 
 |}
@@ -215,7 +190,7 @@ The following parameters are supported:
 |-
 | class="code" | autocomplete
 | class="code" | Boolean
-| Whether or not the autocomplete menu is enabled.
+| Whether or not the autocomplete results menu is enabled.
 |}
 
 
@@ -270,6 +245,10 @@ The following parameters are supported:
 | class="code" | onResults
 | class="code" | Array
 | Event is fired when there results are returned from an search and an array of objects is returned.
+|-
+| class="code" | onGeocoderSelect
+| class="code" | activeGeocoder, oldIndex, newIndex
+| Event is fired when a geocoder is selected.
 |}
 
 
@@ -357,7 +336,7 @@ The following table lists the CSS class names defined by the basemap gallery to 
 </pre>
 
 
-==== Create the dijit with custom parameters ====
+==== Create the dijit with custom parameters (The whole enchilada) ====
 <pre style="border: none;">
 
     var Geocoder = new esri.dijit.Geocoder({
@@ -377,7 +356,10 @@ The following table lists the CSS class names defined by the basemap gallery to 
         maxLocations: 6,
         minCharacters: 3,
         searchDelay: 350,
-        esriGeocoder: true,
+        esriGeocoder: {
+			placeholder: 'My Placeholder',
+			name: 'ArcGIS World Geocoder'
+		},
         autocomplete: true,
         map: map
     }, dojo.byId('search'));

@@ -1,0 +1,35 @@
+Changes:
+
+    10/16:
+    Localized the 3 labels for clearing results, submitting results and geocoder menu button.
+    Moved placeholder to geolocator object.
+    Moved outFields to geolocator object.
+    Moved searchExtent to geolocator object.
+    Added prefix to geolocator object.
+    Added postfix to geolocator object.
+    Renamed "onAutocomplete" method to "onStart".
+    Renamed "onSearch" method to "onSelect".
+    Removed unnecessary clear function.
+    Renamed "activeGeolocator" property to "activeGeolocatorIndex"
+    Added public method "getActiveGeocoder" to return active geocoder object.
+    Removed hideDelay
+    Added Aria support
+    Added "esriGeocoder" property
+
+    10/23:
+    Removed getActiveGeocoder
+    Added activeGeocoder property
+
+    10/24:
+    Renamed css classes
+
+    11/2:
+    Added esriGeocoderCountry for Esri geocoder faster results.
+
+    11/5:
+    Added 'autocomplete' property to disable result menu.
+    Converted to AMD.
+
+    11/8:
+    RTL CSS completed.
+    Should there be another theme option?

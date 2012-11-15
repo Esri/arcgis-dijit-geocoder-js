@@ -262,6 +262,8 @@ require([
             }
         },
 
+        onGeocoderSelect: function (attr, oldVal, newVal) {},
+
         /* ---------------- */
         /* Public Functions */
         /* ---------------- */
@@ -315,7 +317,7 @@ require([
             // Theme
             this.theme = 'arcgisTheme';
             // default geocoder index
-            this.activeGeocoderIndex = -1;
+            this.activeGeocoderIndex = 0;
             // Maximum result locations to return
             this.maxLocations = 6;
             // Minimum amount of characters before searching
@@ -379,33 +381,30 @@ require([
 
         // sets current locator object
         _setActiveGeocoder: function () {
-            if (this.esriGeocoder && this.activeGeocoderIndex === -1) {
-                this.activeGeocoder = this._esriGeocoder;
-            } else {
-                this.activeGeocoder = this.geocoder[this.activeGeocoderIndex];
-            }
+            // set current active geocoder object
+            this.activeGeocoder = this._geocoder[this.activeGeocoderIndex];
             // update placeholder nodes
             this._updatePlaceholder();
         },
 
-        // Count total geocoders
-        _countGeocoders: function () {
-            this._geocoderCount = 0;
+        // Combine and count all geocoders
+        _setGeocoderList: function () {
+            var geocoders = [];
             if (this.esriGeocoder) {
-                this._geocoderCount++;
+                geocoders = geocoders.concat([this._esriGeocoder]);
             }
             if (this.geocoder && this.geocoder.length > 0) {
-                for (var i = 0; i < this.geocoder.length; i++) {
-                    this._geocoderCount++;
-                }
+                geocoders = geocoders.concat(this.geocoder);
             }
-            console.log(this._geocoderCount);
+            this._geocoder = geocoders;
+            this._geocoderCount = geocoders.length;
         },
 
         // Update geocoder nodes
         _updateGeocoder: function () {
+            this.activeGeocoderIndex = 0;
             this._setEsriGeocoder();
-            this._countGeocoders();
+            this._setGeocoderList();
             this._setActiveGeocoder();
             this._insertGeocoderMenuItems();
         },
@@ -461,6 +460,7 @@ require([
             this._setActiveGeocoder();
             this._hideMenus();
             this._insertGeocoderMenuItems();
+            this.onGeocoderSelect(this.activeGeocoder, oldVal, newVal);
         },
 
         // show loading spinner
@@ -558,21 +558,7 @@ require([
                     var html = '';
                     var layerClass = '';
                     html += '<ul role="presentation">';
-                    if (this.esriGeocoder) {
-                        // set layer class
-                        layerClass = this._resultsItemClass + ' ';
-                        layerClass += this._resultsItemOddClass;
-                        if (this.activeGeocoderIndex === -1) {
-                            layerClass += ' ' + this._geocoderSelectedClass;
-                        }
-                        html += '<li data-index="-1" data-item="true" role="menuitem" tabindex="0" class="' + layerClass + '">';
-                        html += '<div class="' + this._geocoderSelectedCheckClass + '"></div>';
-                        html += this._esriGeocoder.name;
-                        html += '<div class="' + this._GeocoderClearClass + '"></div>';
-                        html += '</li>';
-                    }
-                    // for each result
-                    for (i = 0; i < this.geocoder.length; i++) {
+                    for (i = 0; i < this._geocoder.length; i++) {
                         // set layer class
                         layerClass = this._resultsItemClass + ' ';
                         // if it's odd
@@ -586,7 +572,7 @@ require([
                             layerClass += ' ' + this._geocoderSelectedClass;
                         }
                         // geocoder name
-                        var geocoderName = this.geocoder[i].name || i18n.widgets.Geocoder.main.untitledGeocoder;
+                        var geocoderName = this._geocoder[i].name || i18n.widgets.Geocoder.main.untitledGeocoder;
                         // create list item
                         html += '<li data-index="' + i + '" data-item="true" role="menuitem" tabindex="0" class="' + layerClass + '">';
                         html += '<div class="' + this._geocoderSelectedCheckClass + '"></div>';
@@ -757,7 +743,7 @@ require([
                     clearTimeout(this._queryTimer);
                     // hide menus
                     this._hideMenus();
-                } else if (this.autocomplete && alength >= this.minCharacters && event && event.keyCode !== keys.TAB) {
+                } else if (this.autocomplete && alength >= this.minCharacters) {
                     if (this.searchDelay) {
                         // set timer for showing
                         this._queryTimer = setTimeout(function () {
