@@ -97,7 +97,7 @@ require([
             }
         },
         // query for results and then execute a function
-        onStart: function () {
+        onSearchStart: function () {
             // create deferred
             var deferred = new Deferred();
             // if query isn't empty
@@ -205,7 +205,7 @@ require([
             return deferred;
         },
         // called on AC Results
-        onResults: function (results) {
+        onSearchResults: function (results) {
             var _self = this;
             // hide menu to toggle geocoder
             _self._hideGeolocatorMenu();
@@ -698,7 +698,7 @@ require([
                     return;
                 } else if (event && event.keyCode === keys.ENTER) { // if enter key was pushed
                     // query then Locate
-                    this.onStart().then(function (results) {
+                    this.onSearchStart().then(function (results) {
                         _self._select(results);
                     });
                     // hide menus
@@ -714,14 +714,14 @@ require([
                         // set timer for showing
                         this._queryTimer = setTimeout(function () {
                             // query then show
-                            _self.onStart().then(function (response) {
-                                _self.onResults(response);
+                            _self.onSearchStart().then(function (response) {
+                                _self.onSearchResults(response);
                             });
                         }, this.searchDelay);
                     } else {
                         // query then show
-                        _self.onStart().then(function (response) {
-                            _self.onResults(response);
+                        _self.onSearchStart().then(function (response) {
+                            _self.onSearchResults(response);
                         });
                     }
                 } else {
@@ -776,7 +776,7 @@ require([
         _submit: function () {
             var _self = this;
             // query and then Locate
-            this.onStart().then(function (results) {
+            this.onSearchStart().then(function (results) {
                 _self._select(results);
             });
             // hide menus
