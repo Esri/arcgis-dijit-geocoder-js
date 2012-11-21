@@ -44,8 +44,6 @@ require([
                 if (this.value) {
                     this._checkStatus();
                 }
-                // set positions for menus
-                this._setMenuPositions();
                 // setup connections
                 this._setDelegations();
             } else {
@@ -401,21 +399,6 @@ require([
                 }
                 query(this.inputNode).attr('placeholder', this._placeholder);
                 query(this.submitNode).attr('title', this._placeholder);
-            }
-        },
-        // set CSS position of menus
-        _setMenuPositions: function () {
-            if (this.ready) {
-                var container = query(this.containerNode);
-                // position and height of the search box
-                var position = domGeom.position(container[0]);
-                // set params
-                var params = {
-                    'top': position.h + 'px'
-                };
-                // position the menus
-                query(this.geocoderMenuNode).style(params);
-                query(this.resultsNode).style(params);
             }
         },
         // update value of text box

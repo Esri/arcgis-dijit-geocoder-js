@@ -85,6 +85,7 @@
     width: 100%;
     position: absolute;
     left: 0;
+    top:100%;
     margin: -1px 0 0 0;
     border: 1px solid #8b8b8b;
     border-top: 0;
@@ -117,6 +118,7 @@
     z-index: 99;
     position: absolute;
     left: 0;
+    top:100%;
     margin: -1px 0 0 0;
     padding: 0;
     background: #fff;
