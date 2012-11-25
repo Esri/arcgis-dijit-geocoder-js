@@ -1,8 +1,24 @@
-require(["dojo/_base/declare", "dijit/_WidgetBase", "dijit/_OnDijitClickMixin", "dijit/_TemplatedMixin", "dojo/on", "dojo/query", "dojo/dom-geometry", "dojo/json", "dojo/i18n!./nls/jsapi.js",
-// "dojo/i18n!esri/nls/jsapi.js",
-"dojo/dom-construct", "esri/tasks/locator", "dojo/keys", "dojo/text!./templates/Geocoder.html",
-// "dojo/text!esri/dijit/templates/Geocoder.html",
-"dojo/_base/Deferred", "dojo/uacss"], function(declare, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin, on, query, domGeom, JSON, i18n, domConstruct, locator, keys, template, Deferred) {
+define([
+  "dojo/_base/declare", 
+  "dojo/_base/Deferred", 
+  "dojo/dom-construct", 
+  "dojo/dom-geometry", 
+  "dojo/i18n!esri/nls/jsapi", 
+  "dojo/json", 
+  "dojo/keys", 
+  "dojo/on", 
+  "dojo/query", 
+  "dojo/text!esri/dijit/templates/Geocoder.html", 
+  "dojo/uacss",
+  "dijit/_OnDijitClickMixin", 
+  "dijit/_TemplatedMixin", 
+  "dijit/_WidgetBase", 
+  "esri", // We're not directly using anything defined in esri.js but geometry, locator and utils are not AMD. So, the only way to get reference to esri object is through esri module (ie. esri/main)
+  "esri/geometry",
+  "esri/tasks/locator",
+  "esri/utils"
+], 
+function(declare, Deferred, domConstruct, domGeom, i18n, JSON, keys, on, query, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, esri) {
     declare("esri.dijit.Geocoder", [_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
         // Set template file HTML
         templateString: template,
@@ -47,10 +63,13 @@ require(["dojo/_base/declare", "dijit/_WidgetBase", "dijit/_OnDijitClickMixin", 
         destroy: function() {
             // remove html
             domConstruct.empty(this.domNode);
+            
+            var i;
+            
             // if delegations
             if (this._delegations) {
                 // disconnect all events
-                for (var i = 0; i < this._delegations.length; i++) {
+                for (i = 0; i < this._delegations.length; i++) {
                     this._delegations[i].remove();
                 }
             }
@@ -115,12 +134,12 @@ require(["dojo/_base/declare", "dijit/_WidgetBase", "dijit/_OnDijitClickMixin", 
             // if results and result node
             if (results && results.length > 0 && _self.resultsNode) {
                 // textbox value
-                var partialMatch = _self.value;
+                var partialMatch = _self.value, i;
                 // partial match highlight
                 var regex = new RegExp('(' + partialMatch + ')', 'gi');
                 html += '<ul role="presentation">';
                 // for each result
-                for (var i = 0; i < results.length && i < this.maxLocations; ++i) {
+                for (i = 0; i < results.length && i < this.maxLocations; ++i) {
                     // set layer class
                     var layerClass = this._resultsItemClass + ' ';
                     // if it's odd
@@ -512,7 +531,7 @@ require(["dojo/_base/declare", "dijit/_WidgetBase", "dijit/_OnDijitClickMixin", 
             if (this.ready) {
                 if (this.geocoderMenu && this._geocoders.length > 1) {
                     var html = '';
-                    var layerClass = '';
+                    var layerClass = '', i;
                     html += '<ul role="presentation">';
                     for (i = 0; i < this._geocoders.length; i++) {
                         // set layer class
@@ -784,7 +803,10 @@ require(["dojo/_base/declare", "dijit/_WidgetBase", "dijit/_OnDijitClickMixin", 
         _getRadius: function() {
             var extent = this.map.extent;
             // get length of extent in meters
-            var meters = esri.geometry.getLength(new esri.geometry.Point(extent.xmin, extent.ymin, map.spatialReference), new esri.geometry.Point(extent.xmax, extent.ymin, map.spatialReference));
+            var meters = esri.geometry.getLength(
+              new esri.geometry.Point(extent.xmin, extent.ymin, this.map.spatialReference),
+              new esri.geometry.Point(extent.xmax, extent.ymin, this.map.spatialReference)
+            );
             // get radius
             var radius = meters / 2;
             // return rounded result
