@@ -118,7 +118,7 @@ The following parameters are supported:
 |-
 | class="code" | autocomplete
 | class="code" | Boolean
-| Optional. If set false, the geolocator will not autocomplete results and show the menu. Default: true.
+| Optional. If set false, the geolocator will not autocomplete results and show the menu. Default: false.
 |-
 | class="code" | esriGeocoder
 | class="code" | Boolean or Object
@@ -130,7 +130,7 @@ The following parameters are supported:
         prefix: <String> Optional, // prepended to the search string
         postfix: <String> Optional, // appended to the search string
         searchExtent: <Extent> Optional, // constrain search to specified extent
-        sourceCountry: <String> Optional // Country code to use for geocode searches to improve performance. Default: 'USA'.
+        sourceCountry: <String> Optional // Country code to use for geocode searches to improve performance. Default: ''.
     }
 
 	Country Codes: http://geocode.arcgis.com/arcgis/index.html#/Service_coverage/02q000000005000000/
@@ -206,6 +206,10 @@ The following parameters are supported:
 | class="code" | none
 | Finalizes the creation of this dijit. This method should be called after the constructor for this dijit is called and before letting the users interact with it.
 |-
+| class="code" | search()
+| class="code" | none
+| Executes a search using the current value of the geocoder.
+|-
 | class="code" | destroy()
 | class="code" | none
 | Releases all resources used by the dijit. This method should be called when an instance of this dijit is no longer needed in your application.
@@ -217,13 +221,10 @@ The following parameters are supported:
 | class="code" | hide()
 | class="code" | none
 | Hides the widget.
-
 |-
 | class="code" | show()
 | class="code" | none
 | Shows the widget.
-
-
 |}
 
 === Events===
@@ -237,6 +238,10 @@ The following parameters are supported:
 | class="code" | onSelect
 | class="code" | Object
 | Event is fired when a result has been selected, the submit button is pressed or enter key is fired. Returns the result object.
+|-
+| class="code" | onClear
+| class="code" |
+| Event is fired when a result has been cleared from the input box or a new result has been selected.
 |-
 | class="code" | onSearchStart
 | class="code" | none

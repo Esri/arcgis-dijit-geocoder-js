@@ -47,7 +47,7 @@
                 }]
             };
         </script>
-        <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.2"></script>
+        <script src="http://servicesbeta.esri.com/jsapi/arcgis/3.3"></script>
         <script type="text/javascript" src="js/Geocoder.js"></script>
         <script type="text/javascript">
             dojo.require("dijit.dijit"); // optimize: load dijit layer
@@ -101,6 +101,7 @@
                             placeholder: 'My Placeholder',
                             name: 'ArcGIS World Geocoder'
                         },
+                        autocomplete:true,
                         map: map
                     }, dojo.byId('search'));
 					Geocoder.startup();
