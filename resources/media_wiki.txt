@@ -240,7 +240,7 @@ The following parameters are supported:
 | Event is fired when a result has been selected, the submit button is pressed or enter key is fired. Returns the result object.
 |-
 | class="code" | onClear
-| class="code" |
+| class="code" | none
 | Event is fired when a result has been cleared from the input box or a new result has been selected.
 |-
 | class="code" | onSearchStart
@@ -252,7 +252,7 @@ The following parameters are supported:
 | Event is fired when there results are returned from an search and an array of objects is returned.
 |-
 | class="code" | onGeocoderSelect
-| class="code" | activeGeocoder, oldIndex, newIndex
+| class="code" | Object
 | Event is fired when a geocoder is selected.
 |}
 
