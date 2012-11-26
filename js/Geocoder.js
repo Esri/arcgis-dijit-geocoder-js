@@ -4,7 +4,7 @@ require([
   "dojo/_base/Deferred",
   "dojo/_base/array",
   "dojo/dom-construct",
-  "dojo/i18n!./nls/jsapi",
+  "dojo/i18n!./nls/jsapi.js",
   //"dojo/i18n!esri/nls/jsapi",
   "dojo/json",
   "dojo/keys",
