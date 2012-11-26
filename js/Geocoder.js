@@ -87,13 +87,14 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
                     // set map extent to location
                     this.map.setExtent(e.result.extent);
                 } else {
+                    var point = new esri.geometry.Point(e.result.location, this.map.spatialReference);
                     // if zoom set in geocodoer object
                     if (this.activeGeocoder.hasOwnProperty('zoom')) {
                         // use point and zoom
-                        this.map.centerAndZoom(e.result.location, this.activeGeocoder.zoom);
+                        this.map.centerAt(point, this.activeGeocoder.zoom);
                     } else {
                         // use point
-                        this.map.centerAt(e.result.location);
+                        this.map.centerAt(point);
                     }
                 }
             }
@@ -116,11 +117,14 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
         },
         // called on AC Results
         onSearchResults: function(e) {
+
+            console.log(e);
+
             var _self = this;
             // hide menu to toggle geocoder
             _self._hideGeolocatorMenu();
             // set results
-            _self.results = e.results;
+            _self.results = e;
             // field that holds address name
             var addressFieldName;
             // if using esri geocoder
@@ -133,7 +137,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             // string to set
             var html = '';
             // if results and result node
-            if (e.hasOwnProperty("results") && e.results.length > 0 && _self.resultsNode) {
+            if (e && e.length && _self.resultsNode) {
                 // textbox value
                 var partialMatch = _self.value,
                     i;
@@ -141,7 +145,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
                 var regex = new RegExp('(' + partialMatch + ')', 'gi');
                 html += '<ul role="presentation">';
                 // for each result
-                for (i = 0; i < e.results.length && i < this.maxLocations; ++i) {
+                for (i = 0; i < e.length && i < this.maxLocations; ++i) {
                     // set layer class
                     var layerClass = this._resultsItemClass + ' ';
                     // if it's odd
@@ -152,7 +156,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
                         layerClass += _self._resultsItemEvenClass;
                     }
                     // create list item
-                    html += '<li data-text="' + e.results[i][addressFieldName] + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + e.results[i][addressFieldName].replace(regex, '<strong class="' + _self._resultsPartialMatchClass + '">' + partialMatch + '</strong>') + '</li>';
+                    html += '<li data-text="' + e[i][addressFieldName] + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + e[i][addressFieldName].replace(regex, '<strong class="' + _self._resultsPartialMatchClass + '">' + partialMatch + '</strong>') + '</li>';
                 }
                 // close list
                 html += '</ul>';
@@ -300,7 +304,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             if (this.esriGeocoder) {
                 geocoders = geocoders.concat([this._esriGeocoder]);
             }
-            if (this.geocoder && this.geocoder.length > 0) {
+            if (this.geocoder && this.geocoder.length) {
                 geocoders = geocoders.concat(this.geocoder);
             }
             this._geocoders = geocoders;
@@ -424,11 +428,8 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
                         callbackParamName: 'callback',
                         // on load
                         load: function(response) {
-                            response = _self._hydrateResults(response);
-                            _self._hideLoading();
-                            _self._deferred.resolve({
-                                "results": response.locations
-                            });
+                            response = _self._hydrateResults(response.locations);
+                            _self._deferred.resolve(response);
                         }
                     });
                 } else {
@@ -451,15 +452,11 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
                     this._task.outSpatialReference = this.map.spatialReference;
                     // query for location
                     this._task.addressToLocations(params, function(response) {
-                        _self._hideLoading();
-                        _self._deferred.resolve({
-                            "results": response
-                        });
+                        response = _self._hydrateResults(response);
+                        _self._deferred.resolve(response);
                     }, function(response) {
-                        _self._hideLoading();
-                        _self._deferred.resolve({
-                            "results": response
-                        });
+                        response = _self._hydrateResults(response);
+                        _self._deferred.resolve(response);
                     });
                 }
             } else {
@@ -643,10 +640,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
                     // set current text var
                     _self.value = locTxt;
                     // Locate
-                    _self._select({
-                        "results": _self.results,
-                        "resultNumber": resultIndex
-                    });
+                    _self._select([_self.results[resultIndex]]);
                     // hide menus
                     _self._hideMenus();
                 } else if (event.type === 'keydown' && event.keyCode === keys.UP_ARROW) {
@@ -744,9 +738,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
                         // and return those so there's less work for the app
                         // using this widget
                         if (response.length) {
-                            response = _self._hydrateResults({
-                                "locations": response
-                            });
+                            response = _self._hydrateResults(response);
                         }
                         _self.onSearchResults(response);
                     });
@@ -831,14 +823,12 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
         // go to a location
         _select: function(e) { // results, resultNumber) {
             // save results
-            this.results = e.results;
+            this.results = e;
             // if we have results
-            if (e.results && e.results.length > 0) {
-                // selected result
-                var numResult = e.resultNumber || 0;
+            if (this.results && this.results.length) {
                 // result object
                 var evt = {
-                    result: e.results[numResult]
+                    result: this.results[0]
                 };
                 // locate result
                 this.onSelect(evt);
@@ -854,13 +844,18 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
         // create Extent and Graphic objects from JSON
         _hydrateResults: function(e) {
             var _self = this;
-            if (e.hasOwnProperty("locations") && e.locations.length) {
-                arr.forEach(e.locations, function(result) {
-                    result.extent = new esri.geometry.Extent(result.extent);
-                    result.extent.setSpatialReference(_self.map.spatialReference);
+            _self._hideLoading();
+            if (e && e.length) {
+                arr.forEach(e, function(result) {
+                    if(result.hasOwnProperty('extent')){
+                        result.extent = new esri.geometry.Extent(result.extent);
+                        result.extent.setSpatialReference(new esri.SpatialReference(result.spatialReference));
+                    }
                     result.feature = new esri.Graphic(result.feature);
                 });
             }
+            //else if(){
+            //}
             return e;
         }
     });
