@@ -1,4 +1,4 @@
-__NOTOC__
+﻿__NOTOC__
 __NOEDITSECTION__
 
 {{#css:/custom/jsapi.css}}
@@ -207,7 +207,7 @@ The following parameters are supported:
 | Finalizes the creation of this dijit. This method should be called after the constructor for this dijit is called and before letting the users interact with it.
 |-
 | class="code" | search()
-| class="code" | none
+| class="code" | Deferred
 | Executes a search using the current value of the geocoder.
 |-
 | class="code" | destroy()

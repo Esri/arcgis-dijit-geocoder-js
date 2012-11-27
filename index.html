@@ -110,6 +110,10 @@
 					dojo.connect(Geocoder, 'onSearchResults', function(results){
     					console.log(results);
 					});
+					
+					dojo.connect(Geocoder, 'onSearchStart', function(deferred){
+						console.log('search start');
+					});
 
                 });
                 mapDeferred.addErrback(function (error) {

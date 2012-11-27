@@ -84,29 +84,15 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 // set map extent to location
                 this.map.setExtent(e.extent);
             }
-            // if active geocoder has a zoom level set
+            /*
+			// if active geocoder has a zoom level set
             if (this.activeGeocoder.hasOwnProperty('zoom')) {
                 // set zoom level
                 this.map.setLevel(this.activeGeocoder.zoom);
             }
+			*/
             // return selected result
             return e;
-        },
-        // query for results and then execute a function
-        onSearchStart: function (e) {
-            var _self = this;
-            if (!e) {
-                e = {
-                    delay: 0
-                };
-            }
-            // set deferred variable if needed to cancel it
-            this._deferred = new Deferred();
-            // timeout
-            this._queryTimer = setTimeout(function () {
-                _self._performSearch();
-            }, e.delay);
-            return this._deferred;
         },
         // called on results
         onSearchResults: function (e) {
@@ -118,6 +104,8 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 }
             }
         },
+        // when geocoder selected
+        onSearchStart: function () {},
         // when geocoder selected
         onGeocoderSelect: function (e) {},
         // when geocoder selected
@@ -163,9 +151,10 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
         search: function () {
             var _self = this;
             // query and then Locate
-            var deferred = this.onSearchStart().then(function (response) {
+            var deferred = this._startSearch().then(function (response) {
                 _self.onSearchResults({
                     "results": response,
+                        "value": _self.value,
                         "type": "search"
                 });
             });
@@ -352,8 +341,29 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 _self._showResultsMenu();
             }
         },
+        // query for results and then execute a function
+        _startSearch: function (e) {
+            var _self = this;
+            if (!e) {
+                e = {
+                    delay: 0
+                };
+            }
+            if (this._deferred) {
+                this._deferred.cancel('stop query');
+            }
+            // set deferred variable if needed to cancel it
+            this._deferred = new Deferred();
+            // timeout
+            this._queryTimer = setTimeout(function () {
+                _self._performQuery();
+            }, e.delay);
+            return this._deferred;
+        },
         // query for search results
-        _performSearch: function () {
+        _performQuery: function () {
+            // fire event
+            this.onSearchStart();
             // if query isn't empty
             if (this.value) {
                 // hide menu to toggle geocoder
@@ -727,11 +737,12 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                     // hide menus
                     this._hideMenus();
                 } else if (this.autocomplete && alength >= this.minCharacters) {
-                    this.onSearchStart({
+                    this._startSearch({
                         delay: this.searchDelay
                     }).then(function (response) {
                         _self.onSearchResults({
                             "results": response,
+                                "value": _self.value,
                                 "type": "autocomplete"
                         });
                     });
@@ -749,8 +760,10 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
             if (event && event.keyCode === keys.TAB) {
                 // hide menus if opened
                 this._hideMenus();
-                // cancel deferred
-                this._deferred.cancel('stop query');
+                if (this._deferred) {
+                    // cancel deferred
+                    this._deferred.cancel('stop query');
+                }
                 // stop
                 return;
             } else if (event && event.keyCode === keys.UP_ARROW) {
@@ -822,9 +835,6 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
             if (this.results && this.results.length) {
                 // locate result
                 this.onSelect(this.results[0]);
-            } else {
-                // clear address box
-                this.clear();
             }
             // hide menus
             this._hideMenus();
