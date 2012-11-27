@@ -110,8 +110,8 @@
 					dojo.connect(Geocoder, 'onSearchResults', function(results){
     					console.log(results);
 					});
-					
-					dojo.connect(Geocoder, 'onSearchStart', function(deferred){
+
+					dojo.connect(Geocoder, 'onSearchStart', function(){
 						console.log('search start');
 					});
 
