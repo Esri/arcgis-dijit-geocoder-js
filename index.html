@@ -94,7 +94,8 @@
                             {
                                 url: 'http://tasks.arcgis.com/ArcGIS/rest/services/WorldLocator/GeocodeServer',
                                 name: 'ArcGIS Tasks (old)',
-                                placeholder: 'tasks.arcgis.com'
+                                placeholder: 'tasks.arcgis.com',
+                                zoom: 5
                             }
                         ],
                         esriGeocoder: {
@@ -105,6 +106,10 @@
                         map: map
                     }, dojo.byId('search'));
 					Geocoder.startup();
+
+					dojo.connect(Geocoder, 'onSearchResults', function(results){
+    					console.log(results);
+					});
 
                 });
                 mapDeferred.addErrback(function (error) {

@@ -1,32 +1,31 @@
 require([
 //define([
-  "dojo/_base/declare",
-  "dojo/_base/Deferred",
-  "dojo/_base/array",
-  "dojo/dom-construct",
-  "dojo/i18n!./nls/jsapi.js",
-  //"dojo/i18n!esri/nls/jsapi",
-  "dojo/json",
-  "dojo/keys",
-  "dojo/on",
-  "dojo/query",
-  "dojo/text!./templates/Geocoder.html",
-  //"dojo/text!esri/dijit/templates/Geocoder.html",
-  "dojo/uacss",
-  "dijit/_OnDijitClickMixin",
-  "dijit/_TemplatedMixin",
-  "dijit/_WidgetBase",
-  "esri", // We're not directly using anything defined in esri.js but geometry, locator and utils are not AMD. So, the only way to get reference to esri object is through esri module (ie. esri/main)
-  "esri/geometry",
-  "esri/tasks/locator",
-  "esri/utils"
+    "dojo/_base/declare",
+    "dojo/_base/Deferred",
+    "dojo/dom-construct",
+    "dojo/i18n!./nls/jsapi.js",
+    //"dojo/i18n!esri/nls/jsapi",
+    "dojo/json",
+    "dojo/keys",
+    "dojo/on",
+    "dojo/query",
+    "dojo/text!./templates/Geocoder.html",
+    //"dojo/text!esri/dijit/templates/Geocoder.html",
+    "dojo/uacss",
+    "dijit/_OnDijitClickMixin",
+    "dijit/_TemplatedMixin",
+    "dijit/_WidgetBase",
+    "esri", // We're not directly using anything defined in esri.js but geometry, locator and utils are not AMD. So, the only way to get reference to esri object is through esri module (ie. esri/main)
+    "esri/geometry",
+    "esri/tasks/locator",
+    "esri/utils"
 ],
-function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, esri) {
+function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, esri) {
     declare("esri.dijit.Geocoder", [_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
         // Set template file HTML
         templateString: template,
         // init
-        constructor: function(options, srcRefNode) {
+        constructor: function (options, srcRefNode) {
             // set default settings
             this._setPublicDefaults();
             // mix in settings and defaults
@@ -42,7 +41,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             this.watch("esriGeocoder", this._updateGeocoder);
         },
         // start widget
-        startup: function() {
+        startup: function () {
             // if all required options are set
             if (this.domNode && this.map) {
                 // add clear button if already populated
@@ -56,14 +55,14 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // post create widget function
-        postCreate: function() {
+        postCreate: function () {
             // set widget ready
             this.ready = true;
             // build geocoder list
             this._updateGeocoder();
         },
         // destroy widget
-        destroy: function() {
+        destroy: function () {
             // remove html
             domConstruct.empty(this.domNode);
             var i;
@@ -79,28 +78,22 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
         /* Public Events */
         /* ---------------- */
         // called after search has been selected
-        onSelect: function(e) {
-            // if result has attributes
-            if (e && e.hasOwnProperty('result')) {
-                // new locator
-                if (e.result.hasOwnProperty('extent')) {
-                    // set map extent to location
-                    this.map.setExtent(e.result.extent);
-                } else {
-                    var point = new esri.geometry.Point(e.result.location, this.map.spatialReference);
-                    // if zoom set in geocodoer object
-                    if (this.activeGeocoder.hasOwnProperty('zoom')) {
-                        // use point and zoom
-                        this.map.centerAt(point, this.activeGeocoder.zoom);
-                    } else {
-                        // use point
-                        this.map.centerAt(point);
-                    }
-                }
+        onSelect: function (e) {
+            // new locator
+            if (e && e.hasOwnProperty('extent')) {
+                // set map extent to location
+                this.map.setExtent(e.extent);
             }
+            // if active geocoder has a zoom level set
+            if (this.activeGeocoder.hasOwnProperty('zoom')) {
+                // set zoom level
+                this.map.setLevel(this.activeGeocoder.zoom);
+            }
+            // return selected result
+            return e;
         },
         // query for results and then execute a function
-        onSearchStart: function(e) {
+        onSearchStart: function (e) {
             var _self = this;
             if (!e) {
                 e = {
@@ -110,76 +103,33 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             // set deferred variable if needed to cancel it
             this._deferred = new Deferred();
             // timeout
-            this._queryTimer = setTimeout(function() {
+            this._queryTimer = setTimeout(function () {
                 _self._performSearch();
             }, e.delay);
             return this._deferred;
         },
-        // called on AC Results
-        onSearchResults: function(e) {
-
-            console.log(e);
-
-            var _self = this;
-            // hide menu to toggle geocoder
-            _self._hideGeolocatorMenu();
-            // set results
-            _self.results = e;
-            // field that holds address name
-            var addressFieldName;
-            // if using esri geocoder
-            if (_self.activeGeocoder === _self._esriGeocoder) {
-                addressFieldName = 'name';
-            } else {
-                // set results
-                addressFieldName = 'address';
-            }
-            // string to set
-            var html = '';
-            // if results and result node
-            if (e && e.length && _self.resultsNode) {
-                // textbox value
-                var partialMatch = _self.value,
-                    i;
-                // partial match highlight
-                var regex = new RegExp('(' + partialMatch + ')', 'gi');
-                html += '<ul role="presentation">';
-                // for each result
-                for (i = 0; i < e.length && i < this.maxLocations; ++i) {
-                    // set layer class
-                    var layerClass = this._resultsItemClass + ' ';
-                    // if it's odd
-                    if (i % 2 === 0) {
-                        // set it to odd
-                        layerClass += _self._resultsItemOddClass;
-                    } else {
-                        layerClass += _self._resultsItemEvenClass;
-                    }
-                    // create list item
-                    html += '<li data-text="' + e[i][addressFieldName] + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + e[i][addressFieldName].replace(regex, '<strong class="' + _self._resultsPartialMatchClass + '">' + partialMatch + '</strong>') + '</li>';
+        // called on results
+        onSearchResults: function (e) {
+            if (e && e.hasOwnProperty('type')) {
+                if (e.type === 'search') {
+                    this._select(e);
+                } else if (e.type === 'autocomplete') {
+                    this._formatResults(e);
                 }
-                // close list
-                html += '</ul>';
-                // insert HTML
-                if (_self.resultsNode) {
-                    _self.resultsNode.innerHTML = html;
-                }
-                // hide loading
-                _self._hideLoading();
-                // show!
-                _self._showResultsMenu();
             }
         },
         // when geocoder selected
-        onGeocoderSelect: function(e) {},
+        onGeocoderSelect: function (e) {},
         // when geocoder selected
-        onClear: function(e) {},
+        onClear: function () {},
         /* ---------------- */
         /* Public Functions */
         /* ---------------- */
         // clear the input box
-        clear: function() {
+        clear: function () {
+            // clear event
             this.onClear();
+            // if geocoder is ready
             if (this.ready) {
                 // empty input value
                 query(this.inputNode).attr('value', '');
@@ -198,23 +148,26 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             this._hideLoading();
         },
         // show widget
-        show: function() {
+        show: function () {
             if (this.ready) {
                 query(this.domNode).style('display', 'block');
             }
         },
         // hide widget
-        hide: function() {
+        hide: function () {
             if (this.ready) {
                 query(this.domNode).style('display', 'none');
             }
         },
         // submit button selected
-        search: function() {
+        search: function () {
             var _self = this;
             // query and then Locate
-            var deferred = this.onSearchStart().then(function(results) {
-                _self._select(results);
+            var deferred = this.onSearchStart().then(function (response) {
+                _self.onSearchResults({
+                    "results": response,
+                    "type": "search"
+                });
             });
             // hide menus
             this._hideMenus();
@@ -224,7 +177,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
         /* Private Functions */
         /* ---------------- */
         // default settings
-        _setPublicDefaults: function() {
+        _setPublicDefaults: function () {
             // show autocomplete?
             this.autocomplete = false;
             // use esri geocoder
@@ -245,7 +198,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             this.geocoderMenu = true;
         },
         // set variables that aren't to be modified
-        _setPrivateDefaults: function() {
+        _setPrivateDefaults: function () {
             this._i18n = i18n;
             // results holder
             this.results = [];
@@ -272,7 +225,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             this._GeocoderClearClass = 'esriGeocoderClearFloat';
         },
         // setup esri geocoder
-        _setEsriGeocoder: function() {
+        _setEsriGeocoder: function () {
             if (this.esriGeocoder) {
                 // if object defined for esri geocoder
                 if (typeof this.esriGeocoder === 'object') {
@@ -292,14 +245,14 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // sets current locator object
-        _setActiveGeocoder: function() {
+        _setActiveGeocoder: function () {
             // set current active geocoder object
             this.activeGeocoder = this._geocoders[this.activeGeocoderIndex];
             // update placeholder nodes
             this._updatePlaceholder();
         },
         // Combine and count all geocoders
-        _setGeocoderList: function() {
+        _setGeocoderList: function () {
             var geocoders = [];
             if (this.esriGeocoder) {
                 geocoders = geocoders.concat([this._esriGeocoder]);
@@ -310,7 +263,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             this._geocoders = geocoders;
         },
         // Update geocoder nodes
-        _updateGeocoder: function() {
+        _updateGeocoder: function () {
             this.activeGeocoderIndex = 0;
             this._setEsriGeocoder();
             this._setGeocoderList();
@@ -318,7 +271,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             this._insertGeocoderMenuItems();
         },
         // Update placeholder nodes
-        _updatePlaceholder: function() {
+        _updatePlaceholder: function () {
             if (this.ready) {
                 this._placeholder = '';
                 // if placeholder of active geocoder is set
@@ -330,20 +283,20 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // update value of text box
-        _updateValue: function(attr, oldVal, newVal) {
+        _updateValue: function (attr, oldVal, newVal) {
             if (this.ready) {
                 query(this.inputNode).attr('value', newVal);
                 this._checkStatus();
             }
         },
         // update theme
-        _updateTheme: function(attr, oldVal, newVal) {
+        _updateTheme: function (attr, oldVal, newVal) {
             if (this.ready) {
                 query(this.domNode).removeClass(oldVal).addClass(newVal);
             }
         },
         // change active geocoder
-        _setActiveGeocoderIndex: function(attr, oldVal, newVal) {
+        _setActiveGeocoderIndex: function (attr, oldVal, newVal) {
             this.activeGeocoderIndex = newVal;
             // set geocoder object
             this._setActiveGeocoder();
@@ -356,7 +309,50 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             };
             this.onGeocoderSelect(evt);
         },
-        _performSearch: function() {
+        // called on AC Results
+        _formatResults: function (e) {
+            var _self = this;
+            // hide menu to toggle geocoder
+            _self._hideGeolocatorMenu();
+            // set results
+            _self.results = e.results;
+            // string to set
+            var html = '';
+            // if results and result node
+            if (_self.results && _self.results.length && _self.resultsNode) {
+                // textbox value
+                var partialMatch = _self.value,
+                    i;
+                // partial match highlight
+                var regex = new RegExp('(' + partialMatch + ')', 'gi');
+                html += '<ul role="presentation">';
+                // for each result
+                for (i = 0; i < _self.results.length; ++i) {
+                    // set layer class
+                    var layerClass = this._resultsItemClass + ' ';
+                    // if it's odd
+                    if (i % 2 === 0) {
+                        // set it to odd
+                        layerClass += _self._resultsItemOddClass;
+                    } else {
+                        layerClass += _self._resultsItemEvenClass;
+                    }
+                    // create list item
+                    html += '<li data-text="' + _self.results[i].name + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + _self.results[i].name.replace(regex, '<strong class="' + _self._resultsPartialMatchClass + '">' + partialMatch + '</strong>') + '</li>';
+                }
+                // close list
+                html += '</ul>';
+                // insert HTML
+                if (_self.resultsNode) {
+                    _self.resultsNode.innerHTML = html;
+                }
+                // hide loading
+                _self._hideLoading();
+                // show!
+                _self._showResultsMenu();
+            }
+        },
+        _performSearch: function () {
             // if query isn't empty
             if (this.value) {
                 // hide menu to toggle geocoder
@@ -427,9 +423,8 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
                         handleAs: 'json',
                         callbackParamName: 'callback',
                         // on load
-                        load: function(response) {
-                            response = _self._hydrateResults(response.locations);
-                            _self._deferred.resolve(response);
+                        load: function (response) {
+                            _self._deferred.resolve(_self._hydrateResults(response.locations));
                         }
                     });
                 } else {
@@ -451,33 +446,31 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
                     this._task = new esri.tasks.Locator(this.activeGeocoder.url);
                     this._task.outSpatialReference = this.map.spatialReference;
                     // query for location
-                    this._task.addressToLocations(params, function(response) {
-                        response = _self._hydrateResults(response);
-                        _self._deferred.resolve(response);
-                    }, function(response) {
-                        response = _self._hydrateResults(response);
-                        _self._deferred.resolve(response);
+                    this._task.addressToLocations(params, function (response) {
+                        _self._deferred.resolve(_self._hydrateResults(response));
+                    }, function (response) {
+                        _self._deferred.resolve(_self._hydrateResults(response));
                     });
                 }
             } else {
-                _self._hideLoading();
+                this._hideLoading();
                 this._deferred.resolve();
             }
         },
         // show loading spinner
-        _showLoading: function() {
+        _showLoading: function () {
             if (this.ready) {
                 query(this.clearNode).addClass(this._loadingClass);
             }
         },
         // hide loading spinner
-        _hideLoading: function() {
+        _hideLoading: function () {
             if (this.ready) {
                 query(this.clearNode).removeClass(this._loadingClass);
             }
         },
         // show geocoder selection menu
-        _showGeolocatorMenu: function() {
+        _showGeolocatorMenu: function () {
             if (this.ready) {
                 // container node
                 var container = query(this.containerNode);
@@ -491,7 +484,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // hide geocoder selection menu
-        _hideGeolocatorMenu: function() {
+        _hideGeolocatorMenu: function () {
             if (this.ready) {
                 // container node
                 var container = query(this.containerNode);
@@ -504,7 +497,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // toggle geocoder selection menu
-        _toggleGeolocatorMenu: function() {
+        _toggleGeolocatorMenu: function () {
             this._hideResultsMenu();
             if (this.ready) {
                 var display = query(this.geocoderMenuNode).style('display');
@@ -516,7 +509,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // show autolocate menu
-        _showResultsMenu: function() {
+        _showResultsMenu: function () {
             if (this.ready) {
                 // node of the search box container
                 var container = query(this.containerNode);
@@ -529,7 +522,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // hide the results menu
-        _hideResultsMenu: function() {
+        _hideResultsMenu: function () {
             if (this.ready) {
                 // hide
                 query(this.resultsNode).style('display', 'none');
@@ -540,12 +533,12 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // hide both menus
-        _hideMenus: function() {
+        _hideMenus: function () {
             this._hideGeolocatorMenu();
             this._hideResultsMenu();
         },
         // create menu for changing active geocoder
-        _insertGeocoderMenuItems: function() {
+        _insertGeocoderMenuItems: function () {
             if (this.ready) {
                 if (this.geocoderMenu && this._geocoders.length > 1) {
                     var html = '';
@@ -587,7 +580,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // check input box's status
-        _checkStatus: function() {
+        _checkStatus: function () {
             if (this.ready) {
                 // if input value is not empty
                 if (this.value) {
@@ -600,23 +593,23 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // set up connections
-        _setDelegations: function() {
+        _setDelegations: function () {
             // isntance of class
             var _self = this;
             // array of all connections
             this._delegations = [];
             // close on click
-            var closeOnClick = on(document, "click", function(event) {
+            var closeOnClick = on(document, "click", function (event) {
                 _self._hideResultsMenu(event);
             });
             this._delegations.push(closeOnClick);
             // input key up
-            var inputKeyUp = on(this.inputNode, "keyup", function(event) {
+            var inputKeyUp = on(this.inputNode, "keyup", function (event) {
                 _self._inputKeyUp(event);
             });
             this._delegations.push(inputKeyUp);
             // input key down
-            var inputKeyDown = on(this.inputNode, "keydown", function(event) {
+            var inputKeyDown = on(this.inputNode, "keydown", function (event) {
                 _self._inputKeyDown(event);
             });
             this._delegations.push(inputKeyDown);
@@ -624,7 +617,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             var geocoderMenuButtonKeyDown = on(this.geocoderMenuArrowNode, "keydown", _self._geocoderMenuButtonKeyDown());
             this._delegations.push(geocoderMenuButtonKeyDown);
             // list item click
-            var listClick = on(this.resultsNode, '[data-item="true"]:click, [data-item="true"]:keydown', function(event) {
+            var listClick = on(this.resultsNode, '[data-item="true"]:click, [data-item="true"]:keydown', function (event) {
                 clearTimeout(_self._queryTimer);
                 // all items
                 var lists = query('[data-item="true"]', _self.resultsNode);
@@ -640,7 +633,9 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
                     // set current text var
                     _self.value = locTxt;
                     // Locate
-                    _self._select([_self.results[resultIndex]]);
+                    _self._select({
+                        "results": [_self.results[resultIndex]]
+                    });
                     // hide menus
                     _self._hideMenus();
                 } else if (event.type === 'keydown' && event.keyCode === keys.UP_ARROW) {
@@ -668,7 +663,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             });
             this._delegations.push(listClick);
             // select geocoder item
-            var geocoderMenuClick = on(this.geocoderMenuInsertNode, '[data-item="true"]:click, [data-item="true"]:keydown', function(event) {
+            var geocoderMenuClick = on(this.geocoderMenuInsertNode, '[data-item="true"]:click, [data-item="true"]:keydown', function (event) {
                 // all items
                 var lists = query('[data-item="true"]', _self.geocoderMenuInsertNode);
                 // index of this list item
@@ -701,7 +696,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             this._delegations.push(geocoderMenuClick);
         },
         // key up event on input box
-        _inputKeyUp: function(event) {
+        _inputKeyUp: function (event) {
             if (event) {
                 var _self = this;
                 // Reset timer between keys
@@ -733,14 +728,11 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
                 } else if (this.autocomplete && alength >= this.minCharacters) {
                     this.onSearchStart({
                         delay: this.searchDelay
-                    }).then(function(response) {
-                        // create esri.geometry.Extent and esri.Graphic objects
-                        // and return those so there's less work for the app
-                        // using this widget
-                        if (response.length) {
-                            response = _self._hydrateResults(response);
-                        }
-                        _self.onSearchResults(response);
+                    }).then(function (response) {
+                        _self.onSearchResults({
+                            "results": response,
+                            "type": "autocomplete"
+                        });
                     });
                 } else {
                     // hide menus
@@ -751,9 +743,10 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // key down event on input box
-        _inputKeyDown: function(event) {
+        _inputKeyDown: function (event) {
             var lists = query('[data-item="true"]', this.resultsNode);
             if (event && event.keyCode === keys.TAB) {
+                // hide menus if opened
                 this._hideMenus();
                 // cancel deferred
                 this._deferred.cancel('stop query');
@@ -775,7 +768,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // geocoder menu arrow key down
-        _geocoderMenuButtonKeyDown: function(event) {
+        _geocoderMenuButtonKeyDown: function (event) {
             var lists = query('[data-item="true"]', this.geocoderMenuInsertNode);
             if (event && event.keyCode === keys.UP_ARROW) {
                 this._showGeolocatorMenu();
@@ -796,7 +789,7 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             }
         },
         // input box clicked
-        _inputClick: function() {
+        _inputClick: function () {
             // hide geolocator switch
             this._hideGeolocatorMenu();
             // if input value is empty
@@ -810,28 +803,23 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             this._checkStatus();
         },
         // calculate radius of extent
-        _getRadius: function() {
+        _getRadius: function () {
             var extent = this.map.extent;
             // get length of extent in meters
-            var meters = esri.geometry.getLength(
-            new esri.geometry.Point(extent.xmin, extent.ymin, this.map.spatialReference), new esri.geometry.Point(extent.xmax, extent.ymin, this.map.spatialReference));
+            var meters = esri.geometry.getLength(new esri.geometry.Point(extent.xmin, extent.ymin, this.map.spatialReference), new esri.geometry.Point(extent.xmax, extent.ymin, this.map.spatialReference));
             // get radius
             var radius = meters / 2;
             // return rounded result
             return Math.round(radius * 1000) / 1000;
         },
         // go to a location
-        _select: function(e) { // results, resultNumber) {
+        _select: function (e) {
             // save results
-            this.results = e;
+            this.results = e.results;
             // if we have results
             if (this.results && this.results.length) {
-                // result object
-                var evt = {
-                    result: this.results[0]
-                };
                 // locate result
-                this.onSelect(evt);
+                this.onSelect(this.results[0]);
             } else {
                 // clear address box
                 this.clear();
@@ -842,21 +830,52 @@ function(declare, Deferred, arr, domConstruct, i18n, JSON, keys, on, query, temp
             this._hideLoading();
         },
         // create Extent and Graphic objects from JSON
-        _hydrateResults: function(e) {
+        _hydrateResults: function (e) {
             var _self = this;
+            // hide loading spinner
             _self._hideLoading();
+            // return results array
+            var results = [];
+            // if results
             if (e && e.length) {
-                arr.forEach(e, function(result) {
-                    if(result.hasOwnProperty('extent')){
-                        result.extent = new esri.geometry.Extent(result.extent);
-                        result.extent.setSpatialReference(new esri.SpatialReference(result.spatialReference));
+                var i = 0;
+                for (i; i < e.length && i < _self.maxLocations; i++) {
+                    // result to add
+                    var newResult = {};
+                    // Set feature
+                    if (e[i].hasOwnProperty('feature')) {
+                        newResult.feature = new esri.Graphic(e[i].feature);
+                    } else {
+                        newResult.feature = {};
                     }
-                    result.feature = new esri.Graphic(result.feature);
-                });
+                    // Set extent
+                    if (e[i].hasOwnProperty('extent')) {
+                        newResult.extent = new esri.geometry.Extent(e[i].extent);
+                        newResult.extent.setSpatialReference(new esri.SpatialReference(_self.map.spatialReference));
+                    } else if (e[i].hasOwnProperty('location')) {
+                        var point = new esri.geometry.Point(e[i].location.x, e[i].location.y, _self.map.spatialReference);
+                        newResult.extent = _self.map.extent.centerAt(point);
+                        newResult.feature.geometry = point;
+                    }
+                    // set name
+                    if (e[i].hasOwnProperty('name')) {
+                        newResult.name = e[i].name;
+                    } else if (e[i].hasOwnProperty('address')) {
+                        newResult.name = e[i].address;
+                    }
+                    // set attributes
+                    if (e[i].hasOwnProperty('attributes')) {
+                        newResult.feature.attributes = e[i].attributes;
+                    }
+                    // set score
+                    if (e[i].hasOwnProperty('score')) {
+                        newResult.feature.attributes.score = e[i].score;
+                    }
+                    // add to return array
+                    results.push(newResult);
+                }
             }
-            //else if(){
-            //}
-            return e;
+            return results;
         }
     });
 });
