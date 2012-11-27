@@ -166,7 +166,7 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
             var deferred = this.onSearchStart().then(function (response) {
                 _self.onSearchResults({
                     "results": response,
-                    "type": "search"
+                        "type": "search"
                 });
             });
             // hide menus
@@ -352,6 +352,7 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 _self._showResultsMenu();
             }
         },
+        // query for search results
         _performSearch: function () {
             // if query isn't empty
             if (this.value) {
@@ -386,10 +387,10 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                     // Query object
                     params = {
                         "text": singleLine,
-                        "outSR": this.map.spatialReference.wkid,
-                        "location": Math.round(centerPoint.x * 1000) / 1000 + ',' + Math.round(centerPoint.y * 1000) / 1000,
-                        "distance": this._getRadius(),
-                        "f": "json"
+                            "outSR": this.map.spatialReference.wkid,
+                            "location": Math.round(centerPoint.x * 1000) / 1000 + ',' + Math.round(centerPoint.y * 1000) / 1000,
+                            "distance": this._getRadius(),
+                            "f": "json"
                     };
                     // if outfields
                     if (outFields) {
@@ -407,10 +408,10 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                     if (this.activeGeocoder.searchExtent) {
                         var bbox = {
                             "xmin": this.activeGeocoder.searchExtent.xmin,
-                            "ymin": this.activeGeocoder.searchExtent.ymin,
-                            "xmax": this.activeGeocoder.searchExtent.xmax,
-                            "ymax": this.activeGeocoder.searchExtent.ymax,
-                            "spatialReference": {
+                                "ymin": this.activeGeocoder.searchExtent.ymin,
+                                "xmax": this.activeGeocoder.searchExtent.xmax,
+                                "ymax": this.activeGeocoder.searchExtent.ymax,
+                                "spatialReference": {
                                 "wkid": this.activeGeocoder.searchExtent.spatialReference.wkid
                             }
                         };
@@ -731,7 +732,7 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                     }).then(function (response) {
                         _self.onSearchResults({
                             "results": response,
-                            "type": "autocomplete"
+                                "type": "autocomplete"
                         });
                     });
                 } else {
@@ -750,6 +751,7 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 this._hideMenus();
                 // cancel deferred
                 this._deferred.cancel('stop query');
+                // stop
                 return;
             } else if (event && event.keyCode === keys.UP_ARROW) {
                 // get list item length
@@ -842,34 +844,42 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 for (i; i < e.length && i < _self.maxLocations; i++) {
                     // result to add
                     var newResult = {};
-                    // Set feature
-                    if (e[i].hasOwnProperty('feature')) {
-                        newResult.feature = new esri.Graphic(e[i].feature);
-                    } else {
-                        newResult.feature = {};
-                    }
-                    // Set extent
+                    // find geocoder
                     if (e[i].hasOwnProperty('extent')) {
+                        // set extent
                         newResult.extent = new esri.geometry.Extent(e[i].extent);
+                        // set spatial ref
                         newResult.extent.setSpatialReference(new esri.SpatialReference(_self.map.spatialReference));
-                    } else if (e[i].hasOwnProperty('location')) {
+                        // set name
+                        if (e[i].hasOwnProperty('name')) {
+                            newResult.name = e[i].name;
+                        }
+                        // Set feature
+                        if (e[i].hasOwnProperty('feature')) {
+                            newResult.feature = new esri.Graphic(e[i].feature);
+                        }
+                    }
+                    // address candidates geocoder
+                    else if (e[i].hasOwnProperty('location')) {
+                        // create point
                         var point = new esri.geometry.Point(e[i].location.x, e[i].location.y, _self.map.spatialReference);
+                        // create extent from point
                         newResult.extent = _self.map.extent.centerAt(point);
-                        newResult.feature.geometry = point;
-                    }
-                    // set name
-                    if (e[i].hasOwnProperty('name')) {
-                        newResult.name = e[i].name;
-                    } else if (e[i].hasOwnProperty('address')) {
-                        newResult.name = e[i].address;
-                    }
-                    // set attributes
-                    if (e[i].hasOwnProperty('attributes')) {
-                        newResult.feature.attributes = e[i].attributes;
-                    }
-                    // set score
-                    if (e[i].hasOwnProperty('score')) {
-                        newResult.feature.attributes.score = e[i].score;
+                        // set name
+                        if (e[i].hasOwnProperty('address')) {
+                            newResult.name = e[i].address;
+                        }
+                        // create attributes
+                        var attributes = {};
+                        // set attributes
+                        if (e[i].hasOwnProperty('attributes')) {
+                            attributes = e[i].attributes;
+                        }
+                        // set score
+                        if (e[i].hasOwnProperty('score')) {
+                            attributes.score = e[i].score;
+                        }
+                        newResult.feature = new esri.Graphic(point, null, attributes, null);
                     }
                     // add to return array
                     results.push(newResult);
