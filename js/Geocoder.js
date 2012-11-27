@@ -169,8 +169,6 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 _self.onSearchResults(response);
                 _self._select(response);
             });
-            // hide menus
-            this._hideMenus();
         },
         /* ---------------- */
         /* Private Functions */
@@ -313,8 +311,6 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
             var _self = this;
             // hide menu to toggle geocoder
             _self._hideGeolocatorMenu();
-            // set results
-            _self.results = e.results;
             // string to set
             var html = '';
             // if results and result node
@@ -345,8 +341,6 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 if (_self.resultsNode) {
                     _self.resultsNode.innerHTML = html;
                 }
-                // hide loading
-                _self._hideLoading();
                 // show!
                 _self._showResultsMenu();
             }
@@ -360,6 +354,22 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 _self.onAutoComplete(response);
                 _self._showSuggestions(response);
             });
+        },
+        // received results
+        _receivedResults: function(response) {
+            var _self = this;
+            // hide loading spinner
+            _self._hideLoading();
+            // format results
+            var results = _self._hydrateResults(response);
+            // save results
+            _self.results = results;
+            // results object
+            var obj = {
+                "results": results,
+                "value": _self.value
+            };
+            _self._deferred.resolve(obj);
         },
         // query for search results
         _performQuery: function() {
@@ -436,11 +446,7 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                         callbackParamName: 'callback',
                         // on load
                         load: function(response) {
-                            var results = {
-                                "results": _self._hydrateResults(response.locations),
-                                "value": _self.value
-                            };
-                            _self._deferred.resolve(results);
+                            _self._receivedResults(response.locations);
                         }
                     });
                 } else {
@@ -463,17 +469,9 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                     this._task.outSpatialReference = this.map.spatialReference;
                     // query for location
                     this._task.addressToLocations(params, function(response) {
-                        var results = {
-                            "results": _self._hydrateResults(response),
-                            "value": _self.value
-                        };
-                        _self._deferred.resolve(results);
+                        _self._receivedResults(response);
                     }, function(response) {
-                        var results = {
-                            "results": _self._hydrateResults(response),
-                            "value": _self.value
-                        };
-                        _self._deferred.resolve(results);
+                        _self._receivedResults(response);
                     });
                 }
             } else {
@@ -660,8 +658,6 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                     _self._select({
                         "results": [_self.results[resultIndex]]
                     });
-                    // hide menus
-                    _self._hideMenus();
                 } else if (event.type === 'keydown' && event.keyCode === keys.UP_ARROW) {
                     // go to previous item
                     newIndex = resultIndex - 1;
@@ -834,12 +830,10 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
         },
         // go to a location
         _select: function(e) {
-            // save results
-            this.results = e.results;
             // if we have results
-            if (this.results && this.results.length) {
+            if (e.results && e.results.length) {
                 // locate result
-                this.onSelect(this.results[0]);
+                this.onSelect(e.results[0]);
             }
             // hide menus
             this._hideMenus();
@@ -849,8 +843,6 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
         // create Extent and Graphic objects from JSON
         _hydrateResults: function(e) {
             var _self = this;
-            // hide loading spinner
-            _self._hideLoading();
             // return results array
             var results = [];
             // if results
@@ -858,7 +850,8 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 var i = 0;
                 for (i; i < e.length && i < _self.maxLocations; i++) {
                     // result to add
-                    var newResult = {};
+                    var newResult = {},
+                        geometry;
                     // find geocoder
                     if (e[i].hasOwnProperty('extent')) {
                         // set extent
@@ -872,6 +865,11 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                         // Set feature
                         if (e[i].hasOwnProperty('feature')) {
                             newResult.feature = new esri.Graphic(e[i].feature);
+                            geometry = newResult.feature.geometry;
+                            // fix goemetry SR
+                            if (geometry) {
+                                geometry.setSpatialReference(_self.map.spatialReference);
+                            }
                         }
                     }
                     // address candidates geocoder
