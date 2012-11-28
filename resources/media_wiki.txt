@@ -228,6 +228,14 @@ The following parameters are supported:
 | class="code" | show()
 | class="code" | none
 | Shows the widget.
+|-
+| class="code" | focus()
+| class="code" | none
+| Brings focus to the widget's input.
+|-
+| class="code" | blur()
+| class="code" | none
+| Unfocus the widget's input.
 |}
 
 === Events===

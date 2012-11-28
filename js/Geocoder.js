@@ -107,15 +107,15 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
         },
         // called on results
         onSearchResults: function(e) {
-			_self._select(e);
-		},
+            this._select(e);
+        },
         // called on results
         onAutoComplete: function(e) {
-			_self._showSuggestions(e);
-		},
+            this._showSuggestions(e);
+        },
         // when geocoder search starts
         onSearchStart: function() {
-			// if query isn't empty
+            // if query isn't empty
             if (this.value) {
                 // hide menu to toggle geocoder
                 this._hideGeolocatorMenu();
@@ -216,12 +216,12 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 this._hideLoading();
                 this._deferred.resolve();
             }
-		},
+        },
         // when geocoder selected
         onGeocoderSelect: function(e) {},
         // when geocoder selected
         onClear: function() {
-			// if geocoder is ready
+            // if geocoder is ready
             if (this.ready) {
                 // empty input value
                 query(this.inputNode).attr('value', '');
@@ -238,7 +238,7 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
             this._hideMenus();
             // hide loading
             this._hideLoading();
-		},
+        },
         /* ---------------- */
         /* Public Functions */
         /* ---------------- */
@@ -269,14 +269,18 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 _self.onSearchResults(response);
             });
         },
-		// focus on input
-		focus: function(){
-			//todo
-		},
-		// blur input
-		blur: function(){
-			//todo
-		},
+        // focus on input
+        focus: function() {
+            if (this.ready) {
+                this.inputNode.focus();
+            }
+        },
+        // blur input
+        blur: function() {
+            if (this.ready) {
+                this.inputNode.blur();
+            }
+        },
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */

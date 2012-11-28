@@ -31,6 +31,26 @@
                 top: 20px;
                 left: 100px;
             }
+            #focus {
+                display: block;
+                position: absolute;
+                z-index: 2;
+                top: 20px;
+                right: 20px;
+                background:#fff;
+                padding: 5px;
+                border:1px solid #000;
+            }
+            #blur {
+                display: block;
+                position: absolute;
+                z-index: 2;
+                top: 20px;
+                right: 100px;
+                background:#fff;
+                padding: 5px;
+                border:1px solid #000;
+            }
         </style>
         <script type="text/javascript">
             // host path regular expression
@@ -115,6 +135,14 @@
 						console.log('search start');
 					});
 
+					dojo.connect(dojo.byId('focus'), 'onclick', function(){
+						Geocoder.focus();
+					});
+
+					dojo.connect(dojo.byId('blur'), 'onclick', function(){
+						Geocoder.blur();
+					});
+
                 });
                 mapDeferred.addErrback(function (error) {
                     console.log("Map creation failed: ", dojo.toJson(error));
@@ -133,6 +161,8 @@
     </head>
 
     <body class="soria">
+        <div id="focus">Focus</div>
+        <div id="blur">Blur</div>
         <div id="search"></div>
         <div id="map"></div>
     </body>
