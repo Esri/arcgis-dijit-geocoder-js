@@ -210,6 +210,10 @@ The following parameters are supported:
 | class="code" | none
 | Executes a search using the current value of the geocoder.
 |-
+| class="code" | query()
+| class="code" | Deferred
+| Executes a query for results using the current value of the geocoder and returns a deferred with the results.
+|-
 | class="code" | destroy()
 | class="code" | none
 | Releases all resources used by the dijit. This method should be called when an instance of this dijit is no longer needed in your application.
