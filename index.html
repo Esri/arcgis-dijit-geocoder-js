@@ -28,14 +28,14 @@
                 display: block;
                 position: absolute;
                 z-index: 2;
-                top: 20px;
-                left: 100px;
+                top: 15px;
+                left: 75px;
             }
             #focus {
                 display: block;
                 position: absolute;
                 z-index: 2;
-                top: 20px;
+                top: 15px;
                 right: 20px;
                 background:#fff;
                 padding: 5px;
@@ -45,7 +45,7 @@
                 display: block;
                 position: absolute;
                 z-index: 2;
-                top: 20px;
+                top: 15px;
                 right: 100px;
                 background:#fff;
                 padding: 5px;
@@ -96,7 +96,8 @@
 
                 var mapDeferred = esri.arcgis.utils.createMap(webmap, "map", {
                     mapOptions: {
-                        slider: true
+                        slider: true,
+                        sliderStyle: 'small'
                     },
                     bingMapsKey: bingMapsKey,
                     geometryServiceURL: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer"
