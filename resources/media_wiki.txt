@@ -87,7 +87,6 @@ The following parameters are supported:
         prefix: <String> Optional, // prepended to the search string
         postfix: <String> Optional, // appended to the search string
         searchExtent: <Extent> Optional, // constrain search to specified extent
-        zoom: <Number> Optional // If specified, zooms to this level when geocoding
     }
   ]
 |
@@ -362,8 +361,7 @@ The following table lists the CSS class names defined by the basemap gallery to 
                 outFields: '*',
                 preFix: 'shell',
                 postFix 'station',
-                searchExtent: map.extent,
-                zoom: 12
+                searchExtent: map.extent
             }
         ],
         maxLocations: 6,

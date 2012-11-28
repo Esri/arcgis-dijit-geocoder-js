@@ -89,7 +89,7 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
             this._deferred = new Deferred();
             // timeout
             this._queryTimer = setTimeout(function() {
-                _self._performQuery();
+                _self.onSearchStart();
             }, e.delay);
             return this._deferred;
         },
@@ -103,33 +103,125 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 // set map extent to location
                 this.map.setExtent(e.extent);
             }
-/*
-			// if active geocoder has a zoom level set
-            if (this.activeGeocoder.hasOwnProperty('zoom')) {
-                // set zoom level
-                this.map.setLevel(this.activeGeocoder.zoom);
-            }
-			*/
             return e;
         },
         // called on results
-        onSearchResults: function(e) {},
+        onSearchResults: function(e) {
+			_self._select(e);
+		},
         // called on results
-        onAutoComplete: function(e) {},
+        onAutoComplete: function(e) {
+			_self._showSuggestions(e);
+		},
         // when geocoder search starts
-        onSearchStart: function() {},
+        onSearchStart: function() {
+			// if query isn't empty
+            if (this.value) {
+                // hide menu to toggle geocoder
+                this._hideGeolocatorMenu();
+                // show loading spinner
+                this._showLoading();
+                // query parameters
+                var params;
+                // Fields
+                var outFields = this.activeGeocoder.outFields || '';
+                // single line query
+                var singleLine = '';
+                // this
+                var _self = this;
+                // query prefix
+                if (this.activeGeocoder.prefix) {
+                    singleLine += this.activeGeocoder.prefix;
+                }
+                // query value
+                singleLine += this.value;
+                // query postfix
+                if (this.activeGeocoder.postfix) {
+                    singleLine += this.activeGeocoder.postfix;
+                }
+                // if we can use the find function
+                if (this.activeGeocoder === this._esriGeocoder) {
+                    // get geographic center point
+                    var centerPoint = esri.geometry.webMercatorToGeographic(this.map.extent.getCenter());
+                    // Query object
+                    params = {
+                        "text": singleLine,
+                        "outSR": this.map.spatialReference.wkid,
+                        "location": Math.round(centerPoint.x * 1000) / 1000 + ',' + Math.round(centerPoint.y * 1000) / 1000,
+                        "distance": this._getRadius(),
+                        "f": "json"
+                    };
+                    // if outfields
+                    if (outFields) {
+                        params.outFields = outFields;
+                    }
+                    // if max locations set
+                    if (this.maxLocations) {
+                        params.maxLocations = this.maxLocations;
+                    }
+                    // Esri Geocoder country
+                    if (this.activeGeocoder.sourceCountry) {
+                        params.sourceCountry = this.activeGeocoder.sourceCountry;
+                    }
+                    // local results only
+                    if (this.activeGeocoder.searchExtent) {
+                        var bbox = {
+                            "xmin": this.activeGeocoder.searchExtent.xmin,
+                            "ymin": this.activeGeocoder.searchExtent.ymin,
+                            "xmax": this.activeGeocoder.searchExtent.xmax,
+                            "ymax": this.activeGeocoder.searchExtent.ymax,
+                            "spatialReference": {
+                                "wkid": this.activeGeocoder.searchExtent.spatialReference.wkid
+                            }
+                        };
+                        params.bbox = JSON.stringify(bbox);
+                    }
+                    // send request
+                    var requestHandle = esri.request({
+                        url: this.activeGeocoder.url + '/find',
+                        content: params,
+                        handleAs: 'json',
+                        callbackParamName: 'callback',
+                        // on load
+                        load: function(response) {
+                            _self._receivedResults(response.locations);
+                        }
+                    });
+                } else {
+                    // Params
+                    params = {
+                        address: {
+                            "singleLine": singleLine
+                        }
+                    };
+                    // if outfields
+                    if (outFields) {
+                        params.outFields = [outFields];
+                    }
+                    // within extent
+                    if (this.activeGeocoder.searchExtent) {
+                        params.searchExtent = this.activeGeocoder.searchExtent;
+                    }
+                    // Geocoder
+                    this._task = new esri.tasks.Locator(this.activeGeocoder.url);
+                    this._task.outSpatialReference = this.map.spatialReference;
+                    // query for location
+                    this._task.addressToLocations(params, function(response) {
+                        _self._receivedResults(response);
+                    }, function(response) {
+                        _self._receivedResults(response);
+                    });
+                }
+            } else {
+                this._hideLoading();
+                this._deferred.resolve();
+            }
+		},
         // when geocoder selected
         onGeocoderSelect: function(e) {},
         // when geocoder selected
-        onClear: function() {},
-        /* ---------------- */
-        /* Public Functions */
-        /* ---------------- */
-        // clear the input box
-        clear: function() {
-            // clear event
-            this.onClear();
-            // if geocoder is ready
+        onClear: function() {
+			// if geocoder is ready
             if (this.ready) {
                 // empty input value
                 query(this.inputNode).attr('value', '');
@@ -146,6 +238,14 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
             this._hideMenus();
             // hide loading
             this._hideLoading();
+		},
+        /* ---------------- */
+        /* Public Functions */
+        /* ---------------- */
+        // clear the input box
+        clear: function() {
+            // clear event
+            this.onClear();
         },
         // show widget
         show: function() {
@@ -167,9 +267,16 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 delay: 0
             }).then(function(response) {
                 _self.onSearchResults(response);
-                _self._select(response);
             });
         },
+		// focus on input
+		focus: function(){
+			//todo
+		},
+		// blur input
+		blur: function(){
+			//todo
+		},
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */
@@ -352,7 +459,6 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 delay: this.searchDelay
             }).then(function(response) {
                 _self.onAutoComplete(response);
-                _self._showSuggestions(response);
             });
         },
         // received results
@@ -370,114 +476,6 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 "value": _self.value
             };
             _self._deferred.resolve(obj);
-        },
-        // query for search results
-        _performQuery: function() {
-            // fire event
-            this.onSearchStart();
-            // if query isn't empty
-            if (this.value) {
-                // hide menu to toggle geocoder
-                this._hideGeolocatorMenu();
-                // show loading spinner
-                this._showLoading();
-                // query parameters
-                var params;
-                // Fields
-                var outFields = this.activeGeocoder.outFields || '';
-                // single line query
-                var singleLine = '';
-                // this
-                var _self = this;
-                // query prefix
-                if (this.activeGeocoder.prefix) {
-                    singleLine += this.activeGeocoder.prefix;
-                    singleLine += ' ';
-                }
-                // query value
-                singleLine += this.value;
-                // query postfix
-                if (this.activeGeocoder.postfix) {
-                    singleLine += ' ';
-                    singleLine += this.activeGeocoder.postfix;
-                }
-                // if we can use the find function
-                if (this.activeGeocoder === this._esriGeocoder) {
-                    // get geographic center point
-                    var centerPoint = esri.geometry.webMercatorToGeographic(this.map.extent.getCenter());
-                    // Query object
-                    params = {
-                        "text": singleLine,
-                        "outSR": this.map.spatialReference.wkid,
-                        "location": Math.round(centerPoint.x * 1000) / 1000 + ',' + Math.round(centerPoint.y * 1000) / 1000,
-                        "distance": this._getRadius(),
-                        "f": "json"
-                    };
-                    // if outfields
-                    if (outFields) {
-                        params.outFields = outFields;
-                    }
-                    // if max locations set
-                    if (this.maxLocations) {
-                        params.maxLocations = this.maxLocations;
-                    }
-                    // Esri Geocoder country
-                    if (this.activeGeocoder.sourceCountry) {
-                        params.sourceCountry = this.activeGeocoder.sourceCountry;
-                    }
-                    // local results only
-                    if (this.activeGeocoder.searchExtent) {
-                        var bbox = {
-                            "xmin": this.activeGeocoder.searchExtent.xmin,
-                            "ymin": this.activeGeocoder.searchExtent.ymin,
-                            "xmax": this.activeGeocoder.searchExtent.xmax,
-                            "ymax": this.activeGeocoder.searchExtent.ymax,
-                            "spatialReference": {
-                                "wkid": this.activeGeocoder.searchExtent.spatialReference.wkid
-                            }
-                        };
-                        params.bbox = JSON.stringify(bbox);
-                    }
-                    // send request
-                    var requestHandle = esri.request({
-                        url: this.activeGeocoder.url + '/find',
-                        content: params,
-                        handleAs: 'json',
-                        callbackParamName: 'callback',
-                        // on load
-                        load: function(response) {
-                            _self._receivedResults(response.locations);
-                        }
-                    });
-                } else {
-                    // Params
-                    params = {
-                        address: {
-                            "singleLine": singleLine
-                        }
-                    };
-                    // if outfields
-                    if (outFields) {
-                        params.outFields = [outFields];
-                    }
-                    // within extent
-                    if (this.activeGeocoder.searchExtent) {
-                        params.searchExtent = this.activeGeocoder.searchExtent;
-                    }
-                    // Geocoder
-                    this._task = new esri.tasks.Locator(this.activeGeocoder.url);
-                    this._task.outSpatialReference = this.map.spatialReference;
-                    // query for location
-                    this._task.addressToLocations(params, function(response) {
-                        _self._receivedResults(response);
-                    }, function(response) {
-                        _self._receivedResults(response);
-                    });
-                }
-            } else {
-                this._hideLoading();
-                this._deferred.resolve();
-            }
         },
         // show loading spinner
         _showLoading: function() {
@@ -877,7 +875,7 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                         // create point
                         var point = new esri.geometry.Point(e[i].location.x, e[i].location.y, _self.map.spatialReference);
                         // create extent from point
-                        newResult.extent = _self.map.extent.centerAt(point);
+                        newResult.extent = _self.map.extent.centerAt(point).expand(0.0625);
                         // set name
                         if (e[i].hasOwnProperty('address')) {
                             newResult.name = e[i].address;
