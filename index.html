@@ -27,14 +27,14 @@
             #search {
                 display: block;
                 position: absolute;
-                z-index: 2;
+                z-index: 3;
                 top: 15px;
                 left: 75px;
             }
             #focus {
                 display: block;
                 position: absolute;
-                z-index: 2;
+                z-index: 3;
                 top: 15px;
                 right: 20px;
                 background:#fff;
@@ -44,12 +44,33 @@
             #blur {
                 display: block;
                 position: absolute;
-                z-index: 2;
+                z-index: 3;
                 top: 15px;
                 right: 100px;
                 background:#fff;
                 padding: 5px;
                 border:1px solid #000;
+            }
+            .spotlight {
+                z-index:-1;
+                position:absolute;
+                left:50%;
+                top:50%;
+                width:340px;
+                height:340px;
+                margin:-170px 0px 0px -170px;
+                border-radius:50%;
+                opacity:0;
+                box-shadow:
+                inset rgba(0,0,0,0.25) 0px 0px 20px 20px,
+                rgba(0,0,0,0.25) 0px 0px 0px 1000px;
+                transition:all 1000ms;
+                -moz-transition:all 1000ms;
+                -webkit-transition:all 1000ms;
+            }
+            .spotlight-active {
+                z-index:2;
+                opacity:1;
             }
         </style>
         <script type="text/javascript">
@@ -109,6 +130,14 @@
                     dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
                     dojo.connect(window, "onresize", resizeMap);
 
+                    dojo.connect(map, 'onExtentChange', function(){
+                        dojo.query('.spotlight').removeClass('spotlight-active');
+                    });
+
+                    dojo.connect(dojo.query('.spotlight')[0], 'click', function(){
+                        dojo.query('.spotlight').removeClass('spotlight-active');
+                    });
+
                     // Geocoder with all common options set. Only map is required.
                     Geocoder = new esri.dijit.Geocoder({
                         geocoder:[
@@ -134,6 +163,13 @@
 
 					dojo.connect(Geocoder, 'onSearchStart', function(){
 						console.log('search start');
+					});
+
+					dojo.connect(Geocoder, 'onSelect', function(){
+					    var spotlight = dojo.connect(map, 'onExtentChange', function(){
+					        dojo.query('.spotlight').addClass('spotlight-active');
+					        dojo.disconnect(spotlight);
+					    });
 					});
 
 					dojo.connect(dojo.byId('focus'), 'onclick', function(){
@@ -166,6 +202,7 @@
         <div id="blur">Blur</div>
         <div id="search"></div>
         <div id="map"></div>
+        <div class="spotlight"></div>
     </body>
 
 </html>
