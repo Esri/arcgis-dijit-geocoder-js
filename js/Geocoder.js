@@ -342,7 +342,7 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                     this._esriGeocoder = {};
                 }
                 // set esri geocoder options
-                this._esriGeocoder.url = location.protocol + "//geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+                this._esriGeocoder.url = location.protocol + "//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
                 // if name not set
                 if (!this._esriGeocoder.name) {
                     this._esriGeocoder.name = i18n.widgets.Geocoder.esriGeocoderName;
