@@ -1,5 +1,6 @@
 require([
 //define([
+    "dojo/Evented",
     "dojo/_base/declare",
     "dojo/_base/Deferred",
     "dojo/dom-construct",
@@ -20,8 +21,8 @@ require([
     "esri/tasks/locator",
     "esri/utils"
 ],
-function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, esri) {
-    declare("esri.dijit.Geocoder", [_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
+function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, esri) {
+    declare("esri.dijit.Geocoder", [Evented, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
         // Set template file HTML
         templateString: template,
         // init
@@ -40,6 +41,9 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
             this.watch("geocoder", this._updateGeocoder);
             this.watch("esriGeocoder", this._updateGeocoder);
         },
+        /* ---------------- */
+        /* Public Functions */
+        /* ---------------- */
         // start widget
         startup: function() {
             // if all required options are set
@@ -50,6 +54,8 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 }
                 // setup connections
                 this._setDelegations();
+                // widget ready
+                this.emit("start", {});
             } else {
                 console.log('Map or domNode undefined.');
             }
@@ -72,6 +78,45 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                 for (i = 0; i < this._delegations.length; i++) {
                     this._delegations[i].remove();
                 }
+            }
+        },
+        // clear the input box
+        clear: function() {
+            // clear event
+            this.onClear();
+        },
+        // show widget
+        show: function() {
+            if (this.ready) {
+                query(this.domNode).style('display', 'block');
+            }
+        },
+        // hide widget
+        hide: function() {
+            if (this.ready) {
+                query(this.domNode).style('display', 'none');
+            }
+        },
+        // submit button selected
+        search: function() {
+            var _self = this;
+            // query and then Locate
+            _self.query({
+                delay: 0
+            }).then(function(response) {
+                _self.onSearchResults(response);
+            });
+        },
+        // focus on input
+        focus: function() {
+            if (this.ready) {
+                this.inputNode.focus();
+            }
+        },
+        // blur input
+        blur: function() {
+            if (this.ready) {
+                this.inputNode.blur();
             }
         },
         // query for results and then execute a function
@@ -240,48 +285,6 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
             this._hideLoading();
         },
         /* ---------------- */
-        /* Public Functions */
-        /* ---------------- */
-        // clear the input box
-        clear: function() {
-            // clear event
-            this.onClear();
-        },
-        // show widget
-        show: function() {
-            if (this.ready) {
-                query(this.domNode).style('display', 'block');
-            }
-        },
-        // hide widget
-        hide: function() {
-            if (this.ready) {
-                query(this.domNode).style('display', 'none');
-            }
-        },
-        // submit button selected
-        search: function() {
-            var _self = this;
-            // query and then Locate
-            _self.query({
-                delay: 0
-            }).then(function(response) {
-                _self.onSearchResults(response);
-            });
-        },
-        // focus on input
-        focus: function() {
-            if (this.ready) {
-                this.inputNode.focus();
-            }
-        },
-        // blur input
-        blur: function() {
-            if (this.ready) {
-                this.inputNode.blur();
-            }
-        },
-        /* ---------------- */
         /* Private Functions */
         /* ---------------- */
         // default settings
@@ -293,7 +296,7 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
             // Value of input
             this.value = '';
             // Theme
-            this.theme = 'arcgisTheme';
+            this.theme = 'simpleGeocoder';
             // default geocoder index
             this.activeGeocoderIndex = 0;
             // Maximum result locations to return
@@ -319,6 +322,8 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
             this._resultsItemClass = 'esriGeocoderResult';
             this._resultsItemEvenClass = 'esriGeocoderResultEven';
             this._resultsItemOddClass = 'esriGeocoderResultOdd';
+            this._resultsItemFirstClass = 'esriGeocoderResultFirst';
+            this._resultsItemLastClass = 'esriGeocoderResultLast';
             this._resultsPartialMatchClass = 'esriGeocoderResultPartial';
             this._searchButtonClass = 'esriGeocoderSearch';
             this._clearButtonClass = 'esriGeocoderReset';
@@ -442,6 +447,12 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                         layerClass += _self._resultsItemOddClass;
                     } else {
                         layerClass += _self._resultsItemEvenClass;
+                    }
+                    if (i === 0) {
+                        layerClass += ' ' + _self._resultsItemFirstClass;
+                    }
+                    else if(i === (_self.results.length - 1)){
+                        layerClass += ' ' + _self._resultsItemLastClass;
                     }
                     // create list item
                     html += '<li data-text="' + _self.results[i].name + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + _self.results[i].name.replace(regex, '<strong class="' + _self._resultsPartialMatchClass + '">' + partialMatch + '</strong>') + '</li>';
@@ -581,6 +592,12 @@ function(declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template,
                         }
                         if (i === this.activeGeocoderIndex) {
                             layerClass += ' ' + this._geocoderSelectedClass;
+                        }
+                        if (i === 0) {
+                            layerClass += ' ' + this._resultsItemFirstClass;
+                        }
+                        else if(i === (this._geocoders.length - 1)){
+                            layerClass += ' ' + this._resultsItemLastClass;
                         }
                         // geocoder name
                         var geocoderName = this._geocoders[i].name || i18n.widgets.Geocoder.main.untitledGeocoder;

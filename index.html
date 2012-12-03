@@ -11,7 +11,8 @@
         <title></title>
         <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.2/js/dojo/dijit/themes/soria/soria.css">
        <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.2/js/esri/css/esri.css" />
-        <link rel="stylesheet" type="text/css" href="css/Geocoder.css">
+        <link rel="stylesheet" type="text/css" href="css/arcgisGeocoder.css">
+        <link rel="stylesheet" type="text/css" href="css/simpleGeocoder.css">
         <style type="text/css">
             html, body, #map {
                 height:100%;
@@ -28,7 +29,7 @@
                 display: block;
                 position: absolute;
                 z-index: 3;
-                top: 15px;
+                top: 10px;
                 left: 75px;
             }
             #focus {
@@ -152,6 +153,7 @@
                             placeholder: 'My Placeholder',
                             name: 'ArcGIS World Geocoder'
                         },
+                        theme:'simpleGeocoder',
                         autocomplete:true,
                         map: map
                     }, dojo.byId('search'));

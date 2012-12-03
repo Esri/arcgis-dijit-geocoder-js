@@ -305,6 +305,12 @@ The following table lists the CSS class names defined by the basemap gallery to 
 | class="code" | esriGeocoderResultOdd
 | Odd result item
 |-
+| class="code" | esriGeocoderResultFirst
+| First result item
+|-
+| class="code" | esriGeocoderResultLast
+| Last result item
+|-
 | class="code" | esriGeocoderResultPartial
 | Partially matched text inside result item
 |-
