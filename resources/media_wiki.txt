@@ -15,7 +15,6 @@ Geocoder widget provides a ready-to-use widget to locate results from a geocoder
 Todo:
 
     Code review and testing.
-    Another theme?
 
 Graphics Composition:
 
