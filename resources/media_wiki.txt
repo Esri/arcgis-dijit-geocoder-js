@@ -75,9 +75,9 @@ The following parameters are supported:
 | class="code" | Map
 | Map object that this dijit is associated with. This parameter is always required.
 |-
-| class="code" | geocoder
+| class="code" | geocoders
 | class="code" | Array
-| Optional. Defines geocoders to be used. These will be used alongside the esriGeocoder if "esriGeocoder" is true.
+| Optional. Defines geocoders to be used. These will be used alongside the arcgisGeocoder if "arcgisGeocoder" is true.
   [
     {
         url: <String> Required, // URL of the geocoder
@@ -85,7 +85,7 @@ The following parameters are supported:
         placeholder: <String> Optional, // Input box placeholder text
         outFields: <String> Optional, // Out fields
         prefix: <String> Optional, // prepended to the search string
-        postfix: <String> Optional, // appended to the search string
+        suffix: <String> Optional, // appended to the search string
         searchExtent: <Extent> Optional, // constrain search to specified extent
     }
   ]
@@ -115,21 +115,22 @@ The following parameters are supported:
 | class="code" | Boolean
 | Optional. If set false, the geolocator menu will not be shown when more than 1 geocoder is set. Default: true.
 |-
-| class="code" | autocomplete
+| class="code" | autoComplete
 | class="code" | Boolean
-| Optional. If set false, the geolocator will not autocomplete results and show the menu. Default: false.
+| Optional. If set false, the geolocator will not auto-complete results and show the menu. Default: false.
 |-
-| class="code" | esriGeocoder
+| class="code" | arcgisGeocoder
 | class="code" | Boolean or Object
 | Optional. If set false, the esri world geolocator will be disabled. Default: true. Can be configured if set as an object with the following properties:
     {
+        url: <String> Required // URL of the geocoder. Uses ArcGIS World Geocoder if undefined.
         name: <String> Required, // Name of the geocoder
         placeholder: <String> Optional, // Input box placeholder text
         outFields: <String> Optional, // Out fields
         prefix: <String> Optional, // prepended to the search string
-        postfix: <String> Optional, // appended to the search string
+        suffix: <String> Optional, // appended to the search string
         searchExtent: <Extent> Optional, // constrain search to specified extent
-        sourceCountry: <String> Optional // Country code to use for geocode searches to improve performance. Default: ''.
+        sourceCountry: <String> Optional // Country code to use for geocode searches to improve performance. Default: empty string "".
     }
 
 	Country Codes: http://geocode.arcgis.com/arcgis/index.html#/Service_coverage/02q000000005000000/
@@ -187,9 +188,9 @@ The following parameters are supported:
 | class="code" | Boolean
 | Whether or not the geocoder menu is enabled.
 |-
-| class="code" | autocomplete
+| class="code" | autoComplete
 | class="code" | Boolean
-| Whether or not the autocomplete results menu is enabled.
+| Whether or not the auto-complete results menu is enabled.
 |}
 
 
@@ -264,7 +265,7 @@ The following parameters are supported:
 |-
 | class="code" | onAutoComplete
 | class="code" | Object
-| Event is fired when there results are returned from an autocomplete.
+| Event is fired when there results are returned from an auto-complete.
 |-
 | class="code" | onGeocoderSelect
 | class="code" | Object
@@ -284,6 +285,9 @@ The following table lists the CSS class names defined by the basemap gallery to 
 | class="code" | esriGeocoder
 | Represents a node where an instance of the widget is rendered.
 |-
+| class="code" | esriGeocoderMultiple
+| Represents multiple geocoders used.
+|-
 | class="code" | esriGeocoderIcon
 | Represents an icon node.
 |-
@@ -291,7 +295,7 @@ The following table lists the CSS class names defined by the basemap gallery to 
 | This class is applied to the widget node when the results menu is currently active.
 |-
 | class="code" | esriGeocoderLoading
-| Shows loading spinner inside of textbox container
+| Added to the domNode. Shows loading spinner inside of textbox container
 |-
 | class="code" | esriGeocoderResults
 | Results menu container
@@ -320,8 +324,8 @@ The following table lists the CSS class names defined by the basemap gallery to 
 | class="code" | esriGeocoderReset
 | Reset button
 |-
-| class="code" | esriGeocoderResetActive
-| Shown when search box is populated and reset button is visible
+| class="code" | esriGeocoderHasValue
+| Added to dom node when geocoder has a value.
 |-
 | class="code" | esriGeocoderMenu
 | Geocoder menu
@@ -367,25 +371,25 @@ The following table lists the CSS class names defined by the basemap gallery to 
 
     var Geocoder = new esri.dijit.Geocoder({
         theme: 'esriTheme', // Used to add a class to style the widget
-        geocoder:[
+        geocoders:[
             {
                 url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
                 name: 'IHS_Composite',
                 placeholder: 'Search 2',
                 outFields: '*',
                 preFix: 'shell',
-                postFix 'station',
+                suffix 'station',
                 searchExtent: map.extent
             }
         ],
         maxLocations: 6,
         minCharacters: 3,
         searchDelay: 350,
-        esriGeocoder: {
+        arcgisGeocoder: {
 			placeholder: 'My Placeholder',
 			name: 'ArcGIS World Geocoder'
 		},
-        autocomplete: true,
+        autoComplete: true,
         map: map
     }, dojo.byId('search'));
     Geocoder.startup();

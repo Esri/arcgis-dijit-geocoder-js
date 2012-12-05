@@ -180,12 +180,12 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                 }
                 // query value
                 singleLine += this.value;
-                // query postfix
-                if (this.activeGeocoder.postfix) {
-                    singleLine += this.activeGeocoder.postfix;
+                // query suffix
+                if (this.activeGeocoder.suffix) {
+                    singleLine += this.activeGeocoder.suffix;
                 }
                 // if we can use the find function
-                if (this.activeGeocoder === this._esriGeocoder) {
+                if (this.activeGeocoder === this._arcgisGeocoder) {
                     // get geographic center point
                     var centerPoint = esri.geometry.webMercatorToGeographic(this.map.extent.getCenter());
                     // Query object
@@ -277,7 +277,8 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             this.results = [];
             // get node of reset button and remove it's active class
             if (this.ready) {
-                query(this.clearNode).removeClass(this._clearButtonActiveClass).attr('title', '');
+                query(this.containerNode).removeClass(this._hasValueClass);
+                query(this.clearNode).attr('title', '');
             }
             // remove active menus
             this._hideMenus();
@@ -290,9 +291,9 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         // default settings
         _setPublicDefaults: function() {
             // show autocomplete?
-            this.autocomplete = false;
+            this.autoComplete = false;
             // use esri geocoder
-            this.esriGeocoder = true;
+            this.arcgisGeocoder = true;
             // Value of input
             this.value = '';
             // Theme
@@ -315,6 +316,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             this.results = [];
             // css classes
             this._GeocoderClass = 'esriGeocoder';
+            this._GeocoderMultipleClass = 'esriGeocoderMultiple';
             this._GeocoderIconClass = 'esriGeocoderIcon';
             this._GeocoderActiveClass = 'esriGeocoderActive';
             this._loadingClass = 'esriGeocoderLoading';
@@ -327,7 +329,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             this._resultsPartialMatchClass = 'esriGeocoderResultPartial';
             this._searchButtonClass = 'esriGeocoderSearch';
             this._clearButtonClass = 'esriGeocoderReset';
-            this._clearButtonActiveClass = 'esriGeocoderResetActive';
+            this._hasValueClass = 'esriGeocoderHasValue';
             this._geocoderMenuClass = 'esriGeocoderMenu';
             this._geocoderMenuHeaderClass = 'esriGeocoderMenuHeader';
             this._geocoderMenuCloseClass = 'esriGeocoderMenuClose';
@@ -339,22 +341,25 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // setup esri geocoder
         _setEsriGeocoder: function() {
-            if (this.esriGeocoder) {
+            if (this.arcgisGeocoder) {
                 // if object defined for esri geocoder
-                if (typeof this.esriGeocoder === 'object') {
-                    this._esriGeocoder = this.esriGeocoder;
+                if (typeof this.arcgisGeocoder === 'object') {
+                    this._arcgisGeocoder = this.arcgisGeocoder;
                 } else {
-                    this._esriGeocoder = {};
+                    this._arcgisGeocoder = {};
                 }
-                // set esri geocoder options
-                this._esriGeocoder.url = location.protocol + "//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+                // ArcGIS Geocoder URL
+                if(!this._arcgisGeocoder.url){
+                    // set esri geocoder options
+                    this._arcgisGeocoder.url = location.protocol + "//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+                }
                 // if name not set
-                if (!this._esriGeocoder.name) {
-                    this._esriGeocoder.name = i18n.widgets.Geocoder.esriGeocoderName;
+                if (!this._arcgisGeocoder.name) {
+                    this._arcgisGeocoder.name = i18n.widgets.Geocoder.esriGeocoderName;
                 }
-                this.esriGeocoder = this._esriGeocoder;
+                this.arcgisGeocoder = this._arcgisGeocoder;
             } else {
-                this.esriGeocoder = false;
+                this.arcgisGeocoder = false;
             }
         },
         // sets current locator object
@@ -367,11 +372,11 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         // Combine and count all geocoders
         _setGeocoderList: function() {
             var geocoders = [];
-            if (this.esriGeocoder) {
-                geocoders = geocoders.concat([this._esriGeocoder]);
+            if (this.arcgisGeocoder) {
+                geocoders = geocoders.concat([this._arcgisGeocoder]);
             }
-            if (this.geocoder && this.geocoder.length) {
-                geocoders = geocoders.concat(this.geocoder);
+            if (this.geocoders && this.geocoders.length) {
+                geocoders = geocoders.concat(this.geocoders);
             }
             this._geocoders = geocoders;
         },
@@ -495,22 +500,20 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         // show loading spinner
         _showLoading: function() {
             if (this.ready) {
-                query(this.clearNode).addClass(this._loadingClass);
+                query(this.containerNode).addClass(this._loadingClass);
             }
         },
         // hide loading spinner
         _hideLoading: function() {
             if (this.ready) {
-                query(this.clearNode).removeClass(this._loadingClass);
+                query(this.containerNode).removeClass(this._loadingClass);
             }
         },
         // show geocoder selection menu
         _showGeolocatorMenu: function() {
             if (this.ready) {
-                // container node
-                var container = query(this.containerNode);
                 // add class to container
-                container.addClass(this._activeMenuClass);
+                query(this.containerNode).addClass(this._activeMenuClass);
                 // display menu node
                 query(this.geocoderMenuNode).style('display', 'block');
                 // aria
@@ -546,10 +549,8 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         // show autolocate menu
         _showResultsMenu: function() {
             if (this.ready) {
-                // node of the search box container
-                var container = query(this.containerNode);
                 // add class to container
-                container.addClass(this._GeocoderActiveClass);
+                query(this.containerNode).addClass(this._GeocoderActiveClass);
                 // show node
                 query(this.resultsNode).style('display', 'block');
                 // aria
@@ -613,10 +614,12 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                     this.geocoderMenuInsertNode.innerHTML = html;
                     query(this.geocoderMenuNode).style('display', 'none');
                     query(this.geocoderMenuArrowNode).style('display', 'block');
+                    query(this.containerNode).addClass(this._GeocoderMultipleClass);
                 } else {
                     this.geocoderMenuInsertNode.innerHTML = '';
                     query(this.geocoderMenuNode).style('display', 'none');
                     query(this.geocoderMenuArrowNode).style('display', 'none');
+                    query(this.containerNode).removeClass(this._GeocoderMultipleClass);
                 }
             }
         },
@@ -625,8 +628,10 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             if (this.ready) {
                 // if input value is not empty
                 if (this.value) {
+                    // add class to dom
+                    query(this.containerNode).addClass(this._hasValueClass);
                     // set class and title
-                    query(this.clearNode).addClass(this._clearButtonActiveClass).attr('title', i18n.widgets.Geocoder.main.clearButtonTitle);
+                    query(this.clearNode).attr('title', i18n.widgets.Geocoder.main.clearButtonTitle);
                 } else {
                     // clear address
                     this.clear();
@@ -764,7 +769,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                     clearTimeout(this._queryTimer);
                     // hide menus
                     this._hideMenus();
-                } else if (this.autocomplete && alength >= this.minCharacters) {
+                } else if (this.autoComplete && alength >= this.minCharacters) {
                     this._autocomplete();
                 } else {
                     // hide menus
@@ -896,7 +901,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                         // create point
                         var point = new esri.geometry.Point(e[i].location.x, e[i].location.y, _self.map.spatialReference);
                         // create extent from point
-                        newResult.extent = _self.map.extent.centerAt(point).expand(0.0625);
+                        newResult.extent = _self.map.extent.centerAt(point);
                         // set name
                         if (e[i].hasOwnProperty('address')) {
                             newResult.name = e[i].address;

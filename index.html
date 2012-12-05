@@ -141,20 +141,19 @@
 
                     // Geocoder with all common options set. Only map is required.
                     Geocoder = new esri.dijit.Geocoder({
-                        geocoder:[
+                        geocoders:[
                             {
                                 url: 'http://tasks.arcgis.com/ArcGIS/rest/services/WorldLocator/GeocodeServer',
                                 name: 'ArcGIS Tasks (old)',
-                                placeholder: 'tasks.arcgis.com',
-                                zoom: 5
+                                placeholder: 'tasks.arcgis.com'
                             }
                         ],
-                        esriGeocoder: {
+                        arcgisGeocoder: {
                             placeholder: 'My Placeholder',
                             name: 'ArcGIS World Geocoder'
                         },
                         theme:'simpleGeocoder',
-                        autocomplete:true,
+                        autoComplete:true,
                         map: map
                     }, dojo.byId('search'));
 					Geocoder.startup();
@@ -199,11 +198,11 @@
         </script>
     </head>
 
-    <body class="soria">
+    <body dir="" class="soria">
         <div id="focus">Focus</div>
         <div id="blur">Blur</div>
         <div id="search"></div>
-        <div id="map"></div>
+        <div dir="ltr" id="map"></div>
         <div class="spotlight"></div>
     </body>
 
