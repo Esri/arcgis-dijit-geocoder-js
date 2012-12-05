@@ -206,13 +206,9 @@ The following parameters are supported:
 | class="code" | none
 | Finalizes the creation of this dijit. This method should be called after the constructor for this dijit is called and before letting the users interact with it.
 |-
-| class="code" | search()
-| class="code" | none
-| Executes a search using the current value of the geocoder.
-|-
-| class="code" | query()
+| class="code" | search({ autoNavigate: true})
 | class="code" | Deferred
-| Executes a query for results using the current value of the geocoder and returns a deferred with the results.
+| Executes a search using the current value of the geocoder.
 |-
 | class="code" | destroy()
 | class="code" | none
@@ -254,10 +250,6 @@ The following parameters are supported:
 | class="code" | onClear
 | class="code" | none
 | Event is fired when a result has been cleared from the input box or a new result has been selected.
-|-
-| class="code" | onSearchStart
-| class="code" | none
-| Event is fired when query has started.
 |-
 | class="code" | onSearchResults
 | class="code" | Object
