@@ -56,9 +56,6 @@
                 position:absolute;
                 left:50%;
                 top:50%;
-                width:340px;
-                height:340px;
-                margin:-170px 0px 0px -170px;
                 border-radius:50%;
                 opacity:0;
                 box-shadow:
@@ -134,9 +131,16 @@
                         dojo.query('.spotlight').removeClass('spotlight-active');
                     });
 
+                    dojo.connect(dojo.byId('spotlight'), 'onclick', function(){
+                        dojo.query(this).removeClass('spotlight-active');
+                    });
+
                     // Geocoder with all common options set. Only map is required.
                     Geocoder = new esri.dijit.Geocoder({
                         autoComplete: true,
+                        arcgisGeocoder: {
+                            url: 'http://geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer'
+                        },
                         map: map
                     }, dojo.byId('search'));
 
@@ -159,17 +163,38 @@
 					});
 
 					// on select test
-					dojo.connect(Geocoder, 'onSelect', function(obj){
-					    console.log(obj);
+					dojo.connect(Geocoder, 'onSelect', function(result){
+
+
 					    var spotlight = dojo.connect(map, 'onExtentChange', function(){
-					        dojo.query('.spotlight').addClass('spotlight-active');
+    					    var geom = esri.geometry.toScreenGeometry(map.extent, map.width, map.height, result.extent);
+                            var width = geom.xmax - geom.xmin;
+                            var height = geom.ymin - geom.ymax;
+                            var margin = '-' + Math.floor(height/2) + 'px 0 0 -' + Math.floor(width/2) + 'px';
+
+                            var pt = result.feature.geometry;
+                            var sms = new esri.symbol.SimpleMarkerSymbol().setStyle(
+                            esri.symbol.SimpleMarkerSymbol.STYLE_SQUARE).setColor(
+                            new dojo.Color([255,0,0,0.5]));
+                            var graphic = new esri.Graphic(pt,sms,null,null);
+
+                            map.graphics.add(graphic);
+
+					        dojo.query('.spotlight').addClass('spotlight-active').style({
+    					        width: width + 'px',
+    					        height: height + 'px',
+    					        margin: margin
+					        });
 					        dojo.disconnect(spotlight);
 					    });
+
+
 					});
 
 					// on clear test
 					dojo.connect(Geocoder, 'onClear', function(){
 				        dojo.query('.spotlight').removeClass('spotlight-active');
+				        map.graphics.clear();
 				    });
 
                 });
@@ -194,7 +219,7 @@
         <div id="blur">Blur</div>
         <div id="search"></div>
         <div dir="ltr" id="map"></div>
-        <div class="spotlight"></div>
+        <div id="spotlight" class="spotlight"></div>
     </body>
 
 </html>
