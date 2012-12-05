@@ -135,10 +135,6 @@
                         dojo.query('.spotlight').removeClass('spotlight-active');
                     });
 
-                    dojo.connect(dojo.query('.spotlight')[0], 'click', function(){
-                        dojo.query('.spotlight').removeClass('spotlight-active');
-                    });
-
                     // Geocoder with all common options set. Only map is required.
                     Geocoder = new esri.dijit.Geocoder({
                         geocoders:[
@@ -156,6 +152,15 @@
                         autoComplete:true,
                         map: map
                     }, dojo.byId('search'));
+
+
+                    dojo.connect(Geocoder, 'onLoad', function(){
+                        Geocoder.set('value','texas');
+                        Geocoder.goto({autoNavigate:false}).then(function(test){
+                            console.log(test);
+                        });
+					});
+
 					Geocoder.startup();
 
 					dojo.connect(Geocoder, 'onSearchResults', function(results){
@@ -180,6 +185,10 @@
 					dojo.connect(dojo.byId('blur'), 'onclick', function(){
 						Geocoder.blur();
 					});
+
+					dojo.connect(Geocoder, 'onClear', function(){
+				        dojo.query('.spotlight').removeClass('spotlight-active');
+				    });
 
                 });
                 mapDeferred.addErrback(function (error) {

@@ -55,7 +55,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                 }
                 // setup connections
                 this._setDelegations();
-                this.ready();
+                this.onLoad();
             } else {
                 console.log('Map or domNode undefined.');
             }
@@ -135,7 +135,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                         _self._select(response.results[0]);
                     }
                 }
-                deferred.resolve();
+                deferred.resolve(response);
             });
             // give me my deferred
             return deferred;
@@ -155,7 +155,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         /* ---------------- */
         /* Public Events */
         /* ---------------- */
-        ready: function() {},
+        onLoad: function() {},
         // called after search has been selected
         onSelect: function(e) {},
         // called on results
