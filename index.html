@@ -135,6 +135,11 @@
                         dojo.query('.spotlight').removeClass('spotlight-active');
                     });
 
+
+
+
+
+
                     // Geocoder with all common options set. Only map is required.
                     Geocoder = new esri.dijit.Geocoder({
                         geocoders:[
@@ -145,6 +150,7 @@
                             }
                         ],
                         arcgisGeocoder: {
+                            url: 'http://geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer',
                             placeholder: 'My Placeholder',
                             name: 'ArcGIS World Geocoder'
                         },
@@ -153,7 +159,7 @@
                         map: map
                     }, dojo.byId('search'));
 
-
+                    // on widget load
                     dojo.connect(Geocoder, 'onLoad', function(){
                         Geocoder.set('value','texas');
                         Geocoder.goto({autoNavigate:false}).then(function(test){
@@ -161,16 +167,15 @@
                         });
 					});
 
+					// start widget
 					Geocoder.startup();
 
+					// on search results
 					dojo.connect(Geocoder, 'onSearchResults', function(results){
     					console.log(results);
 					});
 
-					dojo.connect(Geocoder, 'onSearchStart', function(){
-						console.log('search start');
-					});
-
+					// on select test
 					dojo.connect(Geocoder, 'onSelect', function(){
 					    var spotlight = dojo.connect(map, 'onExtentChange', function(){
 					        dojo.query('.spotlight').addClass('spotlight-active');
@@ -178,17 +183,25 @@
 					    });
 					});
 
+					// focus
 					dojo.connect(dojo.byId('focus'), 'onclick', function(){
 						Geocoder.focus();
 					});
 
+					// blur
 					dojo.connect(dojo.byId('blur'), 'onclick', function(){
 						Geocoder.blur();
 					});
 
+					// on clear test
 					dojo.connect(Geocoder, 'onClear', function(){
 				        dojo.query('.spotlight').removeClass('spotlight-active');
 				    });
+
+
+
+
+
 
                 });
                 mapDeferred.addErrback(function (error) {
