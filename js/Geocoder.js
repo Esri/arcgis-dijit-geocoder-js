@@ -47,18 +47,28 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         /* ---------------- */
         // start widget
         startup: function() {
-            // if all required options are set
-            if (this.domNode && this.map) {
-                // add clear button if already populated
-                if (this.value) {
-                    this._checkStatus();
-                }
-                // setup connections
-                this._setDelegations();
-                this.onLoad();
-            } else {
-                console.log('Map or domNode undefined.');
+            if (!this._geocoders.length) {
+                console.log('No geocoders defined.');
+                this.destroy();
+                return;
             }
+            if (!this.domNode) {
+                console.log('domNode is undefined.');
+                this.destroy();
+                return;
+            }
+            if (!this.map) {
+                console.log('Map is undefined.');
+                this.destroy();
+                return;
+            }
+            // add clear button if already populated
+            if (this.value) {
+                this._checkStatus();
+            }
+            // setup connections
+            this._setDelegations();
+            this.onLoad();
         },
         // post create widget function
         postCreate: function() {
@@ -124,11 +134,9 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             _self._query({
                 delay: 0
             }).then(function(response) {
-                if (_self.autoNavigate) {
-                    _self.onSearchResults(response);
-                    if (response.results && response.results.length) {
-                        _self._select(response.results[0]);
-                    }
+                _self.onSearchResults(response);
+                if (response.results && response.results.length) {
+                    _self.select(response.results[0]);
                 }
                 deferred.resolve(response);
             });
@@ -145,6 +153,20 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         blur: function() {
             if (this.loaded && focusUtil.curNode) {
                 focusUtil.curNode.blur();
+            }
+        },
+        // go to a location
+        select: function(e) {
+            // event
+            this.onSelect(e);
+            // hide menus
+            this._hideMenus();
+            // hide loading spinner
+            this._hideLoading();
+            // has extent and autoNavigate
+            if (this.autoNavigate && e && e.hasOwnProperty('extent')) {
+                // set map extent to location
+                this.map.setExtent(e.extent);
             }
         },
         /* ---------------- */
@@ -684,7 +706,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                     _self.value = locTxt;
                     if (_self.results && _self.results[resultIndex]) {
                         // Locate
-                        _self._select(_self.results[resultIndex]);
+                        _self.select(_self.results[resultIndex]);
                     }
                 } else if (event.type === 'keydown' && event.keyCode === keys.UP_ARROW) {
                     // go to previous item
@@ -855,21 +877,6 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             var radius = meters / 2;
             // return rounded result
             return Math.round(radius * 1000) / 1000;
-        },
-        // go to a location
-        _select: function(e) {
-            // event
-            this.onSelect(e);
-            // hide menus
-            this._hideMenus();
-            // hide loading spinner
-            this._hideLoading();
-            // has extent
-            if (e && e.hasOwnProperty('extent')) {
-                // set map extent to location
-                this.map.setExtent(e.extent);
-            }
-            return e;
         },
         // create Extent and Graphic objects from JSON
         _hydrateResults: function(e) {

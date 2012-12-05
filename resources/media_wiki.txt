@@ -92,7 +92,7 @@ The following parameters are supported:
 |-
 | class="code" | theme
 | class="code" | String
-| Optional. Adds the theme class to the container node of the widget for styling. Default: 'esriTheme'.
+| Optional. Adds the theme class to the container node of the widget for styling. Default: 'simpleGeocoder'.
 |-
 | class="code" | value
 | class="code" | String
@@ -248,6 +248,15 @@ The following parameters are supported:
 | class="code" | blur()
 | class="code" | none
 | Unfocus the widget's input.
+|-
+| class="code" | select(Object)
+| class="code" | none
+| Select a result. Result object parameter is required.
+    {
+        extent: <Extent>,
+        feature: <Feature>,
+        name: <String>
+    }
 |}
 
 === Events===
@@ -265,6 +274,12 @@ The following parameters are supported:
 | class="code" | onSelect
 | class="code" | Object
 | Event is fired when a result has been selected, the submit button is pressed or enter key is fired. Returns the result object.
+    {
+        extent: <Extent>,
+        feature: <Feature>,
+        name: <String>
+    }
+
 |-
 | class="code" | onClear
 | class="code" | none
@@ -273,14 +288,44 @@ The following parameters are supported:
 | class="code" | onSearchResults
 | class="code" | Object
 | Event is fired when there results are returned from an search.
+    {
+        results: [
+            {
+                extent: <Extent>,
+                feature: <Feature>,
+                name: <String>
+            }
+        ],
+        value: <String>
+    }
 |-
 | class="code" | onAutoComplete
 | class="code" | Object
 | Event is fired when there results are returned from an auto-complete.
+    {
+        results: [
+            {
+                extent: <Extent>,
+                feature: <Feature>,
+                name: <String>
+            }
+        ],
+        value: <String>
+    }
 |-
 | class="code" | onGeocoderSelect
 | class="code" | Object
 | Event is fired when a geocoder is selected.
+    {
+        url: <String>,
+        name: <String>,
+        placeholder: <String>,
+        outFields: <String>,
+        prefix: <String>,
+        suffix: <String>,
+        searchExtent: <Extent>,
+        sourceCountry: <String>
+    }
 |}
 
 
@@ -381,23 +426,27 @@ The following table lists the CSS class names defined by the basemap gallery to 
 <pre style="border: none;">
 
     var Geocoder = new esri.dijit.Geocoder({
-        theme: 'esriTheme', // Used to add a class to style the widget
+        theme: 'arcgisGeocoder', // Used to add a class to style the widget. Create your own theme with CSS.
         geocoders:[
             {
-                url: 'http://dexter2k8/gis/rest/services/IHS_Composite/GeocodeServer',
-                name: 'IHS_Composite',
-                placeholder: 'Search 2',
+                url: 'http://myserver/rest/services/name/GeocodeServer',
+                name: 'My geocoder',
+                placeholder: 'My Geocoder Search',
                 outFields: '*',
-                preFix: 'shell',
+                prefix: 'shell',
                 suffix 'station',
                 searchExtent: map.extent
             }
         ],
-        maxLocations: 6,
+        value: 'Redlands, CA',
+        geocoderMenu: true,
+        autoNavigate: true,
+        showResults: true,
+        maxLocations: 10,
         minCharacters: 3,
         searchDelay: 350,
         arcgisGeocoder: {
-			placeholder: 'My Placeholder',
+			placeholder: 'Locate an address',
 			name: 'ArcGIS World Geocoder'
 		},
         autoComplete: true,

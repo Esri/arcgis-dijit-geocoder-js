@@ -134,73 +134,43 @@
                         dojo.query('.spotlight').removeClass('spotlight-active');
                     });
 
-
-
-
-
-
                     // Geocoder with all common options set. Only map is required.
                     Geocoder = new esri.dijit.Geocoder({
-                        geocoders:[
-                            {
-                                url: 'http://tasks.arcgis.com/ArcGIS/rest/services/WorldLocator/GeocodeServer',
-                                name: 'ArcGIS Tasks (old)',
-                                placeholder: 'tasks.arcgis.com'
-                            }
-                        ],
-                        arcgisGeocoder: {
-                            url: 'http://geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer',
-                            placeholder: 'My Placeholder',
-                            name: 'ArcGIS World Geocoder'
-                        },
-                        theme:'simpleGeocoder',
-                        autoComplete:true,
+                        autoComplete: true,
                         map: map
                     }, dojo.byId('search'));
-
-                    // on widget load
-                    dojo.connect(Geocoder, 'onLoad', function(){
-                        Geocoder.set('value','texas');
-                        Geocoder.goto().then(function(test){
-                            console.log(test);
-                        });
-					});
 
 					// start widget
 					Geocoder.startup();
 
 					// on search results
 					dojo.connect(Geocoder, 'onSearchResults', function(results){
-    					console.log(results);
+    					console.log('search', results);
+					});
+
+					// on search results
+					dojo.connect(Geocoder, 'onGeocoderSelect', function(results){
+    					console.log('onselect', results);
+					});
+
+					// on search results
+					dojo.connect(Geocoder, 'onAutoComplete', function(results){
+    					console.log('autocomplete', results);
 					});
 
 					// on select test
-					dojo.connect(Geocoder, 'onSelect', function(){
+					dojo.connect(Geocoder, 'onSelect', function(obj){
+					    console.log(obj);
 					    var spotlight = dojo.connect(map, 'onExtentChange', function(){
 					        dojo.query('.spotlight').addClass('spotlight-active');
 					        dojo.disconnect(spotlight);
 					    });
 					});
 
-					// focus
-					dojo.connect(dojo.byId('focus'), 'onclick', function(){
-						Geocoder.focus();
-					});
-
-					// blur
-					dojo.connect(dojo.byId('blur'), 'onclick', function(){
-						Geocoder.blur();
-					});
-
 					// on clear test
 					dojo.connect(Geocoder, 'onClear', function(){
 				        dojo.query('.spotlight').removeClass('spotlight-active');
 				    });
-
-
-
-
-
 
                 });
                 mapDeferred.addErrback(function (error) {
