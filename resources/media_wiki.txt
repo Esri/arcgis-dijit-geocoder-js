@@ -119,6 +119,14 @@ The following parameters are supported:
 | class="code" | Boolean
 | Optional. If set false, the geolocator will not auto-complete results and show the menu. Default: false.
 |-
+| class="code" | autoNavigate
+| class="code" | Boolean
+| Optional. If set false, the geolocator will not navigate after a selection or search. Default: true.
+|-
+| class="code" | showResults
+| class="code" | Boolean
+| Optional. If set false, the geolocator will not show search suggestions while typing. Default: true.
+|-
 | class="code" | arcgisGeocoder
 | class="code" | Boolean or Object
 | Optional. If set false, the esri world geolocator will be disabled. Default: true. Can be configured if set as an object with the following properties:
@@ -191,6 +199,14 @@ The following parameters are supported:
 | class="code" | autoComplete
 | class="code" | Boolean
 | Whether or not the auto-complete results menu is enabled.
+|-
+| class="code" | autoNavigate
+| class="code" | Boolean
+| Whether or not the selected location is navigated to.
+|-
+| class="code" | showResults
+| class="code" | Boolean
+| Displays suggestions while user is typing.
 |}
 
 
@@ -206,7 +222,7 @@ The following parameters are supported:
 | class="code" | none
 | Finalizes the creation of this dijit. This method should be called after the constructor for this dijit is called and before letting the users interact with it.
 |-
-| class="code" | goto({ autoNavigate: true})
+| class="code" | goto()
 | class="code" | Deferred
 | Executes a search using the current value of the geocoder.
 |-

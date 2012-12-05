@@ -162,7 +162,7 @@
                     // on widget load
                     dojo.connect(Geocoder, 'onLoad', function(){
                         Geocoder.set('value','texas');
-                        Geocoder.goto({autoNavigate:false}).then(function(test){
+                        Geocoder.goto().then(function(test){
                             console.log(test);
                         });
 					});

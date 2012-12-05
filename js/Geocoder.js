@@ -116,20 +116,15 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             }
         },
         // submit button selected
-        goto: function(e) {
+        goto: function() {
             var _self = this;
-            if (!e) {
-                e = {
-                    autoNavigate: true
-                };
-            }
             // set deferred variable
             var deferred = new Deferred();
             // query and then Locate
             _self._query({
                 delay: 0
             }).then(function(response) {
-                if (e.autoNavigate) {
+                if (_self.autoNavigate) {
                     _self.onSearchResults(response);
                     if (response.results && response.results.length) {
                         _self._select(response.results[0]);
@@ -148,8 +143,8 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // blur input
         blur: function() {
-            if (this.loaded) {
-                focusUtil.curNode && focusUtil.curNode.blur();
+            if (this.loaded && focusUtil.curNode) {
+                focusUtil.curNode.blur();
             }
         },
         /* ---------------- */
@@ -189,6 +184,10 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             this.searchDelay = 350;
             // Show geocoder menu if necessary
             this.geocoderMenu = true;
+            // Automatically navigate
+            this.autoNavigate = true;
+            // show result suggestions
+            this.showResults = true;
         },
         // set variables that aren't to be modified
         _setPrivateDefaults: function() {
@@ -432,7 +431,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             }
         },
         // called on AC Results
-        _showSuggestions: function(e) {
+        _showResults: function(e) {
             var _self = this;
             // hide menu to toggle geocoder
             _self._hideGeolocatorMenu();
@@ -482,7 +481,9 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                 delay: this.searchDelay
             }).then(function(response) {
                 _self.onAutoComplete(response);
-                _self._showSuggestions(response);
+                if (_self.showResults) {
+                    _self._showResults(response);
+                }
             });
         },
         // received results
