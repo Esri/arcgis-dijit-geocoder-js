@@ -206,7 +206,7 @@ The following parameters are supported:
 | class="code" | none
 | Finalizes the creation of this dijit. This method should be called after the constructor for this dijit is called and before letting the users interact with it.
 |-
-| class="code" | search({ autoNavigate: true})
+| class="code" | goto({ autoNavigate: true})
 | class="code" | Deferred
 | Executes a search using the current value of the geocoder.
 |-
@@ -242,6 +242,10 @@ The following parameters are supported:
 ! Event
 ! Return Value
 ! Description
+|-
+| class="code" | ready
+| class="code" | none
+| Event is fired when the widget is ready.
 |-
 | class="code" | onSelect
 | class="code" | Object

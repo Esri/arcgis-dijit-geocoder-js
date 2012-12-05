@@ -16,12 +16,13 @@ require([
     "dijit/_OnDijitClickMixin",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetBase",
+    "dijit/focus",
     "esri", // We're not directly using anything defined in esri.js but geometry, locator and utils are not AMD. So, the only way to get reference to esri object is through esri module (ie. esri/main)
     "esri/geometry",
     "esri/tasks/locator",
     "esri/utils"
 ],
-function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, esri) {
+function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil, esri) {
     declare("esri.dijit.Geocoder", [Evented, _WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
         // Set template file HTML
         templateString: template,
@@ -54,8 +55,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                 }
                 // setup connections
                 this._setDelegations();
-                // widget ready
-                this.emit("start", {});
+                this.ready();
             } else {
                 console.log('Map or domNode undefined.');
             }
@@ -63,7 +63,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         // post create widget function
         postCreate: function() {
             // set widget ready
-            this.ready = true;
+            this.loaded = true;
             // build geocoder list
             this._updateGeocoder();
         },
@@ -84,21 +84,39 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         clear: function() {
             // clear event
             this.onClear();
+            // if geocoder is ready
+            if (this.loaded) {
+                // empty input value
+                query(this.inputNode).attr('value', '');
+            }
+            // set current text
+            this.value = '';
+            // empty results
+            this.results = [];
+            // get node of reset button and remove it's active class
+            if (this.loaded) {
+                query(this.containerNode).removeClass(this._hasValueClass);
+                query(this.clearNode).attr('title', '');
+            }
+            // remove active menus
+            this._hideMenus();
+            // hide loading
+            this._hideLoading();
         },
         // show widget
         show: function() {
-            if (this.ready) {
+            if (this.loaded) {
                 query(this.domNode).style('display', 'block');
             }
         },
         // hide widget
         hide: function() {
-            if (this.ready) {
+            if (this.loaded) {
                 query(this.domNode).style('display', 'none');
             }
         },
         // submit button selected
-        search: function(e) {
+        goto: function(e) {
             var _self = this;
             if (!e) {
                 e = {
@@ -111,8 +129,11 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             _self._query({
                 delay: 0
             }).then(function(response) {
-                if(e.autoNavigate){
+                if (e.autoNavigate) {
                     _self.onSearchResults(response);
+                    if (response.results && response.results.length) {
+                        _self._select(response.results[0]);
+                    }
                 }
                 deferred.resolve();
             });
@@ -121,59 +142,30 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // focus on input
         focus: function() {
-            if (this.ready) {
-                this.inputNode.focus();
+            if (this.loaded) {
+                focusUtil.focus(this.inputNode);
             }
         },
         // blur input
         blur: function() {
-            if (this.ready) {
-                this.inputNode.blur();
+            if (this.loaded) {
+                focusUtil.curNode && focusUtil.curNode.blur();
             }
         },
         /* ---------------- */
         /* Public Events */
         /* ---------------- */
+        ready: function() {},
         // called after search has been selected
-        onSelect: function(e) {
-            // new locator
-            if (e && e.hasOwnProperty('extent')) {
-                // set map extent to location
-                this.map.setExtent(e.extent);
-            }
-            return e;
-        },
+        onSelect: function(e) {},
         // called on results
-        onSearchResults: function(e) {
-            this._select(e);
-        },
+        onSearchResults: function(e) {},
         // called on results
-        onAutoComplete: function(e) {
-            this._showSuggestions(e);
-        },
+        onAutoComplete: function(e) {},
         // when geocoder selected
         onGeocoderSelect: function(e) {},
         // when geocoder selected
-        onClear: function() {
-            // if geocoder is ready
-            if (this.ready) {
-                // empty input value
-                query(this.inputNode).attr('value', '');
-            }
-            // set current text
-            this.value = '';
-            // empty results
-            this.results = [];
-            // get node of reset button and remove it's active class
-            if (this.ready) {
-                query(this.containerNode).removeClass(this._hasValueClass);
-                query(this.clearNode).attr('title', '');
-            }
-            // remove active menus
-            this._hideMenus();
-            // hide loading
-            this._hideLoading();
-        },
+        onClear: function() {},
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */
@@ -238,7 +230,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                     this._arcgisGeocoder = {};
                 }
                 // ArcGIS Geocoder URL
-                if(!this._arcgisGeocoder.url){
+                if (!this._arcgisGeocoder.url) {
                     // set esri geocoder options
                     this._arcgisGeocoder.url = location.protocol + "//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
                 }
@@ -279,7 +271,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // Update placeholder nodes
         _updatePlaceholder: function() {
-            if (this.ready) {
+            if (this.loaded) {
                 this._placeholder = '';
                 // if placeholder of active geocoder is set
                 if (this.activeGeocoder && this.activeGeocoder.placeholder) {
@@ -291,14 +283,14 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // update value of text box
         _updateValue: function(attr, oldVal, newVal) {
-            if (this.ready) {
+            if (this.loaded) {
                 query(this.inputNode).attr('value', newVal);
                 this._checkStatus();
             }
         },
         // update theme
         _updateTheme: function(attr, oldVal, newVal) {
-            if (this.ready) {
+            if (this.loaded) {
                 query(this.domNode).removeClass(oldVal).addClass(newVal);
             }
         },
@@ -467,8 +459,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                     }
                     if (i === 0) {
                         layerClass += ' ' + _self._resultsItemFirstClass;
-                    }
-                    else if(i === (_self.results.length - 1)){
+                    } else if (i === (_self.results.length - 1)) {
                         layerClass += ' ' + _self._resultsItemLastClass;
                     }
                     // create list item
@@ -491,6 +482,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                 delay: this.searchDelay
             }).then(function(response) {
                 _self.onAutoComplete(response);
+                _self._showSuggestions(response);
             });
         },
         // received results
@@ -511,19 +503,19 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // show loading spinner
         _showLoading: function() {
-            if (this.ready) {
+            if (this.loaded) {
                 query(this.containerNode).addClass(this._loadingClass);
             }
         },
         // hide loading spinner
         _hideLoading: function() {
-            if (this.ready) {
+            if (this.loaded) {
                 query(this.containerNode).removeClass(this._loadingClass);
             }
         },
         // show geocoder selection menu
         _showGeolocatorMenu: function() {
-            if (this.ready) {
+            if (this.loaded) {
                 // add class to container
                 query(this.containerNode).addClass(this._activeMenuClass);
                 // display menu node
@@ -535,7 +527,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // hide geocoder selection menu
         _hideGeolocatorMenu: function() {
-            if (this.ready) {
+            if (this.loaded) {
                 // container node
                 var container = query(this.containerNode);
                 // add class to container
@@ -549,7 +541,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         // toggle geocoder selection menu
         _toggleGeolocatorMenu: function() {
             this._hideResultsMenu();
-            if (this.ready) {
+            if (this.loaded) {
                 var display = query(this.geocoderMenuNode).style('display');
                 if (display[0] === 'block') {
                     this._hideGeolocatorMenu();
@@ -560,7 +552,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // show autolocate menu
         _showResultsMenu: function() {
-            if (this.ready) {
+            if (this.loaded) {
                 // add class to container
                 query(this.containerNode).addClass(this._GeocoderActiveClass);
                 // show node
@@ -571,7 +563,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // hide the results menu
         _hideResultsMenu: function() {
-            if (this.ready) {
+            if (this.loaded) {
                 // hide
                 query(this.resultsNode).style('display', 'none');
                 // add class to container
@@ -587,7 +579,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // create menu for changing active geocoder
         _insertGeocoderMenuItems: function() {
-            if (this.ready) {
+            if (this.loaded) {
                 if (this.geocoderMenu && this._geocoders.length > 1) {
                     var html = '';
                     var layerClass = '',
@@ -608,8 +600,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                         }
                         if (i === 0) {
                             layerClass += ' ' + this._resultsItemFirstClass;
-                        }
-                        else if(i === (this._geocoders.length - 1)){
+                        } else if (i === (this._geocoders.length - 1)) {
                             layerClass += ' ' + this._resultsItemLastClass;
                         }
                         // geocoder name
@@ -637,7 +628,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // check input box's status
         _checkStatus: function() {
-            if (this.ready) {
+            if (this.loaded) {
                 // if input value is not empty
                 if (this.value) {
                     // add class to dom
@@ -690,10 +681,10 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                     query(_self.inputNode).attr('value', locTxt);
                     // set current text var
                     _self.value = locTxt;
-                    // Locate
-                    _self._select({
-                        "results": [_self.results[resultIndex]]
-                    });
+                    if (_self.results && _self.results[resultIndex]) {
+                        // Locate
+                        _self._select(_self.results[resultIndex]);
+                    }
                 } else if (event.type === 'keydown' && event.keyCode === keys.UP_ARROW) {
                     // go to previous item
                     newIndex = resultIndex - 1;
@@ -774,7 +765,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                     return;
                 } else if (event && event.keyCode === keys.ENTER) { // if enter key was pushed
                     // query then Locate
-                    this.search();
+                    this.goto();
                     // if up arrow pushed
                 } else if (event && event.keyCode === keys.ESCAPE) { // esc key
                     // clear timer
@@ -866,15 +857,18 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         },
         // go to a location
         _select: function(e) {
-            // if we have results
-            if (e.results && e.results.length) {
-                // locate result
-                this.onSelect(e.results[0]);
-            }
+            // event
+            this.onSelect(e);
             // hide menus
             this._hideMenus();
             // hide loading spinner
             this._hideLoading();
+            // has extent
+            if (e && e.hasOwnProperty('extent')) {
+                // set map extent to location
+                this.map.setExtent(e.extent);
+            }
+            return e;
         },
         // create Extent and Graphic objects from JSON
         _hydrateResults: function(e) {
