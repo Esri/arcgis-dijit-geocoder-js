@@ -123,16 +123,17 @@
                 mapDeferred.addCallback(function (response) {
                     map = response.map;
 
+                    var html = '<div id="spotlight" class="spotlight"></div>';
+
+                    dojo.place(html, dojo.byId('map_container'), 'first');
+
+
                     //resize the map when the browser resizes
                     dojo.connect(dijit.byId('map'), 'resize', map, map.resize);
                     dojo.connect(window, "onresize", resizeMap);
 
                     dojo.connect(map, 'onExtentChange', function(){
-                        dojo.query('.spotlight').removeClass('spotlight-active');
-                    });
-
-                    dojo.connect(dojo.byId('spotlight'), 'onclick', function(){
-                        dojo.query(this).removeClass('spotlight-active');
+                        removeSpotlight();
                     });
 
                     // Geocoder with all common options set. Only map is required.
@@ -161,6 +162,12 @@
 					dojo.connect(Geocoder, 'onAutoComplete', function(results){
     					console.log('autocomplete', results);
 					});
+
+
+					function removeSpotlight(){
+    					dojo.query('.spotlight').removeClass('spotlight-active');
+				        map.graphics.clear();
+					}
 
 					// on select test
 					dojo.connect(Geocoder, 'onSelect', function(result){
@@ -193,8 +200,7 @@
 
 					// on clear test
 					dojo.connect(Geocoder, 'onClear', function(){
-				        dojo.query('.spotlight').removeClass('spotlight-active');
-				        map.graphics.clear();
+				        removeSpotlight();
 				    });
 
                 });
@@ -219,7 +225,7 @@
         <div id="blur">Blur</div>
         <div id="search"></div>
         <div dir="ltr" id="map"></div>
-        <div id="spotlight" class="spotlight"></div>
+
     </body>
 
 </html>
