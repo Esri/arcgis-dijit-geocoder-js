@@ -221,7 +221,7 @@ The following parameters are supported:
 | class="code" | none
 | Finalizes the creation of this dijit. This method should be called after the constructor for this dijit is called and before letting the users interact with it.
 |-
-| class="code" | goto()
+| class="code" | find()
 | class="code" | Deferred
 | Executes a search using the current value of the geocoder.
 |-
