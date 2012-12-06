@@ -134,7 +134,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             _self._query({
                 delay: 0
             }).then(function(response) {
-                _self.onSearchResults(response);
+                _self.onFindResults(response);
                 if (response.results && response.results.length) {
                     _self.select(response.results[0]);
                 }
@@ -176,7 +176,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
         // called after search has been selected
         onSelect: function(e) {},
         // called on results
-        onSearchResults: function(e) {},
+        onFindResults: function(e) {},
         // called on results
         onAutoComplete: function(e) {},
         // when geocoder selected

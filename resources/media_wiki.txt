@@ -285,7 +285,7 @@ The following parameters are supported:
 | class="code" | none
 | Event is fired when a result has been cleared from the input box or a new result has been selected.
 |-
-| class="code" | onSearchResults
+| class="code" | onFindResults
 | class="code" | Object
 | Event is fired when there results are returned from an search.
     {
