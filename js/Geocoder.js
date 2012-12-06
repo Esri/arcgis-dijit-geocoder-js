@@ -126,7 +126,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             }
         },
         // submit button selected
-        goto: function() {
+        find: function() {
             var _self = this;
             // set deferred variable
             var deferred = new Deferred();
@@ -788,7 +788,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                     return;
                 } else if (event && event.keyCode === keys.ENTER) { // if enter key was pushed
                     // query then Locate
-                    this.goto();
+                    this.find();
                     // if up arrow pushed
                 } else if (event && event.keyCode === keys.ESCAPE) { // esc key
                     // clear timer
