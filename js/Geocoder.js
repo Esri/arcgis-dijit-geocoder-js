@@ -217,6 +217,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             // results holder
             this.results = [];
             // css classes
+            this._GeocoderContainerClass = 'esriGeocoderContainer';
             this._GeocoderClass = 'esriGeocoder';
             this._GeocoderMultipleClass = 'esriGeocoderMultiple';
             this._GeocoderIconClass = 'esriGeocoderIcon';
@@ -376,13 +377,13 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                 }
                 // if we can use the find function
                 if (this.activeGeocoder === this._arcgisGeocoder) {
-                    // get geographic center point
-                    var centerPoint = esri.geometry.webMercatorToGeographic(this.map.extent.getCenter());
+                    // set center point
+                    var normalizedPoint = this.map.extent.getCenter().normalize();
                     // Query object
                     params = {
                         "text": singleLine,
                         "outSR": this.map.spatialReference.wkid,
-                        "location": Math.round(centerPoint.x * 1000) / 1000 + ',' + Math.round(centerPoint.y * 1000) / 1000,
+                        "location": JSON.stringify(normalizedPoint),
                         "distance": this._getRadius(),
                         "f": "json"
                     };
@@ -875,8 +876,14 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             var meters = esri.geometry.getLength(new esri.geometry.Point(extent.xmin, extent.ymin, this.map.spatialReference), new esri.geometry.Point(extent.xmax, extent.ymin, this.map.spatialReference));
             // get radius
             var radius = meters / 2;
+
             // return rounded result
-            return Math.round(radius * 1000) / 1000;
+            //return Math.round(radius * 1000) / 1000;
+
+            // NOTE
+            // Geocode service has a bug where float values return incorrect results
+            // See CR 249,845 for details
+            return Math.ceil(radius);
         },
         // create Extent and Graphic objects from JSON
         _hydrateResults: function(e) {
