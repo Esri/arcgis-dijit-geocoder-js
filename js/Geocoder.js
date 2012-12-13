@@ -870,28 +870,29 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             // check status of text box
             this._checkStatus();
         },
-		// convert distance to meters
-		_distanceToMeters: function(sr, distanceInSRUnits) {
-			var lookupTable = esri.WKIDUnitConversion, decDegToMeters = 20015077.0 / 180.0, unitValue, result;
-			if (sr.wkid) {
-				unitValue = lookupTable.values[lookupTable[sr.wkid]];
-			}
-			else if ( sr.wkt && (sr.wkt.search(/^PROJCS/i) !== -1) ) {
-				result = /UNIT\[([^\]]+)\]\]$/i.exec(sr.wkt);
-				if (result && result[1]) {
-					unitValue = parseFloat(result[1].split(",")[1]);
-				}
-			}
-			// else SR assumed to be in degrees
-			return (distanceInSRUnits * (unitValue || decDegToMeters));
-		},
+        // convert distance to meters
+        _distanceToMeters: function(sr, distanceInSRUnits) {
+            var lookupTable = esri.WKIDUnitConversion,
+                decDegToMeters = 20015077.0 / 180.0,
+                unitValue, result;
+            if (sr.wkid) {
+                unitValue = lookupTable.values[lookupTable[sr.wkid]];
+            } else if (sr.wkt && (sr.wkt.search(/^PROJCS/i) !== -1)) {
+                result = /UNIT\[([^\]]+)\]\]$/i.exec(sr.wkt);
+                if (result && result[1]) {
+                    unitValue = parseFloat(result[1].split(",")[1]);
+                }
+            }
+            // else SR assumed to be in degrees
+            return (distanceInSRUnits * (unitValue || decDegToMeters));
+        },
         // calculate radius of extent
         _getRadius: function() {
             var extent = this.map.extent;
             // get length of extent in meters
             var length = esri.geometry.getLength(new esri.geometry.Point(extent.xmin, extent.ymin, this.map.spatialReference), new esri.geometry.Point(extent.xmax, extent.ymin, this.map.spatialReference));
-			// convert to meters if needed
-			var meters = this._distanceToMeters(this.map.spatialReference, length);
+            // convert to meters if needed
+            var meters = this._distanceToMeters(this.map.spatialReference, length);
             // get radius
             var radius = meters / 2;
             // NOTE
