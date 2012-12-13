@@ -384,7 +384,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                     params = {
                         "text": singleLine,
                         "outSR": this.map.spatialReference.wkid,
-                        "location": JSON.stringify(normalizedPoint),
+                        "location": JSON.stringify(normalizedPoint.toJson()),
                         "distance": this._getRadius(),
                         "f": "json"
                     };
@@ -898,7 +898,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             // NOTE
             // Geocode service has a bug where float values return incorrect results
             // See CR 249,845 for details
-            return Math.ceil(meters);
+            return Math.ceil(radius);
         },
         // create Extent and Graphic objects from JSON
         _hydrateResults: function(e) {
