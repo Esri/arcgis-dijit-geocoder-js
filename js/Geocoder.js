@@ -78,10 +78,7 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             // build geocoder list
             this._updateGeocoder();
         },
-        // destroy widget
         destroy: function() {
-            // remove html
-            domConstruct.empty(this.domNode);
             var i;
             // if delegations
             if (this._delegations) {
@@ -90,6 +87,9 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
                     this._delegations[i].remove();
                 }
             }
+            // remove html
+            domConstruct.empty(this.domNode);
+            this.inherited(arguments);
         },
         // clear the input box
         clear: function() {
