@@ -18,6 +18,7 @@ require([
     "dijit/_WidgetBase",
     "dijit/focus",
     "esri", // We're not directly using anything defined in esri.js but geometry, locator and utils are not AMD. So, the only way to get reference to esri object is through esri module (ie. esri/main)
+	"esri/WKIDUnitConversion",
     "esri/geometry",
     "esri/tasks/locator",
     "esri/utils"
@@ -869,21 +870,34 @@ function(Evented, declare, Deferred, domConstruct, i18n, JSON, keys, on, query, 
             // check status of text box
             this._checkStatus();
         },
+		// convert distance to meters
+		_distanceToMeters: function(sr, distanceInSRUnits) {
+			var lookupTable = esri.WKIDUnitConversion, decDegToMeters = 20015077.0 / 180.0, unitValue, result;
+			if (sr.wkid) {
+				unitValue = lookupTable.values[lookupTable[sr.wkid]];
+			}
+			else if ( sr.wkt && (sr.wkt.search(/^PROJCS/i) !== -1) ) {
+				result = /UNIT\[([^\]]+)\]\]$/i.exec(sr.wkt);
+				if (result && result[1]) {
+					unitValue = parseFloat(result[1].split(",")[1]);
+				}
+			}
+			// else SR assumed to be in degrees
+			return (distanceInSRUnits * (unitValue || decDegToMeters));
+		},
         // calculate radius of extent
         _getRadius: function() {
             var extent = this.map.extent;
             // get length of extent in meters
-            var meters = esri.geometry.getLength(new esri.geometry.Point(extent.xmin, extent.ymin, this.map.spatialReference), new esri.geometry.Point(extent.xmax, extent.ymin, this.map.spatialReference));
+            var length = esri.geometry.getLength(new esri.geometry.Point(extent.xmin, extent.ymin, this.map.spatialReference), new esri.geometry.Point(extent.xmax, extent.ymin, this.map.spatialReference));
+			// convert to meters if needed
+			var meters = this._distanceToMeters(this.map.spatialReference, length);
             // get radius
             var radius = meters / 2;
-
-            // return rounded result
-            //return Math.round(radius * 1000) / 1000;
-
             // NOTE
             // Geocode service has a bug where float values return incorrect results
             // See CR 249,845 for details
-            return Math.ceil(radius);
+            return Math.ceil(meters);
         },
         // create Extent and Graphic objects from JSON
         _hydrateResults: function(e) {
