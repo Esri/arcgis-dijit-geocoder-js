@@ -338,6 +338,9 @@ The following table lists the CSS class names defined by the basemap gallery to 
 ! Class Name
 ! Description
 |-
+| class="code" | esriGeocoderContainer
+| Containing class for the geocoder node.
+|-
 | class="code" | esriGeocoder
 | Represents a node where an instance of the widget is rendered.
 |-
