@@ -39,7 +39,7 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
             this.watch("activeGeocoder", this._setActiveGeocoder);
             this.watch("activeGeocoderIndex", this._setActiveGeocoderIndex);
             this.watch("geocoder", this._updateGeocoder);
-            this.watch("esriGeocoder", this._updateGeocoder);
+            this.watch("arcgisGeocoder", this._updateGeocoder);
         },
         /* ---------------- */
         /* Public Functions */
@@ -72,7 +72,6 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
         postCreate: function () {
             // set widget ready
             this.loaded = true;
-            this.onLoad();
             // build geocoder list
             this._updateGeocoder();
         },
@@ -168,7 +167,6 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
         /* ---------------- */
         /* Public Events */
         /* ---------------- */
-        onLoad: function () {},
         // called after search has been selected
         onSelect: function (e) {},
         // called on results
@@ -206,11 +204,6 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
             this.autoNavigate = true;
             // show result suggestions
             this.showResults = true;
-            // local search
-            this.localSearchOptions = {
-                minScale: 150000,
-                distance: 12000
-            };
         },
         // set variables that aren't to be modified
         _setPrivateDefaults: function () {
@@ -261,6 +254,13 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 if (!this._arcgisGeocoder.name) {
                     this._arcgisGeocoder.name = i18n.widgets.Geocoder.esriGeocoderName;
                 }
+				// local search
+				if(!this._arcgisGeocoder.hasOwnProperty('localSearchOptions')){
+					this._arcgisGeocoder.localSearchOptions = {
+						minScale: 150000,
+						distance: 12000
+					};
+				}
                 this.arcgisGeocoder = this._arcgisGeocoder;
             } else {
                 this.arcgisGeocoder = false;
@@ -384,15 +384,15 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                         "outSR": this.map.spatialReference.wkid,
                         "f": "json"
                     };
-                    if (this.localSearchOptions && this.localSearchOptions.hasOwnProperty('distance') && this.localSearchOptions.hasOwnProperty('minScale')) {
+                    if (this.activeGeocoder.localSearchOptions && this.activeGeocoder.localSearchOptions.hasOwnProperty('distance') && this.activeGeocoder.localSearchOptions.hasOwnProperty('minScale')) {
                         // set center point
                         var normalizedPoint = this.map.extent.getCenter().normalize();
                         // current scale of map
                         var scale = this.map.getScale();
                         // location search will be performed when the map scale is less than minScale.
-                        if (scale && scale < parseFloat(this.localSearchOptions.minScale)) {
+                        if (!this.activeGeocoder.localSearchOptions.minScale || (scale && scale <= parseFloat(this.activeGeocoder.localSearchOptions.minScale))) {
                             params.location = JSON.stringify(normalizedPoint.toJson());
-                            params.distance = this.localSearchOptions.distance;
+                            params.distance = this.activeGeocoder.localSearchOptions.distance;
                         }
                     }
                     // if outfields

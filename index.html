@@ -140,7 +140,11 @@
                     Geocoder = new esri.dijit.Geocoder({
                         autoComplete: true,
                         arcgisGeocoder: {
-                            url: 'http://geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer'
+                            url: 'http://geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer',
+							localSearchOptions: {
+								minScale: 0,
+								distance: 2000
+							}
                         },
                         map: map
                     }, dojo.byId('search'));
