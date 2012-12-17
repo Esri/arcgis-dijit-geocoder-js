@@ -267,7 +267,7 @@ The following parameters are supported:
 ! Return Value
 ! Description
 |-
-| class="code" | ready
+| class="code" | onLoad
 | class="code" | none
 | Event is fired when the widget is ready.
 |-
