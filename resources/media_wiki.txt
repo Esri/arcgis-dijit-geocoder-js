@@ -137,7 +137,11 @@ The following parameters are supported:
         prefix: <String> Optional, // prepended to the search string
         suffix: <String> Optional, // appended to the search string
         searchExtent: <Extent> Optional, // constrain search to specified extent
-        sourceCountry: <String> Optional // Country code to use for geocode searches to improve performance. Default: empty string "".
+        sourceCountry: <String> Optional, // Country code to use for geocode searches to improve performance. Default: empty string "".
+        localSearchOptions: <Object> {
+            minScale: <Float>, //Location search will be performed when the map scale is less than minScale.  The default minScale is 150,000.
+            distance: <Integer>, //a distance to be used when location search is performed.  Default is 12,000 meaters
+        }
     }
 
 	Country Codes: http://geocode.arcgis.com/arcgis/index.html#/Service_coverage/02q000000005000000/
@@ -266,10 +270,6 @@ The following parameters are supported:
 ! Event
 ! Return Value
 ! Description
-|-
-| class="code" | onLoad
-| class="code" | none
-| Event is fired when the widget is ready.
 |-
 | class="code" | onSelect
 | class="code" | Object
@@ -438,7 +438,11 @@ The following table lists the CSS class names defined by the basemap gallery to 
                 outFields: '*',
                 prefix: 'shell',
                 suffix 'station',
-                searchExtent: map.extent
+                searchExtent: map.extent,
+                localSearchOptions: {
+                    minScale: 150000,
+                    distance: 12000
+               }
             }
         ],
         value: 'Redlands, CA',

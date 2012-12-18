@@ -390,7 +390,7 @@
     -o-text-overflow: ellipsis;
 }
 
-.simpleGeocoder .esriGeocoderResultOdd {;
+.simpleGeocoder .esriGeocoderResultOdd {
 }
 
 .simpleGeocoder .esriGeocoderResult:hover,.simpleGeocoder .esriGeocoderResultEven:focus,.simpleGeocoder .esriGeocoderResultOdd:focus {
