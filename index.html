@@ -31,26 +31,6 @@
                 top: 20px;
                 left: 75px;
             }
-            #focus {
-                display: block;
-                position: absolute;
-                z-index: 3;
-                top: 15px;
-                right: 20px;
-                background:#fff;
-                padding: 5px;
-                border:1px solid #000;
-            }
-            #blur {
-                display: block;
-                position: absolute;
-                z-index: 3;
-                top: 15px;
-                right: 100px;
-                background:#fff;
-                padding: 5px;
-                border:1px solid #000;
-            }
             .spotlight {
                 z-index:-1;
                 position:absolute;
@@ -74,23 +54,16 @@
             // host path regular expression
             var pathRegex = new RegExp(/\/[^\/]+$/);
             var locationPath = location.pathname.replace(pathRegex, '');
-
             // Dojo Config
             var dojoConfig = {
                 //locale: "ar",
-                parseOnLoad: true,
-                packages: [{
-                    name: "esriTemplate",
-                    location: locationPath
-                }]
+                parseOnLoad: true
             };
         </script>
         <script src="http://servicesbeta.esri.com/jsapi/arcgis/3.3"></script>
         <script type="text/javascript" src="js/Geocoder.js"></script>
         <script type="text/javascript">
-            dojo.require("dijit.dijit"); // optimize: load dijit layer
-            dojo.require("dijit.layout.BorderContainer");
-            dojo.require("dijit.layout.ContentPane");
+
             dojo.require("esri.map");
             dojo.require("esri.IdentityManager");
             dojo.require("esri.arcgis.utils");
@@ -178,10 +151,16 @@
 
 
 					    var spotlight = dojo.connect(map, 'onExtentChange', function(){
-    					    var geom = esri.geometry.toScreenGeometry(map.extent, map.width, map.height, result.extent);
+                            var geom = esri.geometry.toScreenGeometry(map.extent, map.width, map.height, result.extent);
                             var width = geom.xmax - geom.xmin;
                             var height = geom.ymin - geom.ymax;
-                            var margin = '-' + Math.floor(height/2) + 'px 0 0 -' + Math.floor(width/2) + 'px';
+
+                            var max = height;
+                            if(width > height){
+                                max = width;
+                            }
+
+                            var margin = '-' + Math.floor(max/2) + 'px 0 0 -' + Math.floor(max/2) + 'px';
 
                             var pt = result.feature.geometry;
                             var sms = new esri.symbol.SimpleMarkerSymbol().setStyle(
@@ -191,13 +170,13 @@
 
                             map.graphics.add(graphic);
 
-					        dojo.query('.spotlight').addClass('spotlight-active').style({
-    					        width: width + 'px',
-    					        height: height + 'px',
-    					        margin: margin
-					        });
-					        dojo.disconnect(spotlight);
-					    });
+                            dojo.query('.spotlight').addClass('spotlight-active').style({
+                                width: max + 'px',
+                                height: max + 'px',
+                                margin: margin
+                            });
+                            dojo.disconnect(spotlight);
+                        });
 
 
 					});
@@ -225,8 +204,6 @@
     </head>
 
     <body dir="" class="soria">
-        <div id="focus">Focus</div>
-        <div id="blur">Blur</div>
         <div id="search"></div>
         <div dir="ltr" id="map"></div>
 

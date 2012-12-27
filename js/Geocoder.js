@@ -22,7 +22,7 @@ require([
     "esri/utils"
 ],
 function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil, esri) {
-    declare("esri.dijit.Geocoder", [_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
+    var Widget = declare("esri.dijit.Geocoder", [_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
         // Set template file HTML
         templateString: template,
         // init
@@ -946,4 +946,5 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
             return results;
         }
     });
+    return Widget;
 });
