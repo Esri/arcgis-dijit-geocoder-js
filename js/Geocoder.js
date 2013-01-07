@@ -1,16 +1,13 @@
-require([
-//define([
+define([
     "dojo/_base/declare",
     "dojo/_base/Deferred",
     "dojo/dom-construct",
-    "dojo/i18n!./nls/jsapi.js",
-    //"dojo/i18n!esri/nls/jsapi",
+    "dojo/i18n!esri/nls/jsapi",
     "dojo/json",
     "dojo/keys",
     "dojo/on",
     "dojo/query",
-    "dojo/text!./templates/Geocoder.html",
-    //"dojo/text!esri/dijit/templates/Geocoder.html",
+    "dojo/text!esri/dijit/templates/Geocoder.html",
     "dojo/uacss",
     "dijit/_OnDijitClickMixin",
     "dijit/_TemplatedMixin",
@@ -378,10 +375,12 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 }
                 // if we can use the find function
                 if (this.activeGeocoder === this._arcgisGeocoder) {
+                    var mapSR = this.map.spatialReference;
+
                     // Query object
                     params = {
                         "text": singleLine,
-                        "outSR": this.map.spatialReference.wkid,
+                        "outSR": mapSR.wkid || JSON.stringify(mapSR.toJson()),
                         "f": "json"
                     };
                     if (this.activeGeocoder.localSearchOptions && this.activeGeocoder.localSearchOptions.hasOwnProperty('distance') && this.activeGeocoder.localSearchOptions.hasOwnProperty('minScale')) {
@@ -414,10 +413,9 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                             "ymin": this.activeGeocoder.searchExtent.ymin,
                             "xmax": this.activeGeocoder.searchExtent.xmax,
                             "ymax": this.activeGeocoder.searchExtent.ymax,
-                            "spatialReference": {
-                                "wkid": this.activeGeocoder.searchExtent.spatialReference.wkid
-                            }
+                            "spatialReference": this.activeGeocoder.searchExtent.spatialReference.toJson()
                         };
+
                         params.bbox = JSON.stringify(bbox);
                     }
                     // send request
@@ -946,5 +944,5 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
             return results;
         }
     });
-    return Widget;
+	return Widget;
 });
