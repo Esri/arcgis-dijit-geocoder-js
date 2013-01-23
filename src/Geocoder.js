@@ -174,6 +174,10 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
         onGeocoderSelect: function (e) {},
         // when geocoder selected
         onClear: function () {},
+        // geocoder params hook
+        setGeocoderParams: function (e) {
+            return e;
+        },
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */
@@ -251,13 +255,13 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 if (!this._arcgisGeocoder.name) {
                     this._arcgisGeocoder.name = i18n.widgets.Geocoder.esriGeocoderName;
                 }
-				// local search
-				if(!this._arcgisGeocoder.hasOwnProperty('localSearchOptions')){
-					this._arcgisGeocoder.localSearchOptions = {
-						minScale: 150000,
-						distance: 12000
-					};
-				}
+                // local search
+                if (!this._arcgisGeocoder.hasOwnProperty('localSearchOptions')) {
+                    this._arcgisGeocoder.localSearchOptions = {
+                        minScale: 150000,
+                        distance: 12000
+                    };
+                }
                 this.arcgisGeocoder = this._arcgisGeocoder;
             } else {
                 this.arcgisGeocoder = false;
@@ -376,7 +380,6 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 // if we can use the find function
                 if (this.activeGeocoder === this._arcgisGeocoder) {
                     var mapSR = this.map.spatialReference;
-
                     // Query object
                     params = {
                         "text": singleLine,
@@ -415,9 +418,9 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                             "ymax": this.activeGeocoder.searchExtent.ymax,
                             "spatialReference": this.activeGeocoder.searchExtent.spatialReference.toJson()
                         };
-
                         params.bbox = JSON.stringify(bbox);
                     }
+                    params = this.setGeocoderParams(params);
                     // send request
                     var requestHandle = esri.request({
                         url: this.activeGeocoder.url + '/find',
@@ -432,10 +435,13 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 } else {
                     // Params
                     params = {
-                        address: {
-                            "singleLine": singleLine
-                        }
+                        address: {}
                     };
+                    if (this.activeGeocoder.singleLineFieldName) {
+                        params.address[this.activeGeocoder.singleLineFieldName] = singleLine;
+                    } else {
+                        params.address["Single Line Input"] = singleLine;
+                    }
                     // if outfields
                     if (outFields) {
                         params.outFields = [outFields];
@@ -445,6 +451,7 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                         params.searchExtent = this.activeGeocoder.searchExtent;
                     }
                     // Geocoder
+                    params = this.setGeocoderParams(params);
                     this._task = new esri.tasks.Locator(this.activeGeocoder.url);
                     this._task.outSpatialReference = this.map.spatialReference;
                     // query for location
@@ -944,5 +951,5 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
             return results;
         }
     });
-	return Widget;
+    return Widget;
 });
