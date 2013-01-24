@@ -174,10 +174,6 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
         onGeocoderSelect: function (e) {},
         // when geocoder selected
         onClear: function () {},
-        // geocoder params hook
-        setGeocoderParams: function (e) {
-            return e;
-        },
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */
@@ -420,7 +416,6 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                         };
                         params.bbox = JSON.stringify(bbox);
                     }
-                    params = this.setGeocoderParams(params);
                     // send request
                     var requestHandle = esri.request({
                         url: this.activeGeocoder.url + '/find',
@@ -451,7 +446,6 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                         params.searchExtent = this.activeGeocoder.searchExtent;
                     }
                     // Geocoder
-                    params = this.setGeocoderParams(params);
                     this._task = new esri.tasks.Locator(this.activeGeocoder.url);
                     this._task.outSpatialReference = this.map.spatialReference;
                     // query for location
