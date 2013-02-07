@@ -7,6 +7,7 @@ define([
     "dojo/keys",
     "dojo/on",
     "dojo/query",
+    //"dojo/text!./templates/Geocoder.html",
     "dojo/text!esri/dijit/templates/Geocoder.html",
     "dojo/uacss",
     "dijit/_OnDijitClickMixin",
@@ -717,6 +718,8 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                         _self.select(_self.results[resultIndex]);
                     }
                 } else if (event.type === 'keydown' && event.keyCode === keys.UP_ARROW) {
+                    event.preventDefault();
+                    event.stopPropagation();
                     // go to previous item
                     newIndex = resultIndex - 1;
                     if (newIndex < 0) {
@@ -725,6 +728,8 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                         lists[newIndex].focus();
                     }
                 } else if (event.type === 'keydown' && event.keyCode === keys.DOWN_ARROW) {
+                    event.preventDefault();
+                    event.stopPropagation();
                     // go to next item
                     newIndex = resultIndex + 1;
                     if (newIndex >= lists.length) {
@@ -752,6 +757,8 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                     _self._setActiveGeocoderIndex(null, null, resultIndex);
                     _self._hideGeolocatorMenu();
                 } else if (event.type === 'keydown' && event.keyCode === keys.UP_ARROW) {
+                    event.preventDefault();
+                    event.stopPropagation();
                     // go to previous item
                     newIndex = resultIndex - 1;
                     if (newIndex < 0) {
@@ -760,6 +767,8 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                         lists[newIndex].focus();
                     }
                 } else if (event.type === 'keydown' && event.keyCode === keys.DOWN_ARROW) {
+                    event.preventDefault();
+                    event.stopPropagation();
                     // go to next item
                     newIndex = resultIndex + 1;
                     if (newIndex >= lists.length) {
@@ -834,6 +843,8 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                 // stop
                 return;
             } else if (event && event.keyCode === keys.UP_ARROW) {
+                event.preventDefault();
+                event.stopPropagation();
                 // get list item length
                 var listsLen = lists.length;
                 // if not zero
@@ -842,6 +853,8 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                     lists[listsLen - 1].focus();
                 }
             } else if (event && event.keyCode === keys.DOWN_ARROW) {
+                event.preventDefault();
+                event.stopPropagation();
                 // if first item
                 if (lists[0]) {
                     // focus first item
@@ -853,6 +866,8 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
         _geocoderMenuButtonKeyDown: function (event) {
             var lists = query('[data-item="true"]', this.geocoderMenuInsertNode);
             if (event && event.keyCode === keys.UP_ARROW) {
+                event.preventDefault();
+                event.stopPropagation();
                 this._showGeolocatorMenu();
                 // get list item length
                 var listsLen = lists.length;
@@ -862,6 +877,8 @@ function (declare, Deferred, domConstruct, i18n, JSON, keys, on, query, template
                     lists[listsLen - 1].focus();
                 }
             } else if (event && event.keyCode === keys.DOWN_ARROW) {
+                event.preventDefault();
+                event.stopPropagation();
                 this._showGeolocatorMenu();
                 // if first item
                 if (lists[0]) {
