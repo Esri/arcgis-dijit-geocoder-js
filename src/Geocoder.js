@@ -119,8 +119,12 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
             }
         },
         // submit button selected
-        find: function () {
+        find: function (search) {
             var _self = this;
+            // if search param
+            if(search && typeof search === 'string'){
+                _self._updateValue(null, null, search);
+            }
             // set deferred variable
             var deferred = new Deferred();
             // query and then Locate
