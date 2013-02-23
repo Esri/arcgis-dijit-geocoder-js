@@ -126,6 +126,7 @@
                     geocoders:[
                         {
                              url: 'http://geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer',
+                             singleLineFieldName: 'singleLine',
                              name: 'geo2'
                         }
                     ],
@@ -163,7 +164,6 @@
 
 				// on select test
 				connect.connect(myGeocoder, 'onSelect', function(result){
-
 
 				    var spotlight = connect.connect(map, 'onExtentChange', function(){
                         var geom = esri.geometry.toScreenGeometry(map.extent, map.width, map.height, result.extent);

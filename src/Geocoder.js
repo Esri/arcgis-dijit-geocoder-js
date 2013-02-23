@@ -122,7 +122,7 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
         find: function (search) {
             var _self = this;
             // if search param
-            if(search && typeof search === 'string'){
+            if (search && typeof search === 'string') {
                 _self._updateValue(null, null, search);
             }
             // set deferred variable
@@ -386,7 +386,7 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
                     // Query object
                     params = {
                         "text": singleLine,
-                        "outSR": mapSR.wkid || JSON.stringify(mapSR.toJson()),
+                        "outSR": mapSR.wkid,
                         "f": "json"
                     };
                     if (this.map && this.activeGeocoder.localSearchOptions && this.activeGeocoder.localSearchOptions.hasOwnProperty('distance') && this.activeGeocoder.localSearchOptions.hasOwnProperty('minScale')) {
@@ -946,6 +946,17 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
                         // create extent from point
                         if (_self.map) {
                             newResult.extent = _self.map.extent.centerAt(point);
+                        } else {
+                            // create extent
+                            newResult.extent = new esri.geometry.Extent({
+                                "xmin": point.x - 0.25,
+                                "ymin": point.y - 0.25,
+                                "xmax": point.x + 0.25,
+                                "ymax": point.y + 0.25,
+                                "spatialReference": {
+                                    "wkid": 4326
+                                }
+                            });
                         }
                         // set name
                         if (e[i].hasOwnProperty('address')) {
