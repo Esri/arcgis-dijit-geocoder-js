@@ -176,6 +176,8 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
         onGeocoderSelect: function (e) {},
         // when geocoder selected
         onClear: function () {},
+        // on enter key
+        onEnterKeySelect: function(){},
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */
@@ -793,6 +795,7 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
             this.find().then(function (response) {
                 if (response.results && response.results.length) {
                     _self.select(response.results[0]);
+                    _self.onEnterKeySelect();
                 }
             });
         },
