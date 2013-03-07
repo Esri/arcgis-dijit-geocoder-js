@@ -1,5 +1,6 @@
 define([
     "dojo/_base/declare",
+    "dojo/_base/lang",
     "dojo/_base/Deferred",
     "dojo/_base/event",
     "dojo/dom-construct",
@@ -12,17 +13,30 @@ define([
 	//"dojo/i18n!esri/nls/jsapi",
     //"dojo/text!esri/dijit/templates/Geocoder.html",
     "dojo/uacss",
+    
     "dijit/_OnDijitClickMixin",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetBase",
     "dijit/focus",
-    "esri", // We're not directly using anything defined in esri.js but geometry, locator and utils are not AMD. So, the only way to get reference to esri object is through esri module (ie. esri/main)
-    "esri/geometry",
-    "esri/tasks/locator",
-    "esri/utils"
+    
+    "esri/kernel",
+    "esri/SpatialReference",
+    "esri/graphic",
+    "esri/request",
+    
+    "esri/geometry/Point",
+    "esri/geometry/Extent",
+    "esri/tasks/locator"
 ],
-function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil, esri) {
-    var Widget = declare("esri.dijit.Geocoder", [_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
+function (
+  declare, lang, Deferred, event, domConstruct, JSON, keys, on, query, i18n, template, has, 
+  _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil, 
+  esriNS, SpatialReference, Graphic, esriRequest, 
+  Point, Extent, Locator
+) {
+    var Widget = declare([_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
+        declaredClass: "esri.dijit.Geocoder",
+      
         // Set template file HTML
         templateString: template,
         // init
@@ -212,7 +226,7 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
             // results holder
             this.results = [];
             // default Spatial Ref
-            this._defaultSR = new esri.SpatialReference(4326);
+            this._defaultSR = new SpatialReference(4326);
             // css classes
             this._GeocoderContainerClass = 'esriGeocoderContainer';
             this._GeocoderClass = 'esriGeocoder';
@@ -426,7 +440,7 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
                         params.bbox = JSON.stringify(bbox);
                     }
                     // send request
-                    var requestHandle = esri.request({
+                    var requestHandle = esriRequest({
                         url: this.activeGeocoder.url + '/find',
                         content: params,
                         handleAs: 'json',
@@ -455,7 +469,7 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
                         params.searchExtent = this.activeGeocoder.searchExtent;
                     }
                     // Geocoder
-                    this._task = new esri.tasks.Locator(this.activeGeocoder.url);
+                    this._task = new Locator(this.activeGeocoder.url);
                     // spatial ref output
                     this._task.outSpatialReference = this._defaultSR;
                     if (this.map) {
@@ -925,16 +939,16 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
                     // find geocoder
                     if (e[i].hasOwnProperty('extent')) {
                         // set extent
-                        newResult.extent = new esri.geometry.Extent(e[i].extent);
+                        newResult.extent = new Extent(e[i].extent);
                         // set spatial ref
-                        newResult.extent.setSpatialReference(new esri.SpatialReference(sR));
+                        newResult.extent.setSpatialReference(new SpatialReference(sR));
                         // set name
                         if (e[i].hasOwnProperty('name')) {
                             newResult.name = e[i].name;
                         }
                         // Set feature
                         if (e[i].hasOwnProperty('feature')) {
-                            newResult.feature = new esri.Graphic(e[i].feature);
+                            newResult.feature = new Graphic(e[i].feature);
                             geometry = newResult.feature.geometry;
                             // fix goemetry SR
                             if (geometry) {
@@ -945,13 +959,13 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
                     // address candidates geocoder
                     else if (e[i].hasOwnProperty('location')) {
                         // create point
-                        var point = new esri.geometry.Point(e[i].location.x, e[i].location.y, sR);
+                        var point = new Point(e[i].location.x, e[i].location.y, sR);
                         // create extent from point
                         if (_self.map) {
                             newResult.extent = _self.map.extent.centerAt(point);
                         } else {
                             // create extent
-                            newResult.extent = new esri.geometry.Extent({
+                            newResult.extent = new Extent({
                                 "xmin": point.x - 0.25,
                                 "ymin": point.y - 0.25,
                                 "xmax": point.x + 0.25,
@@ -975,7 +989,7 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
                         if (e[i].hasOwnProperty('score')) {
                             attributes.score = e[i].score;
                         }
-                        newResult.feature = new esri.Graphic(point, null, attributes, null);
+                        newResult.feature = new Graphic(point, null, attributes, null);
                     }
                     // add to return array
                     results.push(newResult);
@@ -984,5 +998,10 @@ function (declare, Deferred, event, domConstruct, JSON, keys, on, query, i18n, t
             return results;
         }
     });
+
+    if (has("extend-esri")) {
+      lang.setObject("dijit.Geocoder", Widget, esriNS);
+    }
+
     return Widget;
 });
