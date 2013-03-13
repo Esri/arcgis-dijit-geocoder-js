@@ -13,30 +13,30 @@ define([
 	//"dojo/i18n!esri/nls/jsapi",
     //"dojo/text!esri/dijit/templates/Geocoder.html",
     "dojo/uacss",
-    
+
     "dijit/_OnDijitClickMixin",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetBase",
     "dijit/focus",
-    
+
     "esri/kernel",
     "esri/SpatialReference",
     "esri/graphic",
     "esri/request",
-    
+
     "esri/geometry/Point",
     "esri/geometry/Extent",
     "esri/tasks/locator"
 ],
 function (
-  declare, lang, Deferred, event, domConstruct, JSON, keys, on, query, i18n, template, has, 
-  _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil, 
-  esriNS, SpatialReference, Graphic, esriRequest, 
+  declare, lang, Deferred, event, domConstruct, JSON, keys, on, query, i18n, template, has,
+  _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil,
+  esriNS, SpatialReference, Graphic, esriRequest,
   Point, Extent, Locator
 ) {
     var Widget = declare([_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
         declaredClass: "esri.dijit.Geocoder",
-      
+
         // Set template file HTML
         templateString: template,
         // init
@@ -402,7 +402,7 @@ function (
                     // Query object
                     params = {
                         "text": singleLine,
-                        "outSR": mapSR.wkid,
+                        "outSR": mapSR.wkid || JSON.stringify(mapSR.toJson()),
                         "f": "json"
                     };
                     if (this.map && this.activeGeocoder.localSearchOptions && this.activeGeocoder.localSearchOptions.hasOwnProperty('distance') && this.activeGeocoder.localSearchOptions.hasOwnProperty('minScale')) {
