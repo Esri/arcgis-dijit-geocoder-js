@@ -71,7 +71,7 @@ function (
                 return;
             }
             // add clear button if already populated
-            if (this.value) {
+            if (this.get("value")) {
                 this._checkStatus();
             }
             // setup connections
@@ -107,7 +107,7 @@ function (
                 query(this.inputNode).attr('value', '');
             }
             // set current text
-            this.value = '';
+            this.set("value", '');
             // empty results
             this.results = [];
             // get node of reset button and remove it's active class
@@ -202,9 +202,9 @@ function (
             // use esri geocoder
             this.arcgisGeocoder = true;
             // Value of input
-            this.value = '';
+            this.set("value", '');
             // Theme
-            this.theme = 'simpleGeocoder';
+            this.set("theme", 'simpleGeocoder');
             // default geocoder index
             this.activeGeocoderIndex = 0;
             // Maximum result locations to return
@@ -303,7 +303,7 @@ function (
         },
         // Update geocoder nodes
         _updateGeocoder: function () {
-            this.activeGeocoderIndex = 0;
+            this.set("activeGeocoderIndex", 0);
             this._setEsriGeocoder();
             this._setGeocoderList();
             this._setActiveGeocoder();
@@ -370,7 +370,7 @@ function (
         // when geocoder search starts
         _performQuery: function () {
             // if query isn't empty
-            if (this.value) {
+            if (this.get("value")) {
                 // hide menu to toggle geocoder
                 this._hideGeolocatorMenu();
                 // show loading spinner
@@ -388,7 +388,7 @@ function (
                     singleLine += this.activeGeocoder.prefix;
                 }
                 // query value
-                singleLine += this.value;
+                singleLine += this.get("value");
                 // query suffix
                 if (this.activeGeocoder.suffix) {
                     singleLine += this.activeGeocoder.suffix;
@@ -497,7 +497,7 @@ function (
             // if results and result node
             if (_self.results && _self.results.length && _self.resultsNode) {
                 // textbox value
-                var partialMatch = _self.value,
+                var partialMatch = _self.get("value"),
                     i;
                 // partial match highlight
                 var regex = new RegExp('(' + partialMatch + ')', 'gi');
@@ -555,7 +555,7 @@ function (
             // results object
             var obj = {
                 "results": results,
-                "value": _self.value
+                "value": _self.get("value")
             };
             _self._deferred.resolve(obj);
         },
@@ -688,7 +688,7 @@ function (
         _checkStatus: function () {
             if (this.loaded) {
                 // if input value is not empty
-                if (this.value) {
+                if (this.get("value")) {
                     // add class to dom
                     query(this.containerNode).addClass(this._hasValueClass);
                     // set class and title
@@ -738,7 +738,7 @@ function (
                     // set input text value to this text
                     query(_self.inputNode).attr('value', locTxt);
                     // set current text var
-                    _self.value = locTxt;
+                    _self.set("value", locTxt);
                     if (_self.results && _self.results[resultIndex]) {
                         // Locate
                         _self.select(_self.results[resultIndex]);
@@ -822,7 +822,7 @@ function (
                 // get textbox value
                 var aquery = this.inputNode.value;
                 // update current text variable
-                this.value = aquery;
+                this.set("value", aquery);
                 // length of value
                 var alength = 0;
                 // if value
@@ -911,7 +911,7 @@ function (
             // hide geolocator switch
             this._hideGeolocatorMenu();
             // if input value is empty
-            if (!this.value) {
+            if (!this.get("value")) {
                 // clear address
                 this.clear();
                 // hide menus

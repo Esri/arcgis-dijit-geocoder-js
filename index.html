@@ -9,8 +9,8 @@
         <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"
         />
         <title></title>
-        <link rel="stylesheet" type="text/css" href="http://servicesbeta.esri.com/jsapi/arcgis/3.3/js/dojo/dijit/themes/soria/soria.css">
-        <link rel="stylesheet" type="text/css" href="http://servicesbeta.esri.com/jsapi/arcgis/3.3/js/esri/css/esri.css">
+        <link rel="stylesheet" type="text/css" href="http://servicesbeta.esri.com/jsapi/arcgis/3.4/js/dojo/dijit/themes/soria/soria.css">
+        <link rel="stylesheet" type="text/css" href="http://servicesbeta.esri.com/jsapi/arcgis/3.4/js/esri/css/esri.css">
         <link rel="stylesheet" type="text/css" href="css/Geocoder.css">
         <style type="text/css">
             html, body, #map {
@@ -63,8 +63,9 @@
                     location: locationPath + 'src'
                 }]
             };
+            var myWidget;
         </script>
-        <script src="http://servicesbeta.esri.com/jsapi/arcgis/3.3"></script>
+        <script src="http://servicesbeta.esri.com/jsapi/arcgis/3.4"></script>
         <script type="text/javascript">
         require([
             "dojo/ready",
@@ -135,6 +136,13 @@
 
 				// start widget
 				myGeocoder.startup();
+
+
+				myGeocoder.watch("value", function(){
+
+				});
+
+				myWidget = myGeocoder;
 
 				// on search results
 				connect.connect(myGeocoder, 'onSearchResults', function(results){
