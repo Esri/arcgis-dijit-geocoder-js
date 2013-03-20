@@ -323,7 +323,7 @@ function (
         },
         // update value of text box
         _updateValue: function (attr, oldVal, newVal) {
-            if (this.loaded) {
+            if (this.loaded && !this._ignoreUpdateValue) {
                 query(this.inputNode).attr('value', newVal);
                 this._checkStatus();
             }
@@ -821,8 +821,12 @@ function (
                 clearTimeout(this._queryTimer);
                 // get textbox value
                 var aquery = this.inputNode.value;
+                // don't update input
+                _self._ignoreUpdateValue = true;
                 // update current text variable
                 this.set("value", aquery);
+                // update input
+                _self._ignoreUpdateValue = false;
                 // length of value
                 var alength = 0;
                 // if value
@@ -832,7 +836,7 @@ function (
                 }
                 var lists = query('[data-item="true"]', this.resultsNode);
                 // ignored keys
-                if (e.keyCode === e.shiftKey || e.keyCode === keys.UP_ARROW || e.keyCode === keys.DOWN_ARROW || e.keyCode === keys.LEFT_ARROW || e.keyCode === keys.RIGHT_ARROW) {
+                if (e.keyCode === e.copyKey || e.ctrlKey || e.shiftKey || e.metaKey || e.altKey || e.keyCode === e.ALT || e.keyCode === e.CTRL || e.keyCode === e.META || e.keyCode === e.shiftKey || e.keyCode === keys.UP_ARROW || e.keyCode === keys.DOWN_ARROW || e.keyCode === keys.LEFT_ARROW || e.keyCode === keys.RIGHT_ARROW) {
                     return;
                 } else if (e && e.keyCode === keys.ENTER) { // if enter key was pushed
                     // query then Locate
