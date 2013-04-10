@@ -1,5 +1,6 @@
 define([
     "dojo/_base/declare",
+    "dojo/_base/connect",
     "dojo/_base/lang",
     "dojo/_base/Deferred",
     "dojo/_base/event",
@@ -29,7 +30,7 @@ define([
     "esri/tasks/locator"
 ],
 function (
-  declare, lang, Deferred, event, domConstruct, JSON, keys, on, query, i18n, template, has,
+  declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i18n, template, has,
   _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil,
   esriNS, SpatialReference, Graphic, esriRequest,
   Point, Extent, Locator
@@ -60,30 +61,43 @@ function (
         /* ---------------- */
         // start widget
         startup: function () {
-            if (!this._geocoders.length) {
+            var _self = this;
+            if (!_self._geocoders.length) {
                 console.log('No geocoders defined.');
                 this.destroy();
                 return;
             }
-            if (!this.domNode) {
+            if (!_self.domNode) {
                 console.log('domNode is undefined.');
                 this.destroy();
                 return;
             }
             // add clear button if already populated
-            if (this.get("value")) {
-                this._checkStatus();
+            if (_self.get("value")) {
+                _self._checkStatus();
             }
             // setup connections
             this._setDelegations();
+            // if map is in options
+            if (_self.map) {
+                // once map is loaded
+                if (_self.map.loaded) {
+                    _self._init();
+                } else {
+                    connect.connect(_self.map, "onLoad", function() {
+                        _self._init();
+                    });
+                }
+            } else {
+                // lets go
+                _self._init();
+            }
         },
         // post create widget function
         postCreate: function () {
-            // set widget ready
-            this.loaded = true;
             // build geocoder list
             this._updateGeocoder();
-        },
+        }, 
         destroy: function () {
             var i;
             // if delegations
@@ -137,19 +151,19 @@ function (
             var _self = this;
             // if search param
             if (search && typeof search === 'string') {
-                _self._updateValue(null, null, search);
+                _self.set('value', search);
             }
             // set deferred variable
-            var deferred = new Deferred();
+            var def = new Deferred();
             // query and then Locate
             _self._query({
                 delay: 0
             }).then(function (response) {
                 _self.onFindResults(response);
-                deferred.resolve(response);
+                def.resolve(response);
             });
             // give me my deferred
-            return deferred;
+            return def;
         },
         // focus on input
         focus: function () {
@@ -192,9 +206,17 @@ function (
         onClear: function () {},
         // on enter key
         onEnterKeySelect: function(){},
+        // widget loaded
+        onLoad: function(){},
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */
+        _init: function(){
+            // set widget ready
+            this.loaded = true;
+            // loaded
+            this.onLoad();  
+        },
         // default settings
         _setPublicDefaults: function () {
             // show autocomplete?
@@ -223,6 +245,8 @@ function (
         // set variables that aren't to be modified
         _setPrivateDefaults: function () {
             this._i18n = i18n;
+            // deferreds
+            this._deferreds = [];
             // results holder
             this.results = [];
             // default Spatial Ref
@@ -356,19 +380,17 @@ function (
                     delay: 0
                 };
             }
-            if (this._deferred) {
-                this._deferred.cancel('stop query');
-            }
             // set deferred variable if needed to cancel it
-            this._deferred = new Deferred();
+            var def = new Deferred();
+            _self._deferreds.push(def);
             // timeout
             this._queryTimer = setTimeout(function () {
-                _self._performQuery();
+                _self._performQuery(def);
             }, e.delay);
-            return this._deferred;
+            return def;
         },
         // when geocoder search starts
-        _performQuery: function () {
+        _performQuery: function (def) {
             // if query isn't empty
             if (this.get("value")) {
                 // hide menu to toggle geocoder
@@ -447,7 +469,7 @@ function (
                         callbackParamName: 'callback',
                         // on load
                         load: function (response) {
-                            _self._receivedResults(response.locations);
+                            _self._receivedResults(response.locations, def);
                         }
                     });
                 } else {
@@ -477,14 +499,14 @@ function (
                     }
                     // query for location
                     this._task.addressToLocations(params, function (response) {
-                        _self._receivedResults(response);
+                        _self._receivedResults(response, def);
                     }, function (response) {
-                        _self._receivedResults(response);
+                        _self._receivedResults(response, def);
                     });
                 }
             } else {
                 this._hideLoading();
-                this._deferred.resolve();
+                def.resolve();
             }
         },
         // called on AC Results
@@ -544,7 +566,7 @@ function (
             });
         },
         // received results
-        _receivedResults: function (response) {
+        _receivedResults: function (response, def) {
             var _self = this;
             // hide loading spinner
             _self._hideLoading();
@@ -557,7 +579,7 @@ function (
                 "results": results,
                 "value": _self.get("value")
             };
-            _self._deferred.resolve(obj);
+            def.resolve(obj);
         },
         // show loading spinner
         _showLoading: function () {
@@ -857,20 +879,27 @@ function (
                 this._checkStatus();
             }
         },
+        _cancelDeferreds: function(){
+            if (this._deferreds.length) {
+                for(var i = 0; i < this._deferreds.length; i++){
+                    // cancel deferred
+                    this._deferreds[i].cancel('stop query');
+                    this._deferreds.splice(i, 1);
+                }
+            }
+        },
         // key down event on input box
         _inputKeyDown: function (e) {
             var lists = query('[data-item="true"]', this.resultsNode);
             if (e && e.keyCode === keys.TAB) {
                 // hide menus if opened
                 this._hideMenus();
-                if (this._deferred) {
-                    // cancel deferred
-                    this._deferred.cancel('stop query');
-                }
+                this._cancelDeferreds();
                 // stop
                 return;
             } else if (e && e.keyCode === keys.UP_ARROW) {
                 event.stop(e);
+                this._cancelDeferreds();
                 // get list item length
                 var listsLen = lists.length;
                 // if not zero
@@ -880,6 +909,7 @@ function (
                 }
             } else if (e && e.keyCode === keys.DOWN_ARROW) {
                 event.stop(e);
+                this._cancelDeferreds();
                 // if first item
                 if (lists[0]) {
                     // focus first item
