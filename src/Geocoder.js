@@ -76,6 +76,13 @@ function (
             if (_self.get("value")) {
                 _self._checkStatus();
             }
+            // reverse Geocoder
+            this._reverseTask = new Locator(this._arcgisGeocoder.url);
+            // spatial ref output
+            this._reverseTask.outSpatialReference = this._defaultSR;
+            if (this.map) {
+                this._reverseTask.outSpatialReference = this.map.spatialReference;
+            }
             // setup connections
             this._setDelegations();
             // if map is in options
@@ -149,21 +156,54 @@ function (
         // submit button selected
         find: function (search) {
             var _self = this;
-            // if search param
-            if (search && typeof search === 'string') {
-                _self.set('value', search);
+            if(search){
+                if (typeof search === 'object' && search.type === 'point') {
+                    // point geometry
+                    this._reverseTask.locationToAddress(search, _self.locatorDistance, function(response){
+                        // format results
+                        var results = _self._hydrateResults([response]);
+                        console.log(results);
+                    });
+                } else if (search instanceof Array && search.length === 2) {
+                    var point = new Point(search, new SpatialReference({
+                        wkid: 4326
+                    }));
+                    // long, lat stop
+                    this._reverseTask.locationToAddress(point, _self.locatorDistance, function(response){
+                        // format results
+                        var results = _self._hydrateResults([response]);
+                        console.log(results);
+                    });
+                }
+                // if search param
+                if (typeof search === 'string') {
+                    _self.set('value', search);
+                    // set deferred variable
+                    var def = new Deferred();
+                    // query and then Locate
+                    _self._query({
+                        delay: 0
+                    }).then(function (response) {
+                        _self.onFindResults(response);
+                        def.resolve(response);
+                    });
+                    // give me my deferred
+                    return def;
+                }
             }
-            // set deferred variable
-            var def = new Deferred();
-            // query and then Locate
-            _self._query({
-                delay: 0
-            }).then(function (response) {
-                _self.onFindResults(response);
-                def.resolve(response);
-            });
-            // give me my deferred
-            return def;
+            else{
+                // set deferred variable
+                var def = new Deferred();
+                // query and then Locate
+                _self._query({
+                    delay: 0
+                }).then(function (response) {
+                    _self.onFindResults(response);
+                    def.resolve(response);
+                });
+                // give me my deferred
+                return def;
+            }
         },
         // focus on input
         focus: function () {
@@ -227,6 +267,8 @@ function (
             this.set("value", '');
             // Theme
             this.set("theme", 'simpleGeocoder');
+            // locator distance
+            this.locatorDistance = 1000;
             // default geocoder index
             this.activeGeocoderIndex = 0;
             // Maximum result locations to return
@@ -1010,8 +1052,27 @@ function (
                             });
                         }
                         // set name
-                        if (e[i].hasOwnProperty('address')) {
+                        if (e[i].hasOwnProperty('address') && typeof e[i].address === 'string') {
                             newResult.name = e[i].address;
+                        }
+                        else if(e[i].hasOwnProperty('address') && typeof e[i].address === 'object'){
+                            var address = '';
+                            if (e[i].address.Address) {
+                                address += e[i].address.Address + ' ';
+                            }
+                            if (e[i].address.City) {
+                                address += e[i].address.City + ' ';
+                            }
+                            if (e[i].address.Region) {
+                                address += e[i].address.Region + ' ';
+                            }
+                            if (e[i].address.Postal) {
+                                address += e[i].address.Postal + ' ';
+                            }
+                            if (e[i].address.CountryCode) {
+                                address += e[i].address.CountryCode + ' ';
+                            }
+                            newResult.name = lang.trim(address);
                         }
                         // create attributes
                         var attributes = {};
