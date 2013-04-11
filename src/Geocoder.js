@@ -42,19 +42,20 @@ function (
         templateString: template,
         // init
         constructor: function (options, srcRefNode) {
+            var _self = this;
             // set default settings
-            this._setPublicDefaults();
+            _self._setPublicDefaults();
             // mix in settings and defaults
-            declare.safeMixin(this, options);
+            declare.safeMixin(_self, options);
             // private variables
-            this._setPrivateDefaults();
+            _self._setPrivateDefaults();
             // watch updates of public properties and update the widget accordingly
-            this.watch("value", this._updateValue);
-            this.watch("theme", this._updateTheme);
-            this.watch("activeGeocoder", this._setActiveGeocoder);
-            this.watch("activeGeocoderIndex", this._setActiveGeocoderIndex);
-            this.watch("geocoder", this._updateGeocoder);
-            this.watch("arcgisGeocoder", this._updateGeocoder);
+            _self.watch("value", _self._updateValue);
+            _self.watch("theme", _self._updateTheme);
+            _self.watch("activeGeocoder", _self._setActiveGeocoder);
+            _self.watch("activeGeocoderIndex", _self._setActiveGeocoderIndex);
+            _self.watch("geocoder", _self._updateGeocoder);
+            _self.watch("arcgisGeocoder", _self._updateGeocoder);
         },
         /* ---------------- */
         /* Public Functions */
@@ -64,12 +65,12 @@ function (
             var _self = this;
             if (!_self._geocoders.length) {
                 console.log('No geocoders defined.');
-                this.destroy();
+                _self.destroy();
                 return;
             }
             if (!_self.domNode) {
                 console.log('domNode is undefined.');
-                this.destroy();
+                _self.destroy();
                 return;
             }
             // add clear button if already populated
@@ -77,14 +78,14 @@ function (
                 _self._checkStatus();
             }
             // reverse Geocoder
-            this._reverseTask = new Locator(this._arcgisGeocoder.url);
+            _self._reverseTask = new Locator(_self._arcgisGeocoder.url);
             // spatial ref output
-            this._reverseTask.outSpatialReference = this._defaultSR;
-            if (this.map) {
-                this._reverseTask.outSpatialReference = this.map.spatialReference;
+            _self._reverseTask.outSpatialReference = _self._defaultSR;
+            if (_self.map) {
+                _self._reverseTask.outSpatialReference = _self.map.spatialReference;
             }
             // setup connections
-            this._setDelegations();
+            _self._setDelegations();
             // if map is in options
             if (_self.map) {
                 // once map is loaded
@@ -102,133 +103,119 @@ function (
         },
         // post create widget function
         postCreate: function () {
+            var _self = this;
             // build geocoder list
-            this._updateGeocoder();
+            _self._updateGeocoder();
         }, 
         destroy: function () {
             var i;
+            var _self = this;
             // if delegations
-            if (this._delegations) {
+            if (_self._delegations) {
                 // disconnect all events
-                for (i = 0; i < this._delegations.length; i++) {
-                    this._delegations[i].remove();
+                for (i = 0; i < _self._delegations.length; i++) {
+                    _self._delegations[i].remove();
                 }
             }
             // remove html
-            domConstruct.empty(this.domNode);
-            this.inherited(arguments);
+            domConstruct.empty(_self.domNode);
+            _self.inherited(arguments);
         },
         // clear the input box
         clear: function () {
+            var _self = this;
             // clear event
-            this.onClear();
+            _self.onClear();
             // if geocoder is ready
-            if (this.loaded) {
+            if (_self.loaded) {
                 // empty input value
-                query(this.inputNode).attr('value', '');
+                query(_self.inputNode).attr('value', '');
             }
             // set current text
-            this.set("value", '');
+            _self.set("value", '');
             // empty results
-            this.results = [];
+            _self.results = [];
             // get node of reset button and remove it's active class
-            if (this.loaded) {
-                query(this.containerNode).removeClass(this._hasValueClass);
-                query(this.clearNode).attr('title', '');
+            if (_self.loaded) {
+                query(_self.containerNode).removeClass(_self._hasValueClass);
+                query(_self.clearNode).attr('title', '');
             }
             // remove active menus
-            this._hideMenus();
+            _self._hideMenus();
             // hide loading
-            this._hideLoading();
+            _self._hideLoading();
         },
         // show widget
         show: function () {
-            if (this.loaded) {
-                query(this.domNode).style('display', 'block');
+            var _self = this;
+            if (_self.loaded) {
+                query(_self.domNode).style('display', 'block');
             }
         },
         // hide widget
         hide: function () {
-            if (this.loaded) {
-                query(this.domNode).style('display', 'none');
+            var _self = this;
+            if (_self.loaded) {
+                query(_self.domNode).style('display', 'none');
             }
         },
         // submit button selected
         find: function (search) {
             var _self = this;
+            // set deferred variable
+            var def = new Deferred();
             if(search){
-                if (typeof search === 'object' && search.type === 'point') {
-                    // point geometry
-                    this._reverseTask.locationToAddress(search, _self.locatorDistance, function(response){
-                        // format results
-                        var results = _self._hydrateResults([response]);
-                        console.log(results);
-                    });
-                } else if (search instanceof Array && search.length === 2) {
-                    var point = new Point(search, new SpatialReference({
-                        wkid: 4326
-                    }));
-                    // long, lat stop
-                    this._reverseTask.locationToAddress(point, _self.locatorDistance, function(response){
-                        // format results
-                        var results = _self._hydrateResults([response]);
-                        console.log(results);
-                    });
-                }
-                // if search param
                 if (typeof search === 'string') {
                     _self.set('value', search);
-                    // set deferred variable
-                    var def = new Deferred();
-                    // query and then Locate
-                    _self._query({
-                        delay: 0
-                    }).then(function (response) {
-                        _self.onFindResults(response);
-                        def.resolve(response);
-                    });
-                    // give me my deferred
-                    return def;
+                    _self._queryThenLocate(def);
+                }
+                else if (typeof search === 'object' && search.type === 'point') {
+                    // point geometry
+                    _self._reverseGeocodePoint(search, def);
+                } else if (search instanceof Array && search.length === 2) {
+                    // long, lat
+                    var pt = new Point(search, new SpatialReference({
+                        wkid: 4326
+                    }));
+                    _self._reverseGeocodePoint(pt, def);
+                }
+                else{
+                    def.cancel('Invalid find type');
                 }
             }
             else{
-                // set deferred variable
-                var def = new Deferred();
-                // query and then Locate
-                _self._query({
-                    delay: 0
-                }).then(function (response) {
-                    _self.onFindResults(response);
-                    def.resolve(response);
-                });
-                // give me my deferred
-                return def;
+                _self._queryThenLocate(def);
             }
+            // give me my deferred
+            return def;
         },
         // focus on input
         focus: function () {
-            if (this.loaded) {
-                focusUtil.focus(this.inputNode);
+            var _self = this;
+            if (_self.loaded) {
+                focusUtil.focus(_self.inputNode);
             }
         },
         // blur input
         blur: function () {
-            if (this.loaded && focusUtil.curNode) {
+            var _self = this;
+            if (_self.loaded && focusUtil.curNode) {
                 focusUtil.curNode.blur();
             }
         },
         // go to a location
         select: function (e) {
+            var _self = this;
             // event
-            this.onSelect(e);
+            _self.onSelect(e);
             // hide menus
-            this._hideMenus();
+            _self._hideMenus();
             // hide loading spinner
-            this._hideLoading();
+            _self._hideLoading();
             // has extent and autoNavigate
-            if (this.autoNavigate && e && e.hasOwnProperty('extent') && this.map) {
+            if (_self.autoNavigate && e && e.hasOwnProperty('extent') && _self.map) {
                 // set map extent to location
-                this.map.setExtent(e.extent);
+                _self.map.setExtent(e.extent);
             }
         },
         /* ---------------- */
@@ -252,167 +239,202 @@ function (
         /* Private Functions */
         /* ---------------- */
         _init: function(){
+            var _self = this;
             // set widget ready
-            this.loaded = true;
+            _self.loaded = true;
             // loaded
-            this.onLoad();  
+            _self.onLoad();  
+        },
+        _queryThenLocate: function(def){
+            var _self = this;
+            // query and then Locate
+            _self._query({
+                delay: 0
+            }).then(function (response) {
+                _self.onFindResults(response);
+                if(def){
+                    def.resolve(response);
+                }
+            });
+        },
+        _reverseGeocodePoint: function(pt, def){
+            var _self = this;
+            if(pt){
+                _self._reverseTask.locationToAddress(pt, _self.locatorDistance, function(response){
+                    var result = _self._hydrateResult(response);
+                    _self.onFindResults(result);
+                    if(def){
+                        def.resolve(result);
+                    }
+                });
+            }
         },
         // default settings
         _setPublicDefaults: function () {
+            var _self = this;
             // show autocomplete?
-            this.autoComplete = false;
+            _self.autoComplete = false;
             // use esri geocoder
-            this.arcgisGeocoder = true;
+            _self.arcgisGeocoder = true;
             // Value of input
-            this.set("value", '');
+            _self.set("value", '');
             // Theme
-            this.set("theme", 'simpleGeocoder');
+            _self.set("theme", 'simpleGeocoder');
             // locator distance
-            this.locatorDistance = 1000;
+            _self.locatorDistance = 1000;
             // default geocoder index
-            this.activeGeocoderIndex = 0;
+            _self.activeGeocoderIndex = 0;
             // Maximum result locations to return
-            this.maxLocations = 6;
+            _self.maxLocations = 6;
             // Minimum amount of characters before searching
-            this.minCharacters = 3;
+            _self.minCharacters = 3;
             // Delay before doing the query. To avoid being too chatty.
-            this.searchDelay = 350;
+            _self.searchDelay = 350;
             // Show geocoder menu if necessary
-            this.geocoderMenu = true;
+            _self.geocoderMenu = true;
             // Automatically navigate
-            this.autoNavigate = true;
+            _self.autoNavigate = true;
             // show result suggestions
-            this.showResults = true;
+            _self.showResults = true;
         },
         // set variables that aren't to be modified
         _setPrivateDefaults: function () {
-            this._i18n = i18n;
+            var _self = this;
+            _self._i18n = i18n;
             // deferreds
-            this._deferreds = [];
+            _self._deferreds = [];
             // results holder
-            this.results = [];
+            _self.results = [];
             // default Spatial Ref
-            this._defaultSR = new SpatialReference(4326);
+            _self._defaultSR = new SpatialReference(4326);
             // css classes
-            this._GeocoderContainerClass = 'esriGeocoderContainer';
-            this._GeocoderClass = 'esriGeocoder';
-            this._GeocoderMultipleClass = 'esriGeocoderMultiple';
-            this._GeocoderIconClass = 'esriGeocoderIcon';
-            this._GeocoderActiveClass = 'esriGeocoderActive';
-            this._loadingClass = 'esriGeocoderLoading';
-            this._resultsContainerClass = 'esriGeocoderResults';
-            this._resultsItemClass = 'esriGeocoderResult';
-            this._resultsItemEvenClass = 'esriGeocoderResultEven';
-            this._resultsItemOddClass = 'esriGeocoderResultOdd';
-            this._resultsItemFirstClass = 'esriGeocoderResultFirst';
-            this._resultsItemLastClass = 'esriGeocoderResultLast';
-            this._resultsPartialMatchClass = 'esriGeocoderResultPartial';
-            this._searchButtonClass = 'esriGeocoderSearch';
-            this._clearButtonClass = 'esriGeocoderReset';
-            this._hasValueClass = 'esriGeocoderHasValue';
-            this._geocoderMenuClass = 'esriGeocoderMenu';
-            this._geocoderMenuHeaderClass = 'esriGeocoderMenuHeader';
-            this._geocoderMenuCloseClass = 'esriGeocoderMenuClose';
-            this._activeMenuClass = 'esriGeocoderMenuActive';
-            this._geocoderMenuArrowClass = 'esriGeocoderMenuArrow';
-            this._geocoderSelectedClass = 'esriGeocoderSelected';
-            this._geocoderSelectedCheckClass = 'esriGeocoderSelectedCheck';
-            this._GeocoderClearClass = 'esriGeocoderClearFloat';
+            _self._GeocoderContainerClass = 'esriGeocoderContainer';
+            _self._GeocoderClass = 'esriGeocoder';
+            _self._GeocoderMultipleClass = 'esriGeocoderMultiple';
+            _self._GeocoderIconClass = 'esriGeocoderIcon';
+            _self._GeocoderActiveClass = 'esriGeocoderActive';
+            _self._loadingClass = 'esriGeocoderLoading';
+            _self._resultsContainerClass = 'esriGeocoderResults';
+            _self._resultsItemClass = 'esriGeocoderResult';
+            _self._resultsItemEvenClass = 'esriGeocoderResultEven';
+            _self._resultsItemOddClass = 'esriGeocoderResultOdd';
+            _self._resultsItemFirstClass = 'esriGeocoderResultFirst';
+            _self._resultsItemLastClass = 'esriGeocoderResultLast';
+            _self._resultsPartialMatchClass = 'esriGeocoderResultPartial';
+            _self._searchButtonClass = 'esriGeocoderSearch';
+            _self._clearButtonClass = 'esriGeocoderReset';
+            _self._hasValueClass = 'esriGeocoderHasValue';
+            _self._geocoderMenuClass = 'esriGeocoderMenu';
+            _self._geocoderMenuHeaderClass = 'esriGeocoderMenuHeader';
+            _self._geocoderMenuCloseClass = 'esriGeocoderMenuClose';
+            _self._activeMenuClass = 'esriGeocoderMenuActive';
+            _self._geocoderMenuArrowClass = 'esriGeocoderMenuArrow';
+            _self._geocoderSelectedClass = 'esriGeocoderSelected';
+            _self._geocoderSelectedCheckClass = 'esriGeocoderSelectedCheck';
+            _self._GeocoderClearClass = 'esriGeocoderClearFloat';
         },
         // setup esri geocoder
         _setEsriGeocoder: function () {
-            if (this.arcgisGeocoder) {
+            var _self = this;
+            if (_self.arcgisGeocoder) {
                 // if object defined for esri geocoder
-                if (typeof this.arcgisGeocoder === 'object') {
-                    this._arcgisGeocoder = this.arcgisGeocoder;
+                if (typeof _self.arcgisGeocoder === 'object') {
+                    _self._arcgisGeocoder = _self.arcgisGeocoder;
                 } else {
-                    this._arcgisGeocoder = {};
+                    _self._arcgisGeocoder = {};
                 }
                 // ArcGIS Geocoder URL
-                if (!this._arcgisGeocoder.url) {
+                if (!_self._arcgisGeocoder.url) {
                     // set esri geocoder options
-                    this._arcgisGeocoder.url = location.protocol + "//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+                    _self._arcgisGeocoder.url = location.protocol + "//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
                 }
                 // if name not set
-                if (!this._arcgisGeocoder.name) {
-                    this._arcgisGeocoder.name = i18n.widgets.Geocoder.esriGeocoderName;
+                if (!_self._arcgisGeocoder.name) {
+                    _self._arcgisGeocoder.name = i18n.widgets.Geocoder.esriGeocoderName;
                 }
                 // local search
-                if (!this._arcgisGeocoder.hasOwnProperty('localSearchOptions')) {
-                    this._arcgisGeocoder.localSearchOptions = {
+                if (!_self._arcgisGeocoder.hasOwnProperty('localSearchOptions')) {
+                    _self._arcgisGeocoder.localSearchOptions = {
                         minScale: 150000,
                         distance: 12000
                     };
                 }
-                this.arcgisGeocoder = this._arcgisGeocoder;
+                _self.arcgisGeocoder = _self._arcgisGeocoder;
             } else {
-                this.arcgisGeocoder = false;
+                _self.arcgisGeocoder = false;
             }
         },
         // sets current locator object
         _setActiveGeocoder: function () {
+            var _self = this;
             // set current active geocoder object
-            this.activeGeocoder = this._geocoders[this.activeGeocoderIndex];
+            _self.activeGeocoder = _self._geocoders[_self.activeGeocoderIndex];
             // update placeholder nodes
-            this._updatePlaceholder();
+            _self._updatePlaceholder();
         },
         // Combine and count all geocoders
         _setGeocoderList: function () {
+            var _self = this;
             var geocoders = [];
-            if (this.arcgisGeocoder) {
-                geocoders = geocoders.concat([this._arcgisGeocoder]);
+            if (_self.arcgisGeocoder) {
+                geocoders = geocoders.concat([_self._arcgisGeocoder]);
             }
-            if (this.geocoders && this.geocoders.length) {
-                geocoders = geocoders.concat(this.geocoders);
+            if (_self.geocoders && _self.geocoders.length) {
+                geocoders = geocoders.concat(_self.geocoders);
             }
-            this._geocoders = geocoders;
+            _self._geocoders = geocoders;
         },
         // Update geocoder nodes
         _updateGeocoder: function () {
-            this.set("activeGeocoderIndex", 0);
-            this._setEsriGeocoder();
-            this._setGeocoderList();
-            this._setActiveGeocoder();
-            this._insertGeocoderMenuItems();
+            var _self = this;
+            _self.set("activeGeocoderIndex", 0);
+            _self._setEsriGeocoder();
+            _self._setGeocoderList();
+            _self._setActiveGeocoder();
+            _self._insertGeocoderMenuItems();
         },
         // Update placeholder nodes
         _updatePlaceholder: function () {
-            if (this.loaded) {
-                this._placeholder = '';
+            var _self = this;
+            if (_self.loaded) {
+                _self._placeholder = '';
                 // if placeholder of active geocoder is set
-                if (this.activeGeocoder && this.activeGeocoder.placeholder) {
-                    this._placeholder = this.activeGeocoder.placeholder;
+                if (_self.activeGeocoder && _self.activeGeocoder.placeholder) {
+                    _self._placeholder = _self.activeGeocoder.placeholder;
                 }
-                query(this.inputNode).attr('placeholder', this._placeholder);
-                query(this.submitNode).attr('title', this._placeholder);
+                query(_self.inputNode).attr('placeholder', _self._placeholder);
+                query(_self.submitNode).attr('title', _self._placeholder);
             }
         },
         // update value of text box
         _updateValue: function (attr, oldVal, newVal) {
-            if (this.loaded && !this._ignoreUpdateValue) {
-                query(this.inputNode).attr('value', newVal);
-                this._checkStatus();
+            var _self = this;
+            if (_self.loaded && !_self._ignoreUpdateValue) {
+                query(_self.inputNode).attr('value', newVal);
+                _self._checkStatus();
             }
         },
         // update theme
         _updateTheme: function (attr, oldVal, newVal) {
-            if (this.loaded) {
-                query(this.domNode).removeClass(oldVal).addClass(newVal);
+            var _self = this;
+            if (_self.loaded) {
+                query(_self.domNode).removeClass(oldVal).addClass(newVal);
             }
         },
         // change active geocoder
         _setActiveGeocoderIndex: function (attr, oldVal, newVal) {
-            this.activeGeocoderIndex = newVal;
+            var _self = this;
+            _self.activeGeocoderIndex = newVal;
             // set geocoder object
-            this._setActiveGeocoder();
-            this._hideMenus();
-            this._insertGeocoderMenuItems();
+            _self._setActiveGeocoder();
+            _self._hideMenus();
+            _self._insertGeocoderMenuItems();
             var evt = {
-                attr: this.activeGeocoder,
+                attr: _self.activeGeocoder,
                 oldVal: oldVal,
                 newVal: newVal
             };
-            this.onGeocoderSelect(evt);
+            _self.onGeocoderSelect(evt);
         },
         // query for results and then execute a function
         _query: function (e) {
@@ -426,42 +448,41 @@ function (
             var def = new Deferred();
             _self._deferreds.push(def);
             // timeout
-            this._queryTimer = setTimeout(function () {
+            _self._queryTimer = setTimeout(function () {
                 _self._performQuery(def);
             }, e.delay);
             return def;
         },
         // when geocoder search starts
         _performQuery: function (def) {
+            var _self = this;
             // if query isn't empty
-            if (this.get("value")) {
+            if (_self.get("value")) {
                 // hide menu to toggle geocoder
-                this._hideGeolocatorMenu();
+                _self._hideGeolocatorMenu();
                 // show loading spinner
-                this._showLoading();
+                _self._showLoading();
                 // query parameters
                 var params;
                 // Fields
-                var outFields = this.activeGeocoder.outFields || '';
+                var outFields = _self.activeGeocoder.outFields || '';
                 // single line query
                 var singleLine = '';
-                // this
-                var _self = this;
                 // query prefix
-                if (this.activeGeocoder.prefix) {
-                    singleLine += this.activeGeocoder.prefix;
+                if (_self.activeGeocoder.prefix) {
+                    singleLine += _self.activeGeocoder.prefix;
                 }
                 // query value
-                singleLine += this.get("value");
+                singleLine += _self.get("value");
                 // query suffix
-                if (this.activeGeocoder.suffix) {
-                    singleLine += this.activeGeocoder.suffix;
+                if (_self.activeGeocoder.suffix) {
+                    singleLine += _self.activeGeocoder.suffix;
                 }
                 // if we can use the find function
-                if (this.activeGeocoder === this._arcgisGeocoder) {
-                    var mapSR = this._defaultSR;
-                    if (this.map) {
-                        mapSR = this.map.spatialReference;
+                if (_self.activeGeocoder === _self._arcgisGeocoder) {
+                    var mapSR = _self._defaultSR;
+                    if (_self.map) {
+                        mapSR = _self.map.spatialReference;
                     }
                     // Query object
                     params = {
@@ -469,15 +490,15 @@ function (
                         "outSR": mapSR.wkid || JSON.stringify(mapSR.toJson()),
                         "f": "json"
                     };
-                    if (this.map && this.activeGeocoder.localSearchOptions && this.activeGeocoder.localSearchOptions.hasOwnProperty('distance') && this.activeGeocoder.localSearchOptions.hasOwnProperty('minScale')) {
+                    if (_self.map && _self.activeGeocoder.localSearchOptions && _self.activeGeocoder.localSearchOptions.hasOwnProperty('distance') && _self.activeGeocoder.localSearchOptions.hasOwnProperty('minScale')) {
                         // set center point
-                        var normalizedPoint = this.map.extent.getCenter().normalize();
+                        var normalizedPoint = _self.map.extent.getCenter().normalize();
                         // current scale of map
-                        var scale = this.map.getScale();
+                        var scale = _self.map.getScale();
                         // location search will be performed when the map scale is less than minScale.
-                        if (!this.activeGeocoder.localSearchOptions.minScale || (scale && scale <= parseFloat(this.activeGeocoder.localSearchOptions.minScale))) {
+                        if (!_self.activeGeocoder.localSearchOptions.minScale || (scale && scale <= parseFloat(_self.activeGeocoder.localSearchOptions.minScale))) {
                             params.location = JSON.stringify(normalizedPoint.toJson());
-                            params.distance = this.activeGeocoder.localSearchOptions.distance;
+                            params.distance = _self.activeGeocoder.localSearchOptions.distance;
                         }
                     }
                     // if outfields
@@ -485,27 +506,27 @@ function (
                         params.outFields = outFields;
                     }
                     // if max locations set
-                    if (this.maxLocations) {
-                        params.maxLocations = this.maxLocations;
+                    if (_self.maxLocations) {
+                        params.maxLocations = _self.maxLocations;
                     }
                     // Esri Geocoder country
-                    if (this.activeGeocoder.sourceCountry) {
-                        params.sourceCountry = this.activeGeocoder.sourceCountry;
+                    if (_self.activeGeocoder.sourceCountry) {
+                        params.sourceCountry = _self.activeGeocoder.sourceCountry;
                     }
                     // local results only
-                    if (this.activeGeocoder.searchExtent) {
+                    if (_self.activeGeocoder.searchExtent) {
                         var bbox = {
-                            "xmin": this.activeGeocoder.searchExtent.xmin,
-                            "ymin": this.activeGeocoder.searchExtent.ymin,
-                            "xmax": this.activeGeocoder.searchExtent.xmax,
-                            "ymax": this.activeGeocoder.searchExtent.ymax,
-                            "spatialReference": this.activeGeocoder.searchExtent.spatialReference.toJson()
+                            "xmin": _self.activeGeocoder.searchExtent.xmin,
+                            "ymin": _self.activeGeocoder.searchExtent.ymin,
+                            "xmax": _self.activeGeocoder.searchExtent.xmax,
+                            "ymax": _self.activeGeocoder.searchExtent.ymax,
+                            "spatialReference": _self.activeGeocoder.searchExtent.spatialReference.toJson()
                         };
                         params.bbox = JSON.stringify(bbox);
                     }
                     // send request
                     var requestHandle = esriRequest({
-                        url: this.activeGeocoder.url + '/find',
+                        url: _self.activeGeocoder.url + '/find',
                         content: params,
                         handleAs: 'json',
                         callbackParamName: 'callback',
@@ -519,8 +540,8 @@ function (
                     params = {
                         address: {}
                     };
-                    if (this.activeGeocoder.singleLineFieldName) {
-                        params.address[this.activeGeocoder.singleLineFieldName] = singleLine;
+                    if (_self.activeGeocoder.singleLineFieldName) {
+                        params.address[_self.activeGeocoder.singleLineFieldName] = singleLine;
                     } else {
                         params.address["Single Line Input"] = singleLine;
                     }
@@ -529,25 +550,25 @@ function (
                         params.outFields = [outFields];
                     }
                     // within extent
-                    if (this.activeGeocoder.searchExtent) {
-                        params.searchExtent = this.activeGeocoder.searchExtent;
+                    if (_self.activeGeocoder.searchExtent) {
+                        params.searchExtent = _self.activeGeocoder.searchExtent;
                     }
                     // Geocoder
-                    this._task = new Locator(this.activeGeocoder.url);
+                    _self._task = new Locator(_self.activeGeocoder.url);
                     // spatial ref output
-                    this._task.outSpatialReference = this._defaultSR;
-                    if (this.map) {
-                        this._task.outSpatialReference = this.map.spatialReference;
+                    _self._task.outSpatialReference = _self._defaultSR;
+                    if (_self.map) {
+                        _self._task.outSpatialReference = _self.map.spatialReference;
                     }
                     // query for location
-                    this._task.addressToLocations(params, function (response) {
+                    _self._task.addressToLocations(params, function (response) {
                         _self._receivedResults(response, def);
                     }, function (response) {
                         _self._receivedResults(response, def);
                     });
                 }
             } else {
-                this._hideLoading();
+                _self._hideLoading();
                 def.resolve();
             }
         },
@@ -569,7 +590,7 @@ function (
                 // for each result
                 for (i = 0; i < _self.results.length; ++i) {
                     // set layer class
-                    var layerClass = this._resultsItemClass + ' ';
+                    var layerClass = _self._resultsItemClass + ' ';
                     // if it's odd
                     if (i % 2 === 0) {
                         // set it to odd
@@ -599,7 +620,7 @@ function (
         _autocomplete: function () {
             var _self = this;
             _self._query({
-                delay: this.searchDelay
+                delay: _self.searchDelay
             }).then(function (response) {
                 _self.onAutoComplete(response);
                 if (_self.showResults) {
@@ -625,141 +646,151 @@ function (
         },
         // show loading spinner
         _showLoading: function () {
-            if (this.loaded) {
-                query(this.containerNode).addClass(this._loadingClass);
+            var _self = this;
+            if (_self.loaded) {
+                query(_self.containerNode).addClass(_self._loadingClass);
             }
         },
         // hide loading spinner
         _hideLoading: function () {
-            if (this.loaded) {
-                query(this.containerNode).removeClass(this._loadingClass);
+            var _self = this;
+            if (_self.loaded) {
+                query(_self.containerNode).removeClass(_self._loadingClass);
             }
         },
         // show geocoder selection menu
         _showGeolocatorMenu: function () {
-            if (this.loaded) {
+            var _self = this;
+            if (_self.loaded) {
                 // add class to container
-                query(this.containerNode).addClass(this._activeMenuClass);
+                query(_self.containerNode).addClass(_self._activeMenuClass);
                 // display menu node
-                query(this.geocoderMenuNode).style('display', 'block');
+                query(_self.geocoderMenuNode).style('display', 'block');
                 // aria
-                query(this.geocoderMenuInsertNode).attr('aria-hidden', 'false');
-                query(this.geocoderMenuArrowNode).attr('aria-expanded', 'true');
+                query(_self.geocoderMenuInsertNode).attr('aria-hidden', 'false');
+                query(_self.geocoderMenuArrowNode).attr('aria-expanded', 'true');
             }
         },
         // hide geocoder selection menu
         _hideGeolocatorMenu: function () {
-            if (this.loaded) {
+            var _self = this;
+            if (_self.loaded) {
                 // container node
-                var container = query(this.containerNode);
+                var container = query(_self.containerNode);
                 // add class to container
-                container.removeClass(this._activeMenuClass);
-                query(this.geocoderMenuNode).style('display', 'none');
+                container.removeClass(_self._activeMenuClass);
+                query(_self.geocoderMenuNode).style('display', 'none');
                 // aria
-                query(this.geocoderMenuInsertNode).attr('aria-hidden', 'true');
-                query(this.geocoderMenuArrowNode).attr('aria-expanded', 'false');
+                query(_self.geocoderMenuInsertNode).attr('aria-hidden', 'true');
+                query(_self.geocoderMenuArrowNode).attr('aria-expanded', 'false');
             }
         },
         // toggle geocoder selection menu
         _toggleGeolocatorMenu: function () {
-            this._hideResultsMenu();
-            if (this.loaded) {
-                var display = query(this.geocoderMenuNode).style('display');
+            var _self = this;
+            _self._hideResultsMenu();
+            if (_self.loaded) {
+                var display = query(_self.geocoderMenuNode).style('display');
                 if (display[0] === 'block') {
-                    this._hideGeolocatorMenu();
+                    _self._hideGeolocatorMenu();
                 } else {
-                    this._showGeolocatorMenu();
+                    _self._showGeolocatorMenu();
                 }
             }
         },
         // show autolocate menu
         _showResultsMenu: function () {
-            if (this.loaded) {
+            var _self = this;
+            if (_self.loaded) {
                 // add class to container
-                query(this.containerNode).addClass(this._GeocoderActiveClass);
+                query(_self.containerNode).addClass(_self._GeocoderActiveClass);
                 // show node
-                query(this.resultsNode).style('display', 'block');
+                query(_self.resultsNode).style('display', 'block');
                 // aria
-                query(this.resultsNode).attr('aria-hidden', 'false');
+                query(_self.resultsNode).attr('aria-hidden', 'false');
             }
         },
         // hide the results menu
         _hideResultsMenu: function () {
-            if (this.loaded) {
+            var _self = this;
+            if (_self.loaded) {
                 // hide
-                query(this.resultsNode).style('display', 'none');
+                query(_self.resultsNode).style('display', 'none');
                 // add class to container
-                query(this.containerNode).removeClass(this._GeocoderActiveClass);
+                query(_self.containerNode).removeClass(_self._GeocoderActiveClass);
                 // aria
-                query(this.resultsNode).attr('aria-hidden', 'true');
+                query(_self.resultsNode).attr('aria-hidden', 'true');
             }
         },
         // hide both menus
         _hideMenus: function () {
-            this._hideGeolocatorMenu();
-            this._hideResultsMenu();
+            var _self = this;
+            _self._hideGeolocatorMenu();
+            _self._hideResultsMenu();
         },
         // create menu for changing active geocoder
         _insertGeocoderMenuItems: function () {
-            if (this.loaded) {
-                if (this.geocoderMenu && this._geocoders.length > 1) {
+            var _self = this;
+            if (_self.loaded) {
+                if (_self.geocoderMenu && _self._geocoders.length > 1) {
                     var html = '';
                     var layerClass = '',
                         i;
                     html += '<ul role="presentation">';
-                    for (i = 0; i < this._geocoders.length; i++) {
+                    for (i = 0; i < _self._geocoders.length; i++) {
                         // set layer class
-                        layerClass = this._resultsItemClass + ' ';
+                        layerClass = _self._resultsItemClass + ' ';
                         // if it's odd
                         if (i % 2 === 0) {
                             // set it to odd
-                            layerClass += this._resultsItemOddClass;
+                            layerClass += _self._resultsItemOddClass;
                         } else {
-                            layerClass += this._resultsItemEvenClass;
+                            layerClass += _self._resultsItemEvenClass;
                         }
-                        if (i === this.activeGeocoderIndex) {
-                            layerClass += ' ' + this._geocoderSelectedClass;
+                        if (i === _self.activeGeocoderIndex) {
+                            layerClass += ' ' + _self._geocoderSelectedClass;
                         }
                         if (i === 0) {
-                            layerClass += ' ' + this._resultsItemFirstClass;
-                        } else if (i === (this._geocoders.length - 1)) {
-                            layerClass += ' ' + this._resultsItemLastClass;
+                            layerClass += ' ' + _self._resultsItemFirstClass;
+                        } else if (i === (_self._geocoders.length - 1)) {
+                            layerClass += ' ' + _self._resultsItemLastClass;
                         }
                         // geocoder name
-                        var geocoderName = this._geocoders[i].name || i18n.widgets.Geocoder.main.untitledGeocoder;
+                        var geocoderName = _self._geocoders[i].name || i18n.widgets.Geocoder.main.untitledGeocoder;
                         // create list item
                         html += '<li data-index="' + i + '" data-item="true" role="menuitem" tabindex="0" class="' + layerClass + '">';
-                        html += '<div class="' + this._geocoderSelectedCheckClass + '"></div>';
+                        html += '<div class="' + _self._geocoderSelectedCheckClass + '"></div>';
                         html += geocoderName;
-                        html += '<div class="' + this._GeocoderClearClass + '"></div>';
+                        html += '<div class="' + _self._GeocoderClearClass + '"></div>';
                         html += '</li>';
                     }
                     // close list
                     html += '</ul>';
-                    this.geocoderMenuInsertNode.innerHTML = html;
-                    query(this.geocoderMenuNode).style('display', 'none');
-                    query(this.geocoderMenuArrowNode).style('display', 'block');
-                    query(this.containerNode).addClass(this._GeocoderMultipleClass);
+                    _self.geocoderMenuInsertNode.innerHTML = html;
+                    query(_self.geocoderMenuNode).style('display', 'none');
+                    query(_self.geocoderMenuArrowNode).style('display', 'block');
+                    query(_self.containerNode).addClass(_self._GeocoderMultipleClass);
                 } else {
-                    this.geocoderMenuInsertNode.innerHTML = '';
-                    query(this.geocoderMenuNode).style('display', 'none');
-                    query(this.geocoderMenuArrowNode).style('display', 'none');
-                    query(this.containerNode).removeClass(this._GeocoderMultipleClass);
+                    _self.geocoderMenuInsertNode.innerHTML = '';
+                    query(_self.geocoderMenuNode).style('display', 'none');
+                    query(_self.geocoderMenuArrowNode).style('display', 'none');
+                    query(_self.containerNode).removeClass(_self._GeocoderMultipleClass);
                 }
             }
         },
         // check input box's status
         _checkStatus: function () {
-            if (this.loaded) {
+            var _self = this;
+            if (_self.loaded) {
                 // if input value is not empty
-                if (this.get("value")) {
+                if (_self.get("value")) {
                     // add class to dom
-                    query(this.containerNode).addClass(this._hasValueClass);
+                    query(_self.containerNode).addClass(_self._hasValueClass);
                     // set class and title
-                    query(this.clearNode).attr('title', i18n.widgets.Geocoder.main.clearButtonTitle);
+                    query(_self.clearNode).attr('title', i18n.widgets.Geocoder.main.clearButtonTitle);
                 } else {
                     // clear address
-                    this.clear();
+                    _self.clear();
                 }
             }
         },
@@ -768,38 +799,38 @@ function (
             // isntance of class
             var _self = this;
             // array of all connections
-            this._delegations = [];
+            _self._delegations = [];
             // close on click
             var closeOnClick = on(document, "click", function (e) {
                 _self._hideResultsMenu(e);
             });
-            this._delegations.push(closeOnClick);
+            _self._delegations.push(closeOnClick);
             // input key up
-            var inputKeyUp = on(this.inputNode, "keyup", function (e) {
+            var inputKeyUp = on(_self.inputNode, "keyup", function (e) {
                 _self._inputKeyUp(e);
             });
-            this._delegations.push(inputKeyUp);
+            _self._delegations.push(inputKeyUp);
             // input key down
-            var inputKeyDown = on(this.inputNode, "keydown", function (e) {
+            var inputKeyDown = on(_self.inputNode, "keydown", function (e) {
                 _self._inputKeyDown(e);
             });
-            this._delegations.push(inputKeyDown);
+            _self._delegations.push(inputKeyDown);
             // arrow key down
-            var geocoderMenuButtonKeyDown = on(this.geocoderMenuArrowNode, "keydown", _self._geocoderMenuButtonKeyDown());
-            this._delegations.push(geocoderMenuButtonKeyDown);
+            var geocoderMenuButtonKeyDown = on(_self.geocoderMenuArrowNode, "keydown", _self._geocoderMenuButtonKeyDown());
+            _self._delegations.push(geocoderMenuButtonKeyDown);
             // list item click
-            var listClick = on(this.resultsNode, '[data-item="true"]:click, [data-item="true"]:keydown', function (e) {
+            var listClick = on(_self.resultsNode, '[data-item="true"]:click, [data-item="true"]:keydown', function (e) {
                 clearTimeout(_self._queryTimer);
                 // all items
                 var lists = query('[data-item="true"]', _self.resultsNode);
-                // index of this list item
+                // index of list item
                 var resultIndex = parseInt(query(this).attr('data-index')[0], 10);
                 // input box text
                 var locTxt = query(this).attr('data-text');
                 // next/previous index
                 var newIndex;
                 if (e.type === 'click' || (e.type === 'keydown' && e.keyCode === keys.ENTER)) {
-                    // set input text value to this text
+                    // set input text value to text
                     query(_self.inputNode).attr('value', locTxt);
                     // set current text var
                     _self.set("value", locTxt);
@@ -832,12 +863,12 @@ function (
                     _self._hideMenus();
                 }
             });
-            this._delegations.push(listClick);
+            _self._delegations.push(listClick);
             // select geocoder item
-            var geocoderMenuClick = on(this.geocoderMenuInsertNode, '[data-item="true"]:click, [data-item="true"]:keydown', function (e) {
+            var geocoderMenuClick = on(_self.geocoderMenuInsertNode, '[data-item="true"]:click, [data-item="true"]:keydown', function (e) {
                 // all items
                 var lists = query('[data-item="true"]', _self.geocoderMenuInsertNode);
-                // index of this list item
+                // index of list item
                 var resultIndex = parseInt(query(this).attr('data-index')[0], 10);
                 // next/previous index
                 var newIndex;
@@ -866,11 +897,11 @@ function (
                     _self._hideGeolocatorMenu();
                 }
             });
-            this._delegations.push(geocoderMenuClick);
+            _self._delegations.push(geocoderMenuClick);
         },
         _findThenSelect: function () {
             var _self = this;
-            this.find().then(function (response) {
+            _self.find().then(function (response) {
                 if (response.results && response.results.length) {
                     _self.select(response.results[0]);
                     _self.onEnterKeySelect();
@@ -879,16 +910,16 @@ function (
         },
         // key up event on input box
         _inputKeyUp: function (e) {
+            var _self = this;
             if (e) {
-                var _self = this;
                 // Reset timer between keys
-                clearTimeout(this._queryTimer);
+                clearTimeout(_self._queryTimer);
                 // get textbox value
-                var aquery = this.inputNode.value;
+                var aquery = _self.inputNode.value;
                 // don't update input
                 _self._ignoreUpdateValue = true;
                 // update current text variable
-                this.set("value", aquery);
+                _self.set("value", aquery);
                 // update input
                 _self._ignoreUpdateValue = false;
                 // length of value
@@ -898,50 +929,52 @@ function (
                     // set length of value
                     alength = aquery.length;
                 }
-                var lists = query('[data-item="true"]', this.resultsNode);
+                var lists = query('[data-item="true"]', _self.resultsNode);
                 // ignored keys
                 if (e.keyCode === e.copyKey || e.ctrlKey || e.shiftKey || e.metaKey || e.altKey || e.keyCode === e.ALT || e.keyCode === e.CTRL || e.keyCode === e.META || e.keyCode === e.shiftKey || e.keyCode === keys.UP_ARROW || e.keyCode === keys.DOWN_ARROW || e.keyCode === keys.LEFT_ARROW || e.keyCode === keys.RIGHT_ARROW) {
                     return;
                 } else if (e && e.keyCode === keys.ENTER) { // if enter key was pushed
                     // query then Locate
-                    this._findThenSelect();
+                    _self._findThenSelect();
                     // if up arrow pushed
                 } else if (e && e.keyCode === keys.ESCAPE) { // esc key
                     // clear timer
-                    clearTimeout(this._queryTimer);
+                    clearTimeout(_self._queryTimer);
                     // hide menus
-                    this._hideMenus();
-                } else if (this.autoComplete && alength >= this.minCharacters) {
-                    this._autocomplete();
+                    _self._hideMenus();
+                } else if (_self.autoComplete && alength >= _self.minCharacters) {
+                    _self._autocomplete();
                 } else {
                     // hide menus
-                    this._hideMenus();
+                    _self._hideMenus();
                 }
                 // check status of search box
-                this._checkStatus();
+                _self._checkStatus();
             }
         },
         _cancelDeferreds: function(){
-            if (this._deferreds.length) {
-                for(var i = 0; i < this._deferreds.length; i++){
+            var _self = this;
+            if (_self._deferreds.length) {
+                for(var i = 0; i < _self._deferreds.length; i++){
                     // cancel deferred
-                    this._deferreds[i].cancel('stop query');
-                    this._deferreds.splice(i, 1);
+                    _self._deferreds[i].cancel('stop query');
+                    _self._deferreds.splice(i, 1);
                 }
             }
         },
         // key down event on input box
         _inputKeyDown: function (e) {
-            var lists = query('[data-item="true"]', this.resultsNode);
+            var _self = this;
+            var lists = query('[data-item="true"]', _self.resultsNode);
             if (e && e.keyCode === keys.TAB) {
                 // hide menus if opened
-                this._hideMenus();
-                this._cancelDeferreds();
+                _self._hideMenus();
+                _self._cancelDeferreds();
                 // stop
                 return;
             } else if (e && e.keyCode === keys.UP_ARROW) {
                 event.stop(e);
-                this._cancelDeferreds();
+                _self._cancelDeferreds();
                 // get list item length
                 var listsLen = lists.length;
                 // if not zero
@@ -951,7 +984,7 @@ function (
                 }
             } else if (e && e.keyCode === keys.DOWN_ARROW) {
                 event.stop(e);
-                this._cancelDeferreds();
+                _self._cancelDeferreds();
                 // if first item
                 if (lists[0]) {
                     // focus first item
@@ -961,10 +994,11 @@ function (
         },
         // geocoder menu arrow key down
         _geocoderMenuButtonKeyDown: function (e) {
-            var lists = query('[data-item="true"]', this.geocoderMenuInsertNode);
+            var _self = this;
+            var lists = query('[data-item="true"]', _self.geocoderMenuInsertNode);
             if (e && e.keyCode === keys.UP_ARROW) {
                 event.stop(e);
-                this._showGeolocatorMenu();
+                _self._showGeolocatorMenu();
                 // get list item length
                 var listsLen = lists.length;
                 // if not zero
@@ -974,7 +1008,7 @@ function (
                 }
             } else if (e && e.keyCode === keys.DOWN_ARROW) {
                 event.stop(e);
-                this._showGeolocatorMenu();
+                _self._showGeolocatorMenu();
                 // if first item
                 if (lists[0]) {
                     // focus first item
@@ -984,108 +1018,114 @@ function (
         },
         // input box clicked
         _inputClick: function () {
+            var _self = this;
             // hide geolocator switch
-            this._hideGeolocatorMenu();
+            _self._hideGeolocatorMenu();
             // if input value is empty
-            if (!this.get("value")) {
+            if (!_self.get("value")) {
                 // clear address
-                this.clear();
+                _self.clear();
                 // hide menus
-                this._hideMenus();
+                _self._hideMenus();
             }
             // check status of text box
-            this._checkStatus();
+            _self._checkStatus();
+        },
+        _hydrateResult: function(e){
+            var _self = this;
+            var sR = _self._defaultSR;
+            if (_self.map) {
+                sR = _self.map.spatialReference;
+            }
+            // result to add
+            var newResult = {},
+            geometry;
+            // find geocoder
+            if (e.hasOwnProperty('extent')) {
+                // set extent
+                newResult.extent = new Extent(e.extent);
+                // set spatial ref
+                newResult.extent.setSpatialReference(new SpatialReference(sR));
+                // set name
+                if (e.hasOwnProperty('name')) {
+                    newResult.name = e.name;
+                }
+                // Set feature
+                if (e.hasOwnProperty('feature')) {
+                    newResult.feature = new Graphic(e.feature);
+                    geometry = newResult.feature.geometry;
+                    // fix goemetry SR
+                    if (geometry) {
+                        geometry.setSpatialReference(sR);
+                    }
+                }
+            }
+            // address candidates geocoder
+            else if (e.hasOwnProperty('location')) {
+                // create point
+                var point = new Point(e.location.x, e.location.y, sR);
+                // create extent from point
+                if (_self.map) {
+                    newResult.extent = _self.map.extent.centerAt(point);
+                } else {
+                    // create extent
+                    newResult.extent = new Extent({
+                        "xmin": point.x - 0.25,
+                        "ymin": point.y - 0.25,
+                        "xmax": point.x + 0.25,
+                        "ymax": point.y + 0.25,
+                        "spatialReference": {
+                            "wkid": 4326
+                        }
+                    });
+                }
+                // set name
+                if (e.hasOwnProperty('address') && typeof e.address === 'string') {
+                    newResult.name = e.address;
+                }
+                else if(e.hasOwnProperty('address') && typeof e.address === 'object'){
+                    var address = '';
+                    if (e.address.Address) {
+                        address += e.address.Address + ' ';
+                    }
+                    if (e.address.City) {
+                        address += e.address.City + ' ';
+                    }
+                    if (e.address.Region) {
+                        address += e.address.Region + ' ';
+                    }
+                    if (e.address.Postal) {
+                        address += e.address.Postal + ' ';
+                    }
+                    if (e.address.CountryCode) {
+                        address += e.address.CountryCode + ' ';
+                    }
+                    newResult.name = lang.trim(address);
+                }
+                // create attributes
+                var attributes = {};
+                // set attributes
+                if (e.hasOwnProperty('attributes')) {
+                    attributes = e.attributes;
+                }
+                // set score
+                if (e.hasOwnProperty('score')) {
+                    attributes.score = e.score;
+                }
+                newResult.feature = new Graphic(point, null, attributes, null);
+            }
+            return newResult;
         },
         // create Extent and Graphic objects from JSON
         _hydrateResults: function (e) {
             var _self = this;
             // return results array
             var results = [];
-            var sR = this._defaultSR;
-            if (_self.map) {
-                sR = _self.map.spatialReference;
-            }
             // if results
             if (e && e.length) {
                 var i = 0;
                 for (i; i < e.length && i < _self.maxLocations; i++) {
-                    // result to add
-                    var newResult = {},
-                    geometry;
-                    // find geocoder
-                    if (e[i].hasOwnProperty('extent')) {
-                        // set extent
-                        newResult.extent = new Extent(e[i].extent);
-                        // set spatial ref
-                        newResult.extent.setSpatialReference(new SpatialReference(sR));
-                        // set name
-                        if (e[i].hasOwnProperty('name')) {
-                            newResult.name = e[i].name;
-                        }
-                        // Set feature
-                        if (e[i].hasOwnProperty('feature')) {
-                            newResult.feature = new Graphic(e[i].feature);
-                            geometry = newResult.feature.geometry;
-                            // fix goemetry SR
-                            if (geometry) {
-                                geometry.setSpatialReference(sR);
-                            }
-                        }
-                    }
-                    // address candidates geocoder
-                    else if (e[i].hasOwnProperty('location')) {
-                        // create point
-                        var point = new Point(e[i].location.x, e[i].location.y, sR);
-                        // create extent from point
-                        if (_self.map) {
-                            newResult.extent = _self.map.extent.centerAt(point);
-                        } else {
-                            // create extent
-                            newResult.extent = new Extent({
-                                "xmin": point.x - 0.25,
-                                "ymin": point.y - 0.25,
-                                "xmax": point.x + 0.25,
-                                "ymax": point.y + 0.25,
-                                "spatialReference": {
-                                    "wkid": 4326
-                                }
-                            });
-                        }
-                        // set name
-                        if (e[i].hasOwnProperty('address') && typeof e[i].address === 'string') {
-                            newResult.name = e[i].address;
-                        }
-                        else if(e[i].hasOwnProperty('address') && typeof e[i].address === 'object'){
-                            var address = '';
-                            if (e[i].address.Address) {
-                                address += e[i].address.Address + ' ';
-                            }
-                            if (e[i].address.City) {
-                                address += e[i].address.City + ' ';
-                            }
-                            if (e[i].address.Region) {
-                                address += e[i].address.Region + ' ';
-                            }
-                            if (e[i].address.Postal) {
-                                address += e[i].address.Postal + ' ';
-                            }
-                            if (e[i].address.CountryCode) {
-                                address += e[i].address.CountryCode + ' ';
-                            }
-                            newResult.name = lang.trim(address);
-                        }
-                        // create attributes
-                        var attributes = {};
-                        // set attributes
-                        if (e[i].hasOwnProperty('attributes')) {
-                            attributes = e[i].attributes;
-                        }
-                        // set score
-                        if (e[i].hasOwnProperty('score')) {
-                            attributes.score = e[i].score;
-                        }
-                        newResult.feature = new Graphic(point, null, attributes, null);
-                    }
+                    var newResult = _self._hydrateResult(e[i]);
                     // add to return array
                     results.push(newResult);
                 }
