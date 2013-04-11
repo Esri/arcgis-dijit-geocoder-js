@@ -72,15 +72,6 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             if (_self.get("value")) {
                 _self._checkStatus();
             }
-            // reverse Geocoder
-            _self._reverseTask = new Locator(_self._arcgisGeocoder.url);
-            // spatial ref output
-            _self._reverseTask.outSpatialReference = _self._defaultSR;
-            if (_self.map) {
-                _self._reverseTask.outSpatialReference = _self.map.spatialReference;
-            }
-            // setup connections
-            _self._setDelegations();
             // if map is in options
             if (_self.map) {
                 // once map is loaded
@@ -101,6 +92,15 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             var _self = this;
             // build geocoder list
             _self._updateGeocoder();
+            // reverse Geocoder
+            _self._reverseTask = new Locator(_self._arcgisGeocoder.url);
+            // spatial ref output
+            _self._reverseTask.outSpatialReference = _self._defaultSR;
+            if (_self.map) {
+                _self._reverseTask.outSpatialReference = _self.map.spatialReference;
+            }
+            // setup connections
+            _self._setDelegations();
         },
         destroy: function() {
             var i;
@@ -161,8 +161,7 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             var def = new Deferred();
             if (search) {
                 if (typeof search === 'string') {
-                    _self.set('value', search);
-                    _self._queryThenLocate(def);
+                    _self._queryThenLocate(def, search);
                 } else if (typeof search === 'object' && search.type === 'point') {
                     // point geometry
                     _self._reverseGeocodePoint(search, def);
@@ -176,7 +175,7 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
                     def.cancel('Invalid find type');
                 }
             } else {
-                _self._queryThenLocate(def);
+                _self._queryThenLocate(def, _self.get('value'));
             }
             // give me my deferred
             return def;
@@ -237,11 +236,12 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             // loaded
             _self.onLoad();
         },
-        _queryThenLocate: function(def) {
+        _queryThenLocate: function(def, search) {
             var _self = this;
             // query and then Locate
             _self._query({
-                delay: 0
+                delay: 0,
+                search: search
             }).then(function(response) {
                 _self.onFindResults(response);
                 if (def) {
@@ -435,23 +435,26 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             var _self = this;
             if (!e) {
                 e = {
-                    delay: 0
+                    delay: 0,
                 };
+            }
+            if(!e.search){
+                e.search = _self.get("value");
             }
             // set deferred variable if needed to cancel it
             var def = new Deferred();
             _self._deferreds.push(def);
             // timeout
             _self._queryTimer = setTimeout(function() {
-                _self._performQuery(def);
+                _self._performQuery(def, e);
             }, e.delay);
             return def;
         },
         // when geocoder search starts
-        _performQuery: function(def) {
+        _performQuery: function(def, e) {
             var _self = this;
             // if query isn't empty
-            if (_self.get("value")) {
+            if (e.search) {
                 // hide menu to toggle geocoder
                 _self._hideGeolocatorMenu();
                 // show loading spinner
@@ -467,7 +470,7 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
                     singleLine += _self.activeGeocoder.prefix;
                 }
                 // query value
-                singleLine += _self.get("value");
+                singleLine += e.search;
                 // query suffix
                 if (_self.activeGeocoder.suffix) {
                     singleLine += _self.activeGeocoder.suffix;
@@ -614,7 +617,8 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
         _autocomplete: function() {
             var _self = this;
             _self._query({
-                delay: _self.searchDelay
+                delay: _self.searchDelay,
+                search: _self.get("value")
             }).then(function(response) {
                 _self.onAutoComplete(response);
                 if (_self.showResults) {
