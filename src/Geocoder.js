@@ -161,7 +161,7 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             var def = new Deferred();
             if (search) {
                 if (typeof search === 'string') {
-                    _self._queryThenLocate(def, search);
+                    _self._queryDeferred(def, search);
                 } else if (typeof search === 'object' && search.type === 'point') {
                     // point geometry
                     _self._reverseGeocodePoint(search, def);
@@ -175,7 +175,7 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
                     def.cancel('Invalid find type');
                 }
             } else {
-                _self._queryThenLocate(def, _self.get('value'));
+                _self._queryDeferred(def, _self.get('value'));
             }
             // give me my deferred
             return def;
@@ -236,7 +236,7 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             // loaded
             _self.onLoad();
         },
-        _queryThenLocate: function(def, search) {
+        _queryDeferred: function(def, search) {
             var _self = this;
             // query and then Locate
             _self._query({
@@ -435,7 +435,7 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             var _self = this;
             if (!e) {
                 e = {
-                    delay: 0,
+                    delay: 0
                 };
             }
             if(!e.search){
