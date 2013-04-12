@@ -254,9 +254,13 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             if (pt) {
                 _self._reverseTask.locationToAddress(pt, _self.locatorDistance, function(response) {
                     var result = _self._hydrateResult(response);
-                    _self.onFindResults(result);
+                    var obj = {
+                        "results": [result],
+                        "geometry": pt
+                    };
+                    _self.onFindResults(obj);
                     if (def) {
-                        def.resolve(result);
+                        def.resolve(obj);
                     }
                 }, function(error) {
                     def.cancel(error);
@@ -438,7 +442,7 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
                     delay: 0
                 };
             }
-            if(!e.search){
+            if (!e.search) {
                 e.search = _self.get("value");
             }
             // set deferred variable if needed to cancel it
