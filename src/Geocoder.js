@@ -235,6 +235,8 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             _self.loaded = true;
             // loaded
             _self.onLoad();
+            // hide menus
+            _self._hideMenus();
         },
         _queryDeferred: function(def, search) {
             var _self = this;
