@@ -92,13 +92,6 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             var _self = this;
             // build geocoder list
             _self._updateGeocoder();
-            // reverse Geocoder
-            _self._reverseTask = new Locator(_self._arcgisGeocoder.url);
-            // spatial ref output
-            _self._reverseTask.outSpatialReference = _self._defaultSR;
-            if (_self.map) {
-                _self._reverseTask.outSpatialReference = _self.map.spatialReference;
-            }
             // setup connections
             _self._setDelegations();
         },
@@ -253,8 +246,16 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
         },
         _reverseGeocodePoint: function(pt, def) {
             var _self = this;
-            if (pt) {
-                _self._reverseTask.locationToAddress(pt, _self.locatorDistance, function(response) {
+            if (pt && _self.activeGeocoder) {
+                // reverse Geocoder
+                _self._reverseTask = new Locator(_self.activeGeocoder.url);
+                // spatial ref output
+                _self._reverseTask.outSpatialReference = _self._defaultSR;
+                if (_self.map) {
+                    _self._reverseTask.outSpatialReference = _self.map.spatialReference;
+                }
+                var distance = _self.activeGeocoder.distance || 1000;
+                _self._reverseTask.locationToAddress(pt, distance, function(response) {
                     var result = _self._hydrateResult(response);
                     var obj = {
                         "results": [result],
@@ -280,8 +281,6 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
             _self.set("value", '');
             // Theme
             _self.set("theme", 'simpleGeocoder');
-            // locator distance
-            _self.locatorDistance = 1000;
             // default geocoder index
             _self.activeGeocoderIndex = 0;
             // Maximum result locations to return
