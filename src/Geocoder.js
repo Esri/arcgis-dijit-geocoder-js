@@ -242,6 +242,11 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
                 if (def) {
                     def.resolve(response);
                 }
+            }, function(error){
+                _self.onFindResults(error);
+                if (def) {
+                    def.resolve(error);
+                }
             });
         },
         _reverseGeocodePoint: function(pt, def) {
@@ -266,7 +271,7 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
                         def.resolve(obj);
                     }
                 }, function(error) {
-                    def.cancel(error);
+                    def.resolve(error);
                 });
             }
         },
