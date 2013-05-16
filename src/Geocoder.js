@@ -1,6 +1,5 @@
 define([
     "dojo/_base/declare",
-    "dojo/_base/connect",
     "dojo/_base/lang",
     "dojo/_base/Deferred",
     "dojo/_base/event",
@@ -30,7 +29,7 @@ define([
     "esri/tasks/locator"
 ],
 function(
-declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i18n, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil, esriNS, SpatialReference, Graphic, esriRequest, Point, Extent, Locator) {
+declare, lang, Deferred, event, domConstruct, JSON, keys, on, query, i18n, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil, esriNS, SpatialReference, Graphic, esriRequest, Point, Extent, Locator) {
     var Widget = declare([_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
         declaredClass: "esri.dijit.Geocoder",
         // Set template file HTML
@@ -78,9 +77,10 @@ declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i1
                 if (_self.map.loaded) {
                     _self._init();
                 } else {
-                    connect.connect(_self.map, "onLoad", function() {
+                    var mapLoad = on(_self.map, "load", function() {
                         _self._init();
                     });
+                    _self._delegations.push(mapLoad);
                 }
             } else {
                 // lets go
