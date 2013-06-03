@@ -1,5 +1,6 @@
 define([
     "dojo/_base/declare",
+    "dojo/_base/connect",
     "dojo/_base/lang",
     "dojo/_base/Deferred",
     "dojo/_base/event",
@@ -8,9 +9,9 @@ define([
     "dojo/keys",
     "dojo/on",
     "dojo/query",
-    "dojo/i18n!./nls/jsapi",
-    "dojo/text!./templates/Geocoder.html",
-	//"dojo/i18n!esri/nls/jsapi",
+	"dojo/i18n!esri/nls/jsapi",
+    "dojo/text!esri/dijit/templates/Geocoder.html",
+    //"dojo/i18n!esri/nls/jsapi",
     //"dojo/text!esri/dijit/templates/Geocoder.html",
     "dojo/uacss",
 
@@ -23,17 +24,31 @@ define([
     "esri/SpatialReference",
     "esri/graphic",
     "esri/request",
+    "esri/dijit/_EventedWidget",
 
     "esri/geometry/Point",
     "esri/geometry/Extent",
     "esri/tasks/locator"
 ],
 function(
-declare, lang, Deferred, event, domConstruct, JSON, keys, on, query, i18n, template, has, _OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil, esriNS, SpatialReference, Graphic, esriRequest, Point, Extent, Locator) {
-    var Widget = declare([_WidgetBase, _OnDijitClickMixin, _TemplatedMixin], {
+declare, connect, lang, Deferred, event, domConstruct, JSON, keys, on, query, i18n, template, has,
+_OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil,
+esriNS, SpatialReference, Graphic, esriRequest, _EventedWidget,
+Point, Extent, Locator) {
+    var Widget = declare([_EventedWidget, /*_WidgetBase,*/ _OnDijitClickMixin, _TemplatedMixin], {
         declaredClass: "esri.dijit.Geocoder",
         // Set template file HTML
         templateString: template,
+        // On to Connect Event Mapping
+        _eventMap: {
+            "select": ["result"],
+            "find-results": ["results"],
+            "auto-complete": ["results"],
+            "geocoder-select": ["geocoder"],
+            "clear": true,
+            "enter-key-select": true,
+            "load": true
+        },
         // init
         constructor: function(options, srcRefNode) {
             var _self = this;
@@ -77,10 +92,9 @@ declare, lang, Deferred, event, domConstruct, JSON, keys, on, query, i18n, templ
                 if (_self.map.loaded) {
                     _self._init();
                 } else {
-                    var mapLoad = on(_self.map, "load", function() {
+                    connect.connect(_self.map, "onLoad", function() {
                         _self._init();
                     });
-                    _self._delegations.push(mapLoad);
                 }
             } else {
                 // lets go
