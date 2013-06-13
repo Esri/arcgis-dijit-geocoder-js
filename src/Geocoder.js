@@ -251,7 +251,7 @@ Point, Extent, Locator) {
             }, function(error) {
                 _self.onFindResults(error);
                 if (def) {
-                    def.resolve(error);
+                    def.reject(error);
                 }
             });
         },
@@ -277,7 +277,7 @@ Point, Extent, Locator) {
                         def.resolve(obj);
                     }
                 }, function(error) {
-                    def.resolve(error);
+                    def.reject(error);
                 });
             }
         },
@@ -579,7 +579,7 @@ Point, Extent, Locator) {
                 }
             } else {
                 _self._hideLoading();
-                def.resolve();
+                def.reject('no search to perform');
             }
         },
         // called on AC Results
