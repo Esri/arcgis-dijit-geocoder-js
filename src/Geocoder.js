@@ -174,7 +174,7 @@ Point, Extent, Locator) {
                     }));
                     _self._reverseGeocodePoint(pt, def);
                 } else {
-                    def.cancel('Invalid find type');
+                    def.reject('Invalid find type');
                 }
             } else {
                 _self._queryDeferred(def, _self.get('value'));
