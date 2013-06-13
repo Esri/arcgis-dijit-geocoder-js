@@ -931,6 +931,10 @@ Point, Extent, Locator) {
                     clearTimeout(_self._queryTimer);
                     // hide menus
                     _self._hideMenus();
+                } else if (e && e.keyCode === keys.TAB) {
+                    if (_self._queryTimer) {
+                        clearTimeout(_self._queryTimer);
+                    }
                 } else if (_self.autoComplete && alength >= _self.minCharacters) {
                     _self._autocomplete();
                 } else {
@@ -956,9 +960,12 @@ Point, Extent, Locator) {
             var _self = this;
             var lists = query('[data-item="true"]', _self.resultsNode);
             if (e && e.keyCode === keys.TAB) {
+                if (_self._queryTimer) {
+                    clearTimeout(_self._queryTimer);
+                }
+                _self._cancelDeferreds();
                 // hide menus if opened
                 _self._hideMenus();
-                _self._cancelDeferreds();
                 // stop
                 return;
             } else if (e && e.keyCode === keys.UP_ARROW) {
