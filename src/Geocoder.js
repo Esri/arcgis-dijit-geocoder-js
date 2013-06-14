@@ -847,8 +847,6 @@ Point, Extent, Locator) {
                         lists[newIndex].focus();
                     }
                 } else if (e.keyCode === keys.ESCAPE) { // esc key
-                    // clear timer
-                    clearTimeout(_self._queryTimer);
                     // hide menus
                     _self._hideMenus();
                 }
@@ -923,18 +921,16 @@ Point, Extent, Locator) {
                 if (e.keyCode === e.copyKey || e.ctrlKey || e.shiftKey || e.metaKey || e.altKey || e.keyCode === e.ALT || e.keyCode === e.CTRL || e.keyCode === e.META || e.keyCode === e.shiftKey || e.keyCode === keys.UP_ARROW || e.keyCode === keys.DOWN_ARROW || e.keyCode === keys.LEFT_ARROW || e.keyCode === keys.RIGHT_ARROW) {
                     return;
                 } else if (e && e.keyCode === keys.ENTER) { // if enter key was pushed
+                    _self._cancelDeferreds();
                     // query then Locate
                     _self._findThenSelect();
                     // if up arrow pushed
                 } else if (e && e.keyCode === keys.ESCAPE) { // esc key
-                    // clear timer
-                    clearTimeout(_self._queryTimer);
-                    // hide menus
+                    _self._cancelDeferreds();
                     _self._hideMenus();
                 } else if (e && e.keyCode === keys.TAB) {
-                    if (_self._queryTimer) {
-                        clearTimeout(_self._queryTimer);
-                    }
+                    _self._cancelDeferreds();
+                    _self._hideMenus();
                 } else if (_self.autoComplete && alength >= _self.minCharacters) {
                     _self._autocomplete();
                 } else {
@@ -951,8 +947,8 @@ Point, Extent, Locator) {
                 for (var i = 0; i < _self._deferreds.length; i++) {
                     // cancel deferred
                     _self._deferreds[i].cancel('stop query');
-                    _self._deferreds.splice(i, 1);
                 }
+                _self._deferreds = [];
             }
         },
         // key down event on input box
@@ -960,9 +956,6 @@ Point, Extent, Locator) {
             var _self = this;
             var lists = query('[data-item="true"]', _self.resultsNode);
             if (e && e.keyCode === keys.TAB) {
-                if (_self._queryTimer) {
-                    clearTimeout(_self._queryTimer);
-                }
                 _self._cancelDeferreds();
                 // hide menus if opened
                 _self._hideMenus();
