@@ -63,7 +63,7 @@
                     location: locationPath + 'src'
                 }]
             };
-            var myWidget;
+            var myWidget, map;
         </script>
         <script src="http://jsdev.arcgis.com/3.6/"></script>
         <script type="text/javascript">
@@ -75,14 +75,34 @@
             "dojo/_base/Color",
             "dojo/_base/connect",
             "modules/Geocoder",
+            
+            
+            "esri/geometry/Point",
+            "esri/symbols/SimpleMarkerSymbol",
+            "dojo/_base/Color",
+            "esri/InfoTemplate",
+            "esri/graphic",
+            
+            "esri/geometry/Extent",
+            "esri/geometry/Multipoint",
+            "esri/geometry/Polygon",
+            "esri/geometry/Polyline",
+            "esri/geometry/ScreenPoint",
+            
+            
             "esri",
             "esri/map",
             "esri/IdentityManager",
             "esri/arcgis/utils"
         ],
-        function (ready, dom, domConstruct, query, Color, connect, Geocoder, esri) {
+        function (ready, dom, domConstruct, query, Color, connect, Geocoder,
+        
+        Point, SimpleMarkerSymbol, Color, InfoTemplate, Graphic,
+        
+        Extent, Multipoint, Polygon, Polyline, ScreenPoint,
+        
+         esri) {
 
-            var map;
             var myGeocoder;
 
             function resizeMap() {
@@ -112,7 +132,16 @@
 
                 connect.connect(map, 'onExtentChange', function(){
                     removeSpotlight();
+                    
+                    //console.log(JSON.stringify(map.extent.getCenter()));
+                    
                 });
+                
+                connect.connect(map, 'onClick', function(evt){
+                    console.log(evt.screenPoint);
+                    
+                });
+                
 
                 // Geocoder with all common options set. Only map is required.
                 myGeocoder = new Geocoder({
@@ -144,6 +173,83 @@
 				});
 
 				myWidget = myGeocoder;
+				
+				var geom;
+				
+                //geom = new Point({"x": -8241364.488513179, "y": 5085888.490368734, "spatialReference": map.spatialReference });
+                
+                //geom = new Extent({"xmin":-8607039.231829444,"ymin":4739475.8781803325,"xmax":-7875689.745196914,"ymax":5432301.102557136,"spatialReference":{"wkid":102100}});
+                var mpJson ={"points":[[-8241364.488513179,5085888.490368734],[-8561177.01485834,5036968.792266224],[-8602147.262019193,4615647.892358353]],"spatialReference":map.spatialReference};
+                
+                //geom = new Multipoint(mpJson);
+                
+                var polygonJson  = {"rings":[
+                  [
+                    [-10877122.9377, 4196874.6838999987], 
+                    [-10877491.073, 4198404.1431000009], 
+                    [-10872792.0978, 4200666.6297999993], 
+                    [-10869221.4416, 4203604.6297999993], 
+                    [-10868091.3254, 4204880.5675000027], 
+                    [-10867864.0249, 4205058.9556000009], 
+                    [-10865494.3689, 4206307.3962000012], 
+                    [-10865420.8832, 4206341.5020999983], 
+                    [-10863431.2126, 4207145.8369999975], 
+                    [-10863259.1166, 4207194.0028000027], 
+                    [-10859556.0197, 4207797.7686000019], 
+                    [-10858907.9518, 4208275.2923000008], 
+                    [-10858569.7756, 4208420.0349999964], 
+                    [-10850438.3532, 4209847.744599998], 
+                    [-10846954.0065, 4210534.0552999973], 
+                    [-10846936.3718, 4210537.3250999972], 
+                    [-10842751.9891, 4211265.0438999981], 
+                    [-10842701.9025, 4211272.1406000033], 
+                    [-10840681.1836, 4211493.9178000018], 
+                    [-10840505.6094, 4209894.1766000018], 
+                    [-10842501.1728, 4209675.1603000015], 
+                    [-10846651.7896, 4208953.3138], 
+                    [-10850135.4967, 4208267.1291000023], 
+                    [-10850145.7183, 4208265.184299998], 
+                    [-10850151.8497, 4208264.0833000019], 
+                    [-10858105.3848, 4206867.6070000008], 
+                    [-10858757.6235, 4206387.0101], 
+                    [-10859105.4681, 4206240.6305000037], 
+                    [-10862911.4035, 4205620.0974999964], 
+                    [-10864780.1148, 4204864.6609999985], 
+                    [-10866983.9587, 4203703.5776999965], 
+                    [-10868058.7866, 4202490.0622999966], 
+                    [-10868149.8824, 4202402.2205], 
+                    [-10871844.4038, 4199362.3020000011], 
+                    [-10872006.5951, 4199258.6595999971], 
+                    [-10876792.9088, 4196954.1207000017], 
+                    [-10877122.9377, 4196874.6838999987]
+                  ]
+                ],"spatialReference":map.spatialReference};
+                //geom = new Polygon(polygonJson);
+                
+                
+                var polylineJson = {
+                "paths":[[[-10872006.5951, 4199258.6595999971], 
+                    [-10876792.9088, 4196954.1207000017], 
+                    [-10877122.9377, 4196874.6838999987]]],
+                "spatialReference":map.spatialReference
+              };
+            
+              //geom = new Polyline(polylineJson);
+                
+                geom = new ScreenPoint({x: 895, y: 103});({x: 830, y: 504});
+                
+                console.log(geom);
+                
+                
+               
+                
+                
+                var sms = new SimpleMarkerSymbol().setStyle(SimpleMarkerSymbol.STYLE_SQUARE).setColor(new Color([255,0,0,0.5]));
+                var attr = {test:true};
+                var infoTemplate = new InfoTemplate("");
+				var graphic = new Graphic(geom,sms,attr,infoTemplate);
+				myGeocoder.find(graphic);
+				
 
 				// on search results
 				connect.connect(myGeocoder, 'onSearchResults', function(results){
@@ -164,6 +270,7 @@
 				connect.connect(myGeocoder, 'setGeocoderParams', function(params){
 					console.log('params', params);
 				});
+				
 
 
 				function removeSpotlight(){

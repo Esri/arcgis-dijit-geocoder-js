@@ -163,21 +163,64 @@ Point, Extent, Locator) {
             var def = new Deferred();
             if (search) {
                 if (typeof search === 'string') {
-                    _self._queryDeferred(def, search);
+                    _self._queryDeferred(search).then(function(resp){
+                        def.resolve(resp);
+                    });
+                } else if (typeof search === 'object' && search.hasOwnProperty("geometry")) {
+                    var point;
+                    switch(search.geometry.type){
+                        case "extent":
+                            point = search.geometry.getCenter();
+                            break;
+                        case "multipoint":
+                            point = search.geometry.getExtent().getCenter();
+                            break;
+                        case "point":
+                            point = search.geometry;
+                            break;
+                        case "polygon":
+                            point = search.geometry.getExtent().getCenter();
+                            break;
+                        case "polyline":
+                            point = search.geometry.getExtent().getCenter();
+                            break;
+                    }
+                    if(point){
+                        _self._reverseGeocodePoint(point, search.geometry).then(function(resp){
+                            if(resp.results[0]){
+                                if(search.hasOwnProperty("attributes")){
+                                    resp.results[0].feature.setAttributes(lang.mixin(resp.results[0].feature.attributes, search.attributes));
+                                }
+                                if(search.hasOwnProperty("infoTemplate")){
+                                    resp.results[0].feature.setInfoTemplate(search.infoTemplate);
+                                }
+                                if(search.hasOwnProperty("symbol")){
+                                    resp.results[0].feature.setSymbol(search.symbol);
+                                }
+                            }
+                            def.resolve(resp);
+                        });
+                    }
                 } else if (typeof search === 'object' && search.type === 'point') {
                     // point geometry
-                    _self._reverseGeocodePoint(search, def);
+                    _self._reverseGeocodePoint(search).then(function(resp){
+                        def.resolve(resp);
+                    });
                 } else if (search instanceof Array && search.length === 2) {
                     // long, lat
                     var pt = new Point(search, new SpatialReference({
                         wkid: 4326
                     }));
-                    _self._reverseGeocodePoint(pt, def);
+                    _self._reverseGeocodePoint(pt).then(function(resp){
+                        def.resolve(resp);
+                    });
                 } else {
                     def.reject('Invalid find type');
                 }
             } else {
-                _self._queryDeferred(def, _self.get('value'));
+                _self._queryDeferred(_self.get('value')).then(function(resp){
+                    def.resolve(resp);
+                });
             }
             // give me my deferred
             return def;
@@ -237,27 +280,27 @@ Point, Extent, Locator) {
             // hide menus
             _self._hideMenus();
         },
-        _queryDeferred: function(def, search) {
+        _queryDeferred: function(search) {
             var _self = this;
+            var def = new Deferred();
             // query and then Locate
             _self._query({
                 delay: 0,
                 search: search
             }).then(function(response) {
                 _self.onFindResults(response);
-                if (def) {
-                    def.resolve(response);
-                }
+                def.resolve(response);
             }, function(error) {
                 _self.onFindResults(error);
-                if (def) {
-                    def.reject(error);
-                }
+                def.reject(error);
             });
+            return def;
         },
-        _reverseGeocodePoint: function(pt, def) {
+        _reverseGeocodePoint: function(pt, geometry) {
+            var def = new Deferred();
             var _self = this;
-            if (pt && _self.activeGeocoder) {
+            if (pt && _self.activeGeocoder) {                
+                var geo = geometry || pt;
                 // reverse Geocoder
                 _self._reverseTask = new Locator(_self.activeGeocoder.url);
                 // spatial ref output
@@ -270,16 +313,18 @@ Point, Extent, Locator) {
                     var result = _self._hydrateResult(response);
                     var obj = {
                         "results": [result],
-                        "geometry": pt
+                        "geometry": geo
                     };
                     _self.onFindResults(obj);
-                    if (def) {
-                        def.resolve(obj);
-                    }
+                    def.resolve(obj);
                 }, function(error) {
                     def.reject(error);
                 });
             }
+            else{
+                def.reject("no point or active geocoder defined");
+            }
+            return def;
         },
         // default settings
         _setPublicDefaults: function() {
