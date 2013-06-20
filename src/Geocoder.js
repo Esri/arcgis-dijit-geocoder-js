@@ -199,12 +199,16 @@ Point, Extent, Locator) {
                                 }
                             }
                             def.resolve(resp);
+                        }, function(error){
+                            def.reject(error);
                         });
                     }
                 } else if (typeof search === 'object' && search.type === 'point') {
                     // point geometry
                     _self._reverseGeocodePoint(search).then(function(resp){
                         def.resolve(resp);
+                    }, function(error){
+                        def.reject(error);
                     });
                 } else if (search instanceof Array && search.length === 2) {
                     // long, lat
@@ -213,6 +217,8 @@ Point, Extent, Locator) {
                     }));
                     _self._reverseGeocodePoint(pt).then(function(resp){
                         def.resolve(resp);
+                    }, function(error){
+                        def.reject(error);
                     });
                 } else {
                     def.reject('Invalid find type');
@@ -308,7 +314,7 @@ Point, Extent, Locator) {
                 if (_self.map) {
                     _self._reverseTask.outSpatialReference = _self.map.spatialReference;
                 }
-                var distance = _self.activeGeocoder.distance || 1000;
+                var distance = _self.activeGeocoder.distance || 1500;
                 _self._reverseTask.locationToAddress(pt, distance, function(response) {
                     var result = _self._hydrateResult(response);
                     var obj = {
