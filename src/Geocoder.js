@@ -1122,24 +1122,11 @@ Point, Extent, Locator) {
                 // set name
                 if (e.hasOwnProperty('address') && typeof e.address === 'string') {
                     newResult.name = e.address;
-                } else if (e.hasOwnProperty('address') && typeof e.address === 'object') {
-                    var address = '';
-                    if (e.address.Address) {
-                        address += e.address.Address + ' ';
-                    }
-                    if (e.address.City) {
-                        address += e.address.City + ' ';
-                    }
-                    if (e.address.Region) {
-                        address += e.address.Region + ' ';
-                    }
-                    if (e.address.Postal) {
-                        address += e.address.Postal + ' ';
-                    }
-                    if (e.address.CountryCode) {
-                        address += e.address.CountryCode + ' ';
-                    }
-                    newResult.name = lang.trim(address);
+                } else if (e.hasOwnProperty('address') && typeof e.address === 'object' && e.address.hasOwnProperty('Address')) {
+                    newResult.name = e.address.Address;
+                }
+                else{
+                    newResult.name = '';
                 }
                 // create attributes
                 var attributes = {};
