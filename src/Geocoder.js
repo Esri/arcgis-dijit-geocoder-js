@@ -388,6 +388,11 @@ Point, Extent, Locator) {
                     this._arcgisGeocoder = {};
                 }
                 // ArcGIS Geocoder URL
+                if (!this._arcgisGeocoder.hasOwnProperty('suggest')) {
+                    // set esri geocoder options
+                    this._arcgisGeocoder.suggest = true;
+                }
+                // ArcGIS Geocoder URL
                 if (!this._arcgisGeocoder.url) {
                     // set esri geocoder options
                     this._arcgisGeocoder.url = location.protocol + "//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
@@ -564,7 +569,7 @@ Point, Extent, Locator) {
                         params.bbox = JSON.stringify(bbox);
                     }
                     var path = '/find';
-                    if (e.autocomplete) {
+                    if (e.autocomplete && this.activeGeocoder.suggest) {
                         path = '/suggest';
                     }
                     // send request
@@ -575,11 +580,8 @@ Point, Extent, Locator) {
                         callbackParamName: 'callback',
                         // on load
                         load: lang.hitch(this, function(response) {
-                            if (e.autocomplete) {
-                                this._receivedResults(response.suggestions, def, e);
-                            } else {
-                                this._receivedResults(response.locations, def, e);
-                            }
+                            var results = response.suggestions || response.locations;
+                            this._receivedResults(results, def, e);
                         })
                     });
                 } else {
