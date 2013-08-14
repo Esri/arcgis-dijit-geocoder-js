@@ -331,11 +331,11 @@ Point, Extent, Locator) {
             // default geocoder index
             this.activeGeocoderIndex = 0;
             // Maximum result locations to return
-            this.maxLocations = 6;
+            this.maxLocations = 5;
             // Minimum amount of characters before searching
-            this.minCharacters = 3;
+            this.minCharacters = 0;
             // Delay before doing the query. To avoid being too chatty.
-            this.searchDelay = 350;
+            this.searchDelay = 100;
             // Show geocoder menu if necessary
             this.geocoderMenu = true;
             // Automatically navigate
