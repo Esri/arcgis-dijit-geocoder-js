@@ -959,7 +959,7 @@ Point, Extent, Locator) {
                 }
                 // ignored keys
                 if (e.keyCode === e.copyKey || e.ctrlKey || e.shiftKey || e.metaKey || e.altKey || e.keyCode === e.ALT || e.keyCode === e.CTRL || e.keyCode === e.META || e.keyCode === e.shiftKey || e.keyCode === keys.UP_ARROW || e.keyCode === keys.DOWN_ARROW || e.keyCode === keys.LEFT_ARROW || e.keyCode === keys.RIGHT_ARROW) {
-                    return;
+                    return e;
                 } else if (e && e.keyCode === keys.ENTER) { // if enter key was pushed
                     this._cancelDeferreds();
                     // query then Locate
