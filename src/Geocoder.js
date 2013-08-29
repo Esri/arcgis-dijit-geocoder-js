@@ -119,6 +119,12 @@ Point, Extent, Locator) {
                     this._delegations[i].remove();
                 }
             }
+            if(this._acEvent){
+                this._acEvent.remove();
+            }
+            if(this._gmEvent){
+                this._gmEvent.remove();
+            }
             // remove html
             domConstruct.empty(this.domNode);
             this.inherited(arguments);
@@ -404,8 +410,8 @@ Point, Extent, Locator) {
                 // local search
                 if (!this._arcgisGeocoder.hasOwnProperty('localSearchOptions')) {
                     this._arcgisGeocoder.localSearchOptions = {
-                        minScale: 150000,
-                        distance: 12000
+                        minScale: 50000,
+                        distance: 50000
                     };
                 }
                 this.arcgisGeocoder = this._arcgisGeocoder;
@@ -665,6 +671,7 @@ Point, Extent, Locator) {
                 if (this.resultsNode) {
                     this.resultsNode.innerHTML = html;
                 }
+                this._autoCompleteEvent();
                 // show!
                 this._showResultsMenu();
             }
@@ -792,6 +799,7 @@ Point, Extent, Locator) {
                 // close list
                 html += '</ul>';
                 this.geocoderMenuInsertNode.innerHTML = html;
+                this._geocoderMenuEvent();
                 domStyle.set(this.geocoderMenuNode, 'display', 'none');
                 domStyle.set(this.geocoderMenuArrowNode, 'display', 'block');
                 domClass.add(this.containerNode, this._GeocoderMultipleClass);
@@ -815,37 +823,20 @@ Point, Extent, Locator) {
                 this.clear();
             }
         },
-        // set up connections
-        _setDelegations: function() {
-            // array of all connections
-            this._delegations = [];
-            // close on click
-            var closeOnClick = on(document, "click", lang.hitch(this, function(e) {
-                this._hideResultsMenu(e);
-            }));
-            this._delegations.push(closeOnClick);
-            // input key up
-            var inputKeyUp = on(this.inputNode, "keyup", lang.hitch(this, function(e) {
-                this._inputKeyUp(e);
-            }));
-            this._delegations.push(inputKeyUp);
-            // input key down
-            var inputKeyDown = on(this.inputNode, "keydown", lang.hitch(this, function(e) {
-                this._inputKeyDown(e);
-            }));
-            this._delegations.push(inputKeyDown);
-            // arrow key down
-            var geocoderMenuButtonKeyDown = on(this.geocoderMenuArrowNode, "keydown", this._geocoderMenuButtonKeyDown());
-            this._delegations.push(geocoderMenuButtonKeyDown);
+        _autoCompleteEvent: function(){
+            // list items
+            var lists = query('[data-item="true"]', this.resultsNode);
+            // remove event
+            if(this._acEvent){
+                this._acEvent.remove();
+            }
             // list item click
-            var listClick = on(this.resultsNode, '[data-item="true"]:click, [data-item="true"]:keydown', lang.hitch(this, function(e) {
+            this._acEvent = on(lists, 'click, keydown', lang.hitch(this, function(e) {
                 clearTimeout(this._queryTimer);
-                // all items
-                var lists = query('[data-item="true"]', this.resultsNode);
                 // index of list item
-                var resultIndex = parseInt(domAttr.get(e.target, 'data-index'), 10);
+                var resultIndex = parseInt(domAttr.get(e.currentTarget, 'data-index'), 10);
                 // input box text
-                var locTxt = domAttr.get(e.target, 'data-text');
+                var locTxt = domAttr.get(e.currentTarget, 'data-text');
                 // next/previous index
                 var newIndex;
                 if (e.type === 'click' || (e.type === 'keydown' && e.keyCode === keys.ENTER)) {
@@ -893,13 +884,18 @@ Point, Extent, Locator) {
                     this._hideMenus();
                 }
             }));
-            this._delegations.push(listClick);
+        },
+        _geocoderMenuEvent: function(){
+            // list items
+            var lists = query('[data-item="true"]', this.geocoderMenuInsertNode);
+            // remove event
+            if(this._gmEvent){
+                this._gmEvent.remove();
+            }
             // select geocoder item
-            var geocoderMenuClick = on(this.geocoderMenuInsertNode, '[data-item="true"]:click, [data-item="true"]:keydown', lang.hitch(this, function(e) {
-                // all items
-                var lists = query('[data-item="true"]', this.geocoderMenuInsertNode);
+            this._gmEvent = on(lists, 'click, keydown', lang.hitch(this, function(e) {
                 // index of list item
-                var resultIndex = parseInt(domAttr.get(e.target, 'data-index'), 10);
+                var resultIndex = parseInt(domAttr.get(e.currentTarget, 'data-index'), 10);
                 // next/previous index
                 var newIndex;
                 if (e.type === 'click' || (e.type === 'keydown' && e.keyCode === keys.ENTER)) {
@@ -927,7 +923,29 @@ Point, Extent, Locator) {
                     this._hideGeolocatorMenu();
                 }
             }));
-            this._delegations.push(geocoderMenuClick);
+        },
+        // set up connections
+        _setDelegations: function() {
+            // array of all connections
+            this._delegations = [];
+            // close on click
+            var closeOnClick = on(document, "click", lang.hitch(this, function(e) {
+                this._hideResultsMenu(e);
+            }));
+            this._delegations.push(closeOnClick);
+            // input key up
+            var inputKeyUp = on(this.inputNode, "keyup", lang.hitch(this, function(e) {
+                this._inputKeyUp(e);
+            }));
+            this._delegations.push(inputKeyUp);
+            // input key down
+            var inputKeyDown = on(this.inputNode, "keydown", lang.hitch(this, function(e) {
+                this._inputKeyDown(e);
+            }));
+            this._delegations.push(inputKeyDown);
+            // arrow key down
+            var geocoderMenuButtonKeyDown = on(this.geocoderMenuArrowNode, "keydown", this._geocoderMenuButtonKeyDown());
+            this._delegations.push(geocoderMenuButtonKeyDown);
         },
         _findThenSelect: function() {
             this.find().then(lang.hitch(this, function(response) {
