@@ -410,7 +410,7 @@ Point, Extent, Locator) {
                 // local search
                 if (!this._arcgisGeocoder.hasOwnProperty('localSearchOptions')) {
                     this._arcgisGeocoder.localSearchOptions = {
-                        minScale: 50000,
+                        minScale: 100000,
                         distance: 50000
                     };
                 }
@@ -674,6 +674,12 @@ Point, Extent, Locator) {
                 this._autoCompleteEvent();
                 // show!
                 this._showResultsMenu();
+            }
+            else{
+               if (this.resultsNode) {
+                    this.resultsNode.innerHTML = html;
+                }
+                this._hideResultsMenu(); 
             }
         },
         // ac query
@@ -1019,7 +1025,7 @@ Point, Extent, Locator) {
                 return;
             } else if (e && e.keyCode === keys.UP_ARROW) {
                 event.stop(e);
-                this._cancelDeferreds();
+                //this._cancelDeferreds();
                 // get list item length
                 var listsLen = lists.length;
                 // if not zero
@@ -1029,7 +1035,7 @@ Point, Extent, Locator) {
                 }
             } else if (e && e.keyCode === keys.DOWN_ARROW) {
                 event.stop(e);
-                this._cancelDeferreds();
+                //this._cancelDeferreds();
                 // if first item
                 if (lists[0]) {
                     // focus first item
