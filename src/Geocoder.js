@@ -410,7 +410,7 @@ Point, Extent, Locator) {
                 // local search
                 if (!this._arcgisGeocoder.hasOwnProperty('localSearchOptions')) {
                     this._arcgisGeocoder.localSearchOptions = {
-                        minScale: 100000,
+                        minScale: 300000,
                         distance: 50000
                     };
                 }
