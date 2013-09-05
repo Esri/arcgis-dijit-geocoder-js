@@ -238,6 +238,8 @@ Point, Extent, Locator) {
             if (focusUtil.curNode) {
                 focusUtil.curNode.blur();
             }
+            this.inputNode.blur();
+            this._hideMenus();
         },
         // go to a location
         select: function(e) {
