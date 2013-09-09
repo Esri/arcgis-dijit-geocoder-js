@@ -158,6 +158,11 @@
                     ],
                     map: map
                 }, dom.byId('search'));
+                
+                
+                myGeocoder.on("load", function(){
+                    console.log('bleh');
+				});
 
 				// start widget
 				myGeocoder.startup();
@@ -243,7 +248,7 @@
                 var attr = {test:true};
                 var infoTemplate = new InfoTemplate("");
 				var graphic = new Graphic(geom,sms,attr,infoTemplate);
-				myGeocoder.find(graphic);
+				//myGeocoder.find(graphic);
 				
 
 				// on search results
