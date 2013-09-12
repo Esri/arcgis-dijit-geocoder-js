@@ -366,6 +366,7 @@ Point, Extent, Locator) {
             this._GeocoderMultipleClass = 'esriGeocoderMultiple';
             this._GeocoderIconClass = 'esriGeocoderIcon';
             this._GeocoderActiveClass = 'esriGeocoderActive';
+            this._GeocoderResultsOpenClass = 'esriGeocoderResultsOpen';
             this._loadingClass = 'esriGeocoderLoading';
             this._resultsContainerClass = 'esriGeocoderResults';
             this._resultsItemClass = 'esriGeocoderResult';
@@ -751,6 +752,7 @@ Point, Extent, Locator) {
         _showResultsMenu: function() {
             // add class to container
             domClass.add(this.containerNode, this._GeocoderActiveClass);
+            domClass.add(this.domNode, this._GeocoderResultsOpenClass);
             // show node
             domStyle.set(this.resultsNode, 'display', 'block');
             // aria
@@ -762,6 +764,7 @@ Point, Extent, Locator) {
             domStyle.set(this.resultsNode, 'display', 'none');
             // add class to container
             domClass.remove(this.containerNode, this._GeocoderActiveClass);
+            domClass.remove(this.domNode, this._GeocoderResultsOpenClass);
             // aria
             domAttr.set(this.resultsNode, 'aria-hidden', 'true');
         },
