@@ -341,9 +341,9 @@ Point, Extent, Locator) {
             // Maximum result locations to return
             this.maxLocations = 5;
             // Minimum amount of characters before searching
-            this.minCharacters = 0;
+            this.minCharacters = 3;
             // Delay before doing the query. To avoid being too chatty.
-            this.searchDelay = 100;
+            this.searchDelay = 300;
             // Show geocoder menu if necessary
             this.geocoderMenu = true;
             // Automatically navigate
@@ -580,10 +580,15 @@ Point, Extent, Locator) {
                     var path = '/find';
                     if (e.autocomplete && this.activeGeocoder.suggest) {
                         path = '/suggest';
+                        
+                    }
+                    var url = this.activeGeocoder.url + path;
+                    if(e.autocomplete && this.activeGeocoder.suggest && this.activeGeocoder.suggestUrl){
+                        url = this.activeGeocoder.suggestUrl;
                     }
                     // send request
                     esriRequest({
-                        url: this.activeGeocoder.url + path,
+                        url: url,
                         content: params,
                         handleAs: 'json',
                         callbackParamName: 'callback',
