@@ -227,7 +227,7 @@ Point, Extent, Locator) {
                 });
             }
             // give me my deferred
-            return def;
+            return def.promise;
         },
         // focus on input
         focus: function() {
@@ -296,7 +296,7 @@ Point, Extent, Locator) {
                 this.onFindResults(error);
                 def.reject(error);
             }));
-            return def;
+            return def.promise;
         },
         _reverseGeocodePoint: function(pt, geometry) {
             var def = new Deferred();
@@ -324,7 +324,7 @@ Point, Extent, Locator) {
             } else {
                 def.reject("no point or active geocoder defined");
             }
-            return def;
+            return def.promise;
         },
         // default settings
         _setPublicDefaults: function() {
@@ -501,7 +501,7 @@ Point, Extent, Locator) {
             this._queryTimer = setTimeout(lang.hitch(this, function() {
                 this._performQuery(def, e);
             }), e.delay);
-            return def;
+            return def.promise;
         },
         // when geocoder search starts
         _performQuery: function(def, e) {
