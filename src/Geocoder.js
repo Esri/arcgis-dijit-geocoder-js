@@ -56,7 +56,7 @@ Point, Extent, Locator) {
             // set default settings
             this._setPublicDefaults();
             // mix in settings and defaults
-            declare.safeMixin(this, options);
+            lang.mixin(this, options);
             // private variables
             this._setPrivateDefaults();
             // watch updates of public properties and update the widget accordingly
