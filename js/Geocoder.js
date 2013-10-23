@@ -11,10 +11,8 @@ define([
     "dojo/keys",
     "dojo/on",
     "dojo/query",
-	//"dojo/i18n!esri/nls/jsapi",
-    //"dojo/text!esri/dijit/templates/Geocoder.html",
-    "dojo/i18n!./nls/jsapi",
-    "dojo/text!./templates/Geocoder.html",
+	"dojo/i18n!zesri/nls/jsapi",
+    "dojo/text!zesri/dijit/templates/Geocoder.html",
     "dojo/uacss",
 
     "dijit/a11yclick",

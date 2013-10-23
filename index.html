@@ -1,365 +1,63 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=7, IE=9, IE=10">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>ArcGIS API for JavaScript | Simple Geocoding</title>
+    <link rel="stylesheet" href="http://js.arcgis.com/3.7/js/esri/css/esri.css">
+    <link rel="stylesheet" type="text/css" href="css/Geocoder.css">
+    <style>
+      html, body, #map {
+        height:100%;
+        width:100%;
+        margin:0;
+        padding:0;
+      }
+      #search {
+        display: block;
+        position: absolute;
+        z-index: 2;
+        top: 20px;
+        left: 74px;
+      }
+    </style>
+    <script type="text/javascript">
+        var package_path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+        var dojoConfig = {
+            // The locationPath logic below may look confusing but all its doing is 
+            // enabling us to load the api from a CDN and load local modules from the correct location.
+            packages: [{
+                name: "modules",
+                location: package_path + '/js'
+            }, {
+                name: "zesri",
+                location: package_path + '/js'
+            }]
+        };
+    </script>
+    <script src="http://js.arcgis.com/3.7/"></script>
+    <script>
+      var map, geocoder;
 
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=7, IE=9" />
-        <!--The viewport meta tag is used to improve the presentation and behavior
-        of the samples on iOS devices-->
-        <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"
-        />
-        <title></title>
-        <link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.7/js/dojo/dijit/themes/soria/soria.css">
-        <link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.7/js/esri/css/esri.css">
-        <link rel="stylesheet" type="text/css" href="css/Geocoder.css">
-        <style type="text/css">
-            html, body, #map {
-                height:100%;
-                width:100%;
-                margin:0;
-                padding:0;
-            }
-            body {
-                background-color:#FFF;
-                overflow:hidden;
-                font-family:"Trebuchet MS";
-            }
-            #search {
-                display: block;
-                position: absolute;
-                z-index: 3;
-                top: 20px;
-                left: 75px;
-            }
-            .spotlight {
-                z-index:-1;
-                position:absolute;
-                left:50%;
-                top:50%;
-                border-radius:50%;
-                opacity:0;
-                box-shadow:
-                inset rgba(0,0,0,0.25) 0px 0px 20px 20px,
-                rgba(0,0,0,0.25) 0px 0px 0px 1000px;
-                transition:all 1000ms;
-                -moz-transition:all 1000ms;
-                -webkit-transition:all 1000ms;
-            }
-            .spotlight-active {
-                z-index:2;
-                opacity:1;
-            }
-        </style>
-        <script type="text/javascript">
-            // host path regular expression
-            var pathRegex = new RegExp(/\/[^\/]+$/);
-            var locationPath = location.pathname.replace(pathRegex, '');
-            // Dojo Config
-            var dojoConfig = {
-                parseOnLoad: true,
-                packages: [
-                {
-                    name: "modules",
-                    location: locationPath + 'src'
-                }]
-            };
-            var myWidget, map;
-        </script>
-        <script src="http://js.arcgis.com/3.7/"></script>
-        <script type="text/javascript">
-        require([
-            "dojo/ready",
-            "dojo/dom",
-            "dojo/dom-construct",
-            "dojo/query",
-            "dojo/_base/Color",
-            "dojo/_base/connect",
-            "modules/Geocoder",
-            
-            
-            "esri/geometry/Point",
-            "esri/symbols/SimpleMarkerSymbol",
-            "dojo/_base/Color",
-            "esri/InfoTemplate",
-            "esri/graphic",
-            
-            "esri/geometry/Extent",
-            "esri/geometry/Multipoint",
-            "esri/geometry/Polygon",
-            "esri/geometry/Polyline",
-            "esri/geometry/ScreenPoint",
-            
-            
-            "esri",
-            "esri/map",
-            "esri/IdentityManager",
-            "esri/arcgis/utils"
-        ],
-        function (ready, dom, domConstruct, query, Color, connect, Geocoder,
-        
-        Point, SimpleMarkerSymbol, Color, InfoTemplate, Graphic,
-        
-        Extent, Multipoint, Polygon, Polyline, ScreenPoint,
-        
-         esri) {
-
-            var myGeocoder;
-
-            function resizeMap() {
-                map.resize();
-                map.reposition();
-            }
-
-            function init(){
-
-                var extent = esri.geometry.Extent({
-                    xmax: -7856121.865955909,
-                    xmin: -8626607.111070449,
-                    ymax: 5442390.7902907785,
-                    ymin: 4729386.19044669,
-                    spatialReference: map.extent.spatialReference
-                });
-                map.setExtent(extent);
-
-                var html = '<div id="spotlight" class="spotlight"></div>';
-
-                domConstruct.place(html, dom.byId('map_container'), 'first');
-
-
-                //resize the map when the browser resizes
-                connect.connect(dijit.byId('map'), 'resize', map, map.resize);
-                connect.connect(window, "onresize", resizeMap);
-
-                connect.connect(map, 'onExtentChange', function(){
-                    removeSpotlight();
-                    
-                    //console.log(JSON.stringify(map.extent.getCenter()));
-                    
-                });
-                
-                connect.connect(map, 'onClick', function(evt){
-                    console.log(evt.screenPoint);
-                    
-                });
-                
-
-                // Geocoder with all common options set. Only map is required.
-                myGeocoder = new Geocoder({
-                    autoComplete: true,
-                    arcgisGeocoder: {
-                        url: 'http://geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer'
-                    },
-                    geocoders:[
-                        {
-                             url: 'http://geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer',
-                             singleLineFieldName: 'singleLine',
-                             name: 'geo2'
-                        }
-                    ],
-                    map: map
-                }, dom.byId('search'));
-                
-                
-                myGeocoder.on("load", function(){
-                    console.log('bleh');
-				});
-
-				// start widget
-				myGeocoder.startup();
-
-
-				myGeocoder.watch("value", function(){
-
-				});
-
-				myWidget = myGeocoder;
-				
-				var geom;
-				
-                //geom = new Point({"x": -8241364.488513179, "y": 5085888.490368734, "spatialReference": map.spatialReference });
-                
-                //geom = new Extent({"xmin":-8607039.231829444,"ymin":4739475.8781803325,"xmax":-7875689.745196914,"ymax":5432301.102557136,"spatialReference":{"wkid":102100}});
-                var mpJson ={"points":[[-8241364.488513179,5085888.490368734],[-8561177.01485834,5036968.792266224],[-8602147.262019193,4615647.892358353]],"spatialReference":map.spatialReference};
-                
-                //geom = new Multipoint(mpJson);
-                
-                var polygonJson  = {"rings":[
-                  [
-                    [-10877122.9377, 4196874.6838999987], 
-                    [-10877491.073, 4198404.1431000009], 
-                    [-10872792.0978, 4200666.6297999993], 
-                    [-10869221.4416, 4203604.6297999993], 
-                    [-10868091.3254, 4204880.5675000027], 
-                    [-10867864.0249, 4205058.9556000009], 
-                    [-10865494.3689, 4206307.3962000012], 
-                    [-10865420.8832, 4206341.5020999983], 
-                    [-10863431.2126, 4207145.8369999975], 
-                    [-10863259.1166, 4207194.0028000027], 
-                    [-10859556.0197, 4207797.7686000019], 
-                    [-10858907.9518, 4208275.2923000008], 
-                    [-10858569.7756, 4208420.0349999964], 
-                    [-10850438.3532, 4209847.744599998], 
-                    [-10846954.0065, 4210534.0552999973], 
-                    [-10846936.3718, 4210537.3250999972], 
-                    [-10842751.9891, 4211265.0438999981], 
-                    [-10842701.9025, 4211272.1406000033], 
-                    [-10840681.1836, 4211493.9178000018], 
-                    [-10840505.6094, 4209894.1766000018], 
-                    [-10842501.1728, 4209675.1603000015], 
-                    [-10846651.7896, 4208953.3138], 
-                    [-10850135.4967, 4208267.1291000023], 
-                    [-10850145.7183, 4208265.184299998], 
-                    [-10850151.8497, 4208264.0833000019], 
-                    [-10858105.3848, 4206867.6070000008], 
-                    [-10858757.6235, 4206387.0101], 
-                    [-10859105.4681, 4206240.6305000037], 
-                    [-10862911.4035, 4205620.0974999964], 
-                    [-10864780.1148, 4204864.6609999985], 
-                    [-10866983.9587, 4203703.5776999965], 
-                    [-10868058.7866, 4202490.0622999966], 
-                    [-10868149.8824, 4202402.2205], 
-                    [-10871844.4038, 4199362.3020000011], 
-                    [-10872006.5951, 4199258.6595999971], 
-                    [-10876792.9088, 4196954.1207000017], 
-                    [-10877122.9377, 4196874.6838999987]
-                  ]
-                ],"spatialReference":map.spatialReference};
-                //geom = new Polygon(polygonJson);
-                
-                
-                var polylineJson = {
-                "paths":[[[-10872006.5951, 4199258.6595999971], 
-                    [-10876792.9088, 4196954.1207000017], 
-                    [-10877122.9377, 4196874.6838999987]]],
-                "spatialReference":map.spatialReference
-              };
-            
-              //geom = new Polyline(polylineJson);
-                
-                geom = new ScreenPoint({x: 287, y: 411});
-                
-                console.log(geom);
-                
-                
-               
-                
-                
-                var sms = new SimpleMarkerSymbol().setStyle(SimpleMarkerSymbol.STYLE_SQUARE).setColor(new Color([255,0,0,0.5]));
-                var attr = {test:true};
-                var infoTemplate = new InfoTemplate("");
-				var graphic = new Graphic(geom,sms,attr,infoTemplate);
-				//myGeocoder.find(graphic);
-				
-
-				// on search results
-				connect.connect(myGeocoder, 'onSearchResults', function(results){
-					console.log('search', results);
-				});
-
-				// on search results
-				connect.connect(myGeocoder, 'onGeocoderSelect', function(results){
-					console.log('onselect', results);
-				});
-
-				// on search results
-				connect.connect(myGeocoder, 'onAutoComplete', function(results){
-					console.log('autocomplete', results);
-				});
-
-				// on params
-				connect.connect(myGeocoder, 'setGeocoderParams', function(params){
-					console.log('params', params);
-				});
-				
-
-
-				function removeSpotlight(){
-					query('.spotlight').removeClass('spotlight-active');
-			        map.graphics.clear();
-				}
-
-				// on select test
-				connect.connect(myGeocoder, 'onSelect', function(result){
-
-				    var spotlight = connect.connect(map, 'onExtentChange', function(){
-                        var geom = esri.geometry.toScreenGeometry(map.extent, map.width, map.height, result.extent);
-                        var width = geom.xmax - geom.xmin;
-                        var height = geom.ymin - geom.ymax;
-
-                        var max = height;
-                        if(width > height){
-                            max = width;
-                        }
-
-                        var margin = '-' + Math.floor(max/2) + 'px 0 0 -' + Math.floor(max/2) + 'px';
-
-                        var pt = result.feature.geometry;
-                        var sms = new esri.symbol.SimpleMarkerSymbol().setStyle(
-                        esri.symbol.SimpleMarkerSymbol.STYLE_SQUARE).setColor(
-                        new Color([255,0,0,0.5]));
-                        var graphic = new esri.Graphic(pt,sms,null,null);
-
-                        map.graphics.add(graphic);
-
-                        query('.spotlight').addClass('spotlight-active').style({
-                            width: max + 'px',
-                            height: max + 'px',
-                            margin: margin
-                        });
-                        connect.disconnect(spotlight);
-                    });
-
-
-				});
-
-				// on clear test
-				connect.connect(myGeocoder, 'onClear', function(){
-			        removeSpotlight();
-			    });
-            }
-
-            ready(function () {
-                esri.config.defaults.io.proxyUrl = "/arcgisserver/apis/javascript/proxy/proxy.ashx";
-                //This service is for development and testing purposes only. We recommend that you create your own geometry service for use within your applications.
-                esri.config.defaults.geometryService = new esri.tasks.GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
-
-                var urlObject = esri.urlToObject(document.location.href);
-                var webmap = "6e03e8c26aad4b9c92a87c1063ddb0e3";
-                var bingMapsKey = "Enter your Bing Maps Key";
-                if (urlObject.query) {
-                    webmap = urlObject.query.webmap;
-                    bingMapsKey = urlObject.query.bingMapsKey;
-                }
-
-                var mapDeferred = esri.arcgis.utils.createMap(webmap, "map", {
-                    mapOptions: {
-                        slider: true,
-                        sliderStyle: 'small'
-                    },
-                    bingMapsKey: bingMapsKey,
-                    geometryServiceURL: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer"
-                });
-                mapDeferred.addCallback(function (response) {
-                    map = response.map;
-                    if(map.loaded){
-                        init();
-                    }
-                    else{
-                        connect.connect(map, "onload", init);
-                    }
-                    //resize the map when the browser resizes
-                    connect.connect(dijit.byId('map'), 'resize', map, map.resize);
-                    connect.connect(window, "onresize", resizeMap);
-                });
-                mapDeferred.addErrback(function (error) {
-                    console.log("Map creation failed" + error.toString());
-                });
-            });
+      require([
+        "esri/map", "zesri/Geocoder", "dojo/domReady!"
+      ], function(Map, Geocoder) {
+        map = new Map("map",{
+          basemap: "gray",
+          center: [-120.435, 46.159], // lon, lat
+          zoom: 7 
         });
-        </script>
-    </head>
-    <body dir="" class="soria">
-        <div id="search"></div>
-        <div dir="ltr" id="map"></div>
-    </body>
+
+        geocoder = new Geocoder({ 
+          map: map 
+        }, "search");
+        geocoder.startup();
+      });
+    </script>
+  </head>
+  <body>
+    <div id="search"></div>
+    <div id="map"></div>
+  </body>
 </html>
