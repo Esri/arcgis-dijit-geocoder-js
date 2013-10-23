@@ -17,7 +17,7 @@ define([
     "dojo/text!./templates/Geocoder.html",
     "dojo/uacss",
 
-    "dijit/_OnDijitClickMixin",
+    "dijit/a11yclick",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetBase",
     "dijit/focus",
@@ -34,10 +34,10 @@ define([
 ],
 function(
 declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, JSON, keys, on, query, i18n, template, has,
-_OnDijitClickMixin, _TemplatedMixin, _WidgetBase, focusUtil,
+a11yclick, _TemplatedMixin, _WidgetBase, focusUtil,
 esriNS, SpatialReference, Graphic, esriRequest, _EventedWidget,
 Point, Extent, Locator) {
-    var Widget = declare([_EventedWidget, /*_WidgetBase,*/ _OnDijitClickMixin, _TemplatedMixin], {
+    var Widget = declare([_EventedWidget, _TemplatedMixin], {
         declaredClass: "esri.dijit.Geocoder",
         // Set template file HTML
         templateString: template,
@@ -105,6 +105,27 @@ Point, Extent, Locator) {
         },
         // post create widget function
         postCreate: function() {
+            this.inherited(arguments);
+            // submit button
+            this.own(
+                on(this.submitNode, a11yclick, lang.hitch(this, this._findThenSelect))
+            );
+            // geocoder menu
+            this.own(
+                on(this.geocoderMenuArrowNode, a11yclick, lang.hitch(this, this._toggleGeolocatorMenu))
+            );
+            // input click
+            this.own(
+                on(this.inputNode, a11yclick, lang.hitch(this, this._inputClick))
+            );
+            // clear text
+            this.own(
+                on(this.clearNode, a11yclick, lang.hitch(this, this.clear))
+            );
+            // hide menu
+            this.own(
+                on(this.geocoderMenuCloseNode, a11yclick, lang.hitch(this, this._hideGeolocatorMenu))
+            );
             // build geocoder list
             this._updateGeocoder();
             // setup connections
