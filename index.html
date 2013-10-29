@@ -49,10 +49,21 @@
           zoom: 7 
         });
 
-        geocoder = new Geocoder({ 
-          map: map 
+        geocoder = new Geocoder({
+            autoComplete: true,
+            map: map 
         }, "search");
         geocoder.startup();
+        
+        
+        
+        geocoder.on('load', function(){
+            geocoder.find('texas').then(function(results){
+                console.log(results);
+            });
+        });
+        
+        
       });
     </script>
   </head>
