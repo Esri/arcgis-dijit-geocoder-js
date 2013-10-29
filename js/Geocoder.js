@@ -193,7 +193,7 @@ Point, Extent, Locator) {
         destroy: function() {
             var i;
             // if delegations
-            if (this._events) {
+            if (this._events && this._events.length) {
                 // disconnect all events
                 for (i = 0; i < this._events.length; i++) {
                     this._events[i].remove();
