@@ -86,8 +86,8 @@
         var geocoders = [{
             url: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/ESRI_Places_World/GeocodeServer",
             name: "ESRI_Places_World",
+            outFields: "Xmin, Xmax, Ymin, Ymax",
             singleLineFieldName: "SingleLine"
-        
         }];
 
         geocoder = new Geocoder({
