@@ -77,7 +77,7 @@ Point, Extent, Locator) {
             };
             // default settings
             this.options = {
-                autoComplete: false, // show autocomplete?
+                autoComplete: false, // show autoComplete?
                 arcgisGeocoder: true, // use esri geocoder
                 value: "", // Value of input
                 theme: "simpleGeocoder", // Theme
@@ -144,10 +144,6 @@ Point, Extent, Locator) {
                 this.destroy();
                 return;
             }
-            // add clear button if already populated
-            if (this.get("value")) {
-                this._checkStatus();
-            }
             // if map is in options
             if (this.get("map")) {
                 // once map is loaded
@@ -190,6 +186,12 @@ Point, Extent, Locator) {
             this._updateGeocoder();
             // setup connections
             this._setupEvents();
+            // add clear button if already populated
+            if (this.get("value")) {
+                this._checkStatus();
+            }
+            // hide menus
+            this._hideMenus();
         },
         destroy: function() {
             this._removeEvents();
@@ -348,8 +350,6 @@ Point, Extent, Locator) {
             this.set("loaded", true);
             // loaded
             this.onLoad();
-            // hide menus
-            this._hideMenus();
         },
         _queryDeferred: function(search) {
             var def = new Deferred();
@@ -536,7 +536,7 @@ Point, Extent, Locator) {
                     singleLine += this.get("activeGeocoder").suffix;
                 }
                 // if we can use the find function
-                if (this.get("activeGeocoder") === this._arcgisGeocoder) {
+                if (this.get("activeGeocoder").suggest) {
                     var mapSR = this._defaultSR;
                     if (this.get("map")) {
                         mapSR = this.get("map").spatialReference;
@@ -586,12 +586,12 @@ Point, Extent, Locator) {
                         params.bbox = JSON.stringify(bbox);
                     }
                     var path = '/find';
-                    if (e.autocomplete && this.get("activeGeocoder").suggest) {
+                    if (e.autoComplete && this.get("activeGeocoder").suggest) {
                         path = '/suggest';
                         
                     }
                     var url = this.get("activeGeocoder").url + path;
-                    if(e.autocomplete && this.get("activeGeocoder").suggest && this.get("activeGeocoder").suggestUrl){
+                    if(e.autoComplete && this.get("activeGeocoder").suggest && this.get("activeGeocoder").suggestUrl){
                         url = this.get("activeGeocoder").suggestUrl;
                     }
                     // send request
@@ -699,10 +699,10 @@ Point, Extent, Locator) {
             }
         },
         // ac query
-        _autocomplete: function() {
+        _autoComplete: function() {
             this._query({
                 delay: this.get("searchDelay"),
-                autocomplete: true,
+                autoComplete: true,
                 search: this.get("value")
             }).then(lang.hitch(this, function(response) {
                 this.onAutoComplete(response);
@@ -788,7 +788,7 @@ Point, Extent, Locator) {
         },
         // create menu for changing active geocoder
         _insertGeocoderMenuItems: function() {
-            if (this.get("geocoderMenu") && this._geocoders.length > 1) {
+            if (this.get("geocoderMenu") && this._geocoders && this._geocoders.length > 1) {
                 var html = '';
                 var layerClass = '',
                     i;
@@ -994,6 +994,8 @@ Point, Extent, Locator) {
                 }));
                 this._events.push(mapClick);
             }
+            this._geocoderMenuEvent();
+            this._autoCompleteEvent();
         },
         _findThenSelect: function() {
             this.find().then(lang.hitch(this, function(response) {
@@ -1038,7 +1040,7 @@ Point, Extent, Locator) {
                     this._cancelDeferreds();
                     this._hideMenus();
                 } else if (this.get("autoComplete") && alength >= this.get("minCharacters")) {
-                    this._autocomplete();
+                    this._autoComplete();
                 } else {
                     // hide menus
                     this._hideMenus();
