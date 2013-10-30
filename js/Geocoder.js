@@ -125,6 +125,7 @@ Point, Extent, Locator) {
             this.watch("geocoders", this._updateGeocoder);
             this.watch("arcgisGeocoder", this._updateGeocoder);
             this.watch("geocoderMenu", this._updateGeocoder);
+            this.watch("map", this._setupEvents);
             // widget node
             this.domNode = srcRefNode;
         },
@@ -191,20 +192,7 @@ Point, Extent, Locator) {
             this._setupEvents();
         },
         destroy: function() {
-            var i;
-            // if delegations
-            if (this._events && this._events.length) {
-                // disconnect all events
-                for (i = 0; i < this._events.length; i++) {
-                    this._events[i].remove();
-                }
-            }
-            if(this._acEvent){
-                this._acEvent.remove();
-            }
-            if(this._gmEvent){
-                this._gmEvent.remove();
-            }
+            this._removeEvents();
             // remove html
             domConstruct.empty(this.domNode);
             this.inherited(arguments);
@@ -960,10 +948,27 @@ Point, Extent, Locator) {
                 }
             }));
         },
-        // set up connections
-        _setupEvents: function() {
+        _removeEvents: function(){
+            var i;
+            // if delegations
+            if (this._events && this._events.length) {
+                // disconnect all events
+                for (i = 0; i < this._events.length; i++) {
+                    this._events[i].remove();
+                }
+            }
+            if(this._acEvent){
+                this._acEvent.remove();
+            }
+            if(this._gmEvent){
+                this._gmEvent.remove();
+            }
             // array of all connections
             this._events = [];
+        },
+        // set up connections
+        _setupEvents: function() {
+            this._removeEvents();
             // close on click
             var closeOnClick = on(document, "click", lang.hitch(this, function(e) {
                 this._hideResultsMenu(e);
@@ -982,6 +987,13 @@ Point, Extent, Locator) {
             // arrow key down
             var geocoderMenuButtonKeyDown = on(this.geocoderMenuArrowNode, "keydown", this._geocoderMenuButtonKeyDown());
             this._events.push(geocoderMenuButtonKeyDown);
+            // if map set
+            if(this.get("map")){
+                var mapClick = on(this.get("map"), "click", lang.hitch(this, function() {
+                    this.blur();
+                }));
+                this._events.push(mapClick);
+            }
         },
         _findThenSelect: function() {
             this.find().then(lang.hitch(this, function(response) {
