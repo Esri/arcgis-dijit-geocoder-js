@@ -55,6 +55,7 @@ Point, Extent, Locator) {
                 GeocoderIconClass: 'esriGeocoderIcon',
                 GeocoderActiveClass: 'esriGeocoderActive',
                 GeocoderResultsOpenClass: 'esriGeocoderResultsOpen',
+                GeocoderMenuOpenClass: 'esriGeocoderMenuOpen',
                 loadingClass: 'esriGeocoderLoading',
                 resultsContainerClass: 'esriGeocoderResults',
                 resultsItemClass: 'esriGeocoderResult',
@@ -737,6 +738,7 @@ Point, Extent, Locator) {
         _showGeolocatorMenu: function() {
             // add class to container                
             domClass.add(this.containerNode, this._css.activeMenuClass);
+            domClass.add(this.domNode, this._css.GeocoderMenuOpenClass);
             // display menu node
             domStyle.set(this.geocoderMenuNode, 'display', 'block');
             // aria
@@ -746,6 +748,7 @@ Point, Extent, Locator) {
         // hide geocoder selection menu
         _hideGeolocatorMenu: function() {
             domClass.remove(this.containerNode, this._css.activeMenuClass);
+            domClass.remove(this.domNode, this._css.GeocoderMenuOpenClass);
             domStyle.set(this.geocoderMenuNode, 'display', 'none');
             // aria
             domAttr.set(this.geocoderMenuInsertNode, 'aria-hidden', 'true');
