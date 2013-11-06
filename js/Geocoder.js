@@ -83,7 +83,7 @@ Point, Extent, Locator) {
                 value: "", // Value of input
                 theme: "simpleGeocoder", // Theme
                 activeGeocoderIndex: 0, // default geocoder index
-                maxLocations: 5, // Maximum result locations to return
+                maxLocations: 1, // Maximum result locations to return
                 minCharacters: 3, // Minimum amount of characters before searching
                 searchDelay: 300,// Delay before doing the query. To avoid being too chatty.
                 geocoderMenu: true, // Show geocoder menu if necessary
@@ -536,6 +536,8 @@ Point, Extent, Locator) {
                 if (this.get("activeGeocoder").suffix) {
                     singleLine += this.get("activeGeocoder").suffix;
                 }
+                // maximum results
+                var maxLocations = this.get("maxLocations") || 1;
                 // if we can use the find function
                 if (this.get("activeGeocoder").suggest) {
                     var mapSR = this._defaultSR;
@@ -545,6 +547,7 @@ Point, Extent, Locator) {
                     // Query object
                     params = {
                         "text": singleLine,
+                        "maxLocations": maxLocations,
                         "outSR": mapSR.wkid || JSON.stringify(mapSR.toJson()),
                         "f": "json"
                     };
@@ -566,10 +569,6 @@ Point, Extent, Locator) {
                     // if outfields
                     if (outFields) {
                         params.outFields = outFields;
-                    }
-                    // if max locations set
-                    if (this.get("maxLocations")) {
-                        params.maxLocations = this.get("maxLocations");
                     }
                     // Esri Geocoder country
                     if (this.get("activeGeocoder").sourceCountry) {
@@ -610,7 +609,8 @@ Point, Extent, Locator) {
                 } else {
                     // Params
                     params = {
-                        address: {}
+                        address: {},
+                        maxLocations: maxLocations
                     };
                     if (e.magicKey) {
                         params.magicKey = e.magicKey;
@@ -1207,7 +1207,7 @@ Point, Extent, Locator) {
             // if results
             if (e && e.length) {
                 var i = 0;
-                for (i; i < e.length && i < this.get("maxLocations"); i++) {
+                for (i; i < e.length; i++) {
                     var newResult = this._hydrateResult(e[i]);
                     // add to return array
                     results.push(newResult);
