@@ -83,7 +83,7 @@ Point, Extent, Locator) {
                 value: "", // Value of input
                 theme: "simpleGeocoder", // Theme
                 activeGeocoderIndex: 0, // default geocoder index
-                maxLocations: 1, // Maximum result locations to return
+                maxLocations: 6, // Maximum result locations to return
                 minCharacters: 3, // Minimum amount of characters before searching
                 searchDelay: 300,// Delay before doing the query. To avoid being too chatty.
                 geocoderMenu: true, // Show geocoder menu if necessary
@@ -537,7 +537,7 @@ Point, Extent, Locator) {
                     singleLine += this.get("activeGeocoder").suffix;
                 }
                 // maximum results
-                var maxLocations = this.get("maxLocations") || 1;
+                var maxLocations = this.get("maxLocations") || 6;
                 // if we can use the find function
                 if (this.get("activeGeocoder").suggest) {
                     var mapSR = this._defaultSR;
