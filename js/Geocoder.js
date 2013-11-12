@@ -151,7 +151,7 @@ Point, Extent, Locator) {
                 if (this.get("map").loaded) {
                     this._init();
                 } else {
-                    on(this.get("map"), "load", lang.hitch(this, function() {
+                    on.once(this.get("map"), "load", lang.hitch(this, function() {
                         this._init();
                     }));
                 }
