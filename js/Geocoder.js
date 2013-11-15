@@ -41,6 +41,8 @@ Point, Extent, Locator) {
             "find-results": ["results"],
             "auto-complete": ["results"],
             "geocoder-select": ["geocoder"],
+            "auto-complete-select-start":["result"],
+            "auto-complete-select-finish":["result"],
             "clear": true,
             "enter-key-select": true,
             "load": true
@@ -343,6 +345,9 @@ Point, Extent, Locator) {
         onEnterKeySelect: function() {},
         // widget loaded
         onLoad: function() {},
+        // widget loaded
+        onAutoCompleteSelectStart: function() {},
+        onAutoCompleteSelectFinish: function() {},
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */
@@ -872,11 +877,19 @@ Point, Extent, Locator) {
                     // set current text var
                     this.set("value", locTxt);
                     if (this.get("results") && this.get("results")[resultIndex]) {
+                        // result
+                        var result = this.get("results")[resultIndex];
+                        
+                        this.onAutoCompleteSelectStart(result);
+                        
+                        
                         if (this.get("results")[resultIndex].name) {
                             this.select(this.get("results")[resultIndex]);
+                            this.onAutoCompleteSelectFinish(result);
                         } else {
-                            var text = this.get("results")[resultIndex].text;
-                            var magicKey = this.get("results")[resultIndex].magicKey || null;
+                            
+                            var text = result.text;
+                            var magicKey = result.magicKey || null;
                             var params = {
                                 delay: 0,
                                 search: text,
@@ -885,6 +898,7 @@ Point, Extent, Locator) {
                             this._query(params).then(lang.hitch(this, function(response) {
                                 // Locate
                                 this.select(response.results[0]);
+                                this.onAutoCompleteSelectFinish(result);
                             }));
                         }
                     }
