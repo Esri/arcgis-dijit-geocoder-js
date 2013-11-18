@@ -1207,7 +1207,7 @@ Point, Extent, Locator) {
             // if results
             if (e && e.length) {
                 var i = 0;
-                for (i; i < e.length && i < 5; i++) {
+                for (i; i < e.length && i < this.get("maxLocations"); i++) {
                     var newResult = this._hydrateResult(e[i]);
                     // add to return array
                     results.push(newResult);
