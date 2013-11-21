@@ -662,7 +662,7 @@ Point, Extent, Locator) {
                 var regex = new RegExp('(' + partialMatch + ')', 'gi');
                 html += '<ul role="presentation">';
                 // for each result
-                for (i = 0; i < this.get("results").length; ++i) {
+                for (i = 0; i < this.get("results").length && i < 5; ++i) {
                     // location text
                     var text = this.get("results")[i].text || this.get("results")[i].name;
                     // set layer class
@@ -1207,7 +1207,7 @@ Point, Extent, Locator) {
             // if results
             if (e && e.length) {
                 var i = 0;
-                for (i; i < e.length && i < this.get("maxLocations"); i++) {
+                for (i; i < e.length; i++) {
                     var newResult = this._hydrateResult(e[i]);
                     // add to return array
                     results.push(newResult);
