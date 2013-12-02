@@ -24,13 +24,14 @@ define([
     "esri/dijit/_EventedWidget",
     "esri/geometry/Point",
     "esri/geometry/Extent",
-    "esri/tasks/locator"
+    "esri/tasks/locator",
+    "esri/geometry/scaleUtils"
 ],
 function(
 declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, JSON, keys, on, query, i18n, template, has,
 a11yclick, _TemplatedMixin, focusUtil,
 esriNS, SpatialReference, Graphic, esriRequest, _EventedWidget,
-Point, Extent, Locator) {
+Point, Extent, Locator, scaleUtils) {
     var Widget = declare([_EventedWidget, _TemplatedMixin], {
         declaredClass: "esri.dijit.Geocoder",
         // Set template file HTML
@@ -91,7 +92,8 @@ Point, Extent, Locator) {
                 showResults: true, // show result suggestions
                 map: null,
                 activeGeocoder: null,
-                geocoders: null
+                geocoders: null,
+                zoomScale: 10000
             };
             // mix in settings and defaults
             var defaults = lang.mixin({}, this.options, options);
@@ -110,6 +112,7 @@ Point, Extent, Locator) {
             this.set("map", defaults.map);
             this.set("activeGeocoder", defaults.activeGeocoder);
             this.set("geocoders", defaults.geocoders);
+            this.set("zoomScale", defaults.zoomScale);
             // results holder
             this.set("results", []);
             // languages
@@ -1165,7 +1168,7 @@ Point, Extent, Locator) {
                 var point = new Point(e.location.x, e.location.y, sR);
                 // create extent from point
                 if (this.get("map")) {
-                    newResult.extent = this.get("map").extent.centerAt(point);
+                    newResult.extent = scaleUtils.getExtentForScale(this.get("map"), this.get("zoomScale")).centerAt(point);
                 } else {
                     // create extent
                     newResult.extent = new Extent({
