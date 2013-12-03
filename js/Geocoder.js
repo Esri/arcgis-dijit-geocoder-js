@@ -1168,7 +1168,15 @@ Point, Extent, Locator, scaleUtils) {
                 var point = new Point(e.location.x, e.location.y, sR);
                 // create extent from point
                 if (this.get("map")) {
-                    newResult.extent = scaleUtils.getExtentForScale(this.get("map"), this.get("zoomScale")).centerAt(point);
+                    // current map scale is greater than zoomScale
+                    if(this.get("map").getScale() > this.get("zoomScale")){
+                        // get extent for scale at zoom scale
+                        newResult.extent = scaleUtils.getExtentForScale(this.get("map"), this.get("zoomScale")).centerAt(point);    
+                    }
+                    else{
+                        // use centered extent at current scale
+                        newResult.extent = this.get("map").extent.centerAt(point);
+                    }
                 } else {
                     // create extent
                     newResult.extent = new Extent({
