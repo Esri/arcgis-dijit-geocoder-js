@@ -662,7 +662,7 @@ Point, Extent, Locator, scaleUtils) {
                 var partialMatch = this.get("value"),
                     i;
                 // partial match highlight
-                var regex = new RegExp('(' + partialMatch + ')', 'gi');
+                var r = new RegExp('(' + partialMatch + ')', 'gi');
                 html += '<ul role="presentation">';
                 // for each result
                 for (i = 0; i < this.get("results").length && i < 5; ++i) {
@@ -683,7 +683,7 @@ Point, Extent, Locator, scaleUtils) {
                         layerClass += ' ' + this._css.resultsItemLastClass;
                     }
                     // create list item
-                    html += '<li data-text="' + text + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + text.replace(regex, '<strong class="' + this._css.resultsPartialMatchClass + '">' + partialMatch + '</strong>') + '</li>';
+                    html += '<li data-text="' + text + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + text.replace(r, '<strong class="' + this._css.resultsPartialMatchClass + '">$1</strong>') + '</li>';
                 }
                 // close list
                 html += '</ul>';
