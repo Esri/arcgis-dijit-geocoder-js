@@ -683,7 +683,7 @@ Point, Extent, Locator, scaleUtils) {
                         layerClass += ' ' + this._css.resultsItemLastClass;
                     }
                     // create list item
-                    html += '<li data-text="' + text + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + text.replace(r, '<strong class="' + this._css.resultsPartialMatchClass + '">$1</strong>') + '</li>';
+                    html += '<li title="' + text + '" data-text="' + text + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + text.replace(r, '<strong class="' + this._css.resultsPartialMatchClass + '">$1</strong>') + '</li>';
                 }
                 // close list
                 html += '</ul>';
