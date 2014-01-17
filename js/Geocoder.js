@@ -1195,7 +1195,7 @@ Point, Extent, Locator, scaleUtils) {
                 } else if (e.hasOwnProperty('address') && typeof e.address === 'object' && e.address.hasOwnProperty('Address')) {
                     newResult.name = e.address.Address;
                 } else {
-                    newResult.name = '';
+                    newResult.name = e.location.x + ',' + e.location.y;
                 }
                 // create attributes
                 var attributes = {};
