@@ -88,7 +88,14 @@
             name: "ESRI_Places_World",
             outFields: "Xmin, Xmax, Ymin, Ymax",
             singleLineFieldName: "SingleLine"
-        }];
+        },
+        {
+            url: "http://geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+            name: "ESRI_Places_World2",
+            outFields: "Xmin, Xmax, Ymin, Ymax",
+            singleLineFieldName: "SingleLine"
+        }
+        ];
 
         geocoder = new Geocoder({
             autoComplete: true, // show autocomplete?
@@ -129,7 +136,8 @@
         
         
         geocoder.on('load', function(){
-                        // text
+            
+            // text
             //geocoder.find('texas');
             
             // test graphic        

@@ -1131,72 +1131,30 @@ Point, Extent, Locator, scaleUtils) {
             this._checkStatus();
         },
         _hydrateResult: function(e) {
-            var sR = this._defaultSR;
+            // result to add
+            var newResult = {}, sR = this._defaultSR;
+            // set default spatial reference
             if (this.get("map")) {
                 sR = this.get("map").spatialReference;
             }
-            // result to add
-            var newResult = {},
-                geometry;
             // suggest api result
             if (e.hasOwnProperty('text') && e.hasOwnProperty('magicKey')) {
+                // don't do anything
                 return e;
             }
-            // find geocoder
-            if (e.hasOwnProperty('extent')) {
-                // set extent
-                newResult.extent = new Extent(e.extent);
-                // set spatial ref
-                newResult.extent.setSpatialReference(new SpatialReference(sR));
-                // set name
-                if (e.hasOwnProperty('name')) {
-                    newResult.name = e.name;
-                }
-                // Set feature
-                if (e.hasOwnProperty('feature')) {
-                    newResult.feature = new Graphic(e.feature);
-                    geometry = newResult.feature.geometry;
-                    // fix goemetry SR
-                    if (geometry) {
-                        geometry.setSpatialReference(sR);
-                    }
+            // need feature graphic
+            if (e.hasOwnProperty('feature')) {
+                newResult.feature = new Graphic(e.feature);
+                var geometry = newResult.feature.geometry;
+                // fix goemetry SR
+                if (geometry) {
+                    geometry.setSpatialReference(sR);
                 }
             }
             // address candidates geocoder
             else if (e.hasOwnProperty('location')) {
                 // create point
-                var point = new Point(e.location.x, e.location.y, sR);
-                // create extent from point
-                if (this.get("map")) {
-                    // current map scale is greater than zoomScale
-                    if(this.get("map").getScale() > this.get("zoomScale")){
-                        // get extent for scale at zoom scale
-                        newResult.extent = scaleUtils.getExtentForScale(this.get("map"), this.get("zoomScale")).centerAt(point);    
-                    }
-                    else{
-                        // use centered extent at current scale
-                        newResult.extent = this.get("map").extent.centerAt(point);
-                    }
-                } else {
-                    // create extent
-                    newResult.extent = new Extent({
-                        "xmin": point.x - 0.25,
-                        "ymin": point.y - 0.25,
-                        "xmax": point.x + 0.25,
-                        "ymax": point.y + 0.25,
-                        "spatialReference": {
-                            "wkid": 4326
-                        }
-                    });
-                }
-                // set name
-                if (e.hasOwnProperty('address') && typeof e.address === 'string') {
-                    newResult.name = e.address;
-                } else if (e.hasOwnProperty('address') && typeof e.address === 'object' && e.address.hasOwnProperty('Address')) {
-                    newResult.name = e.address.Address;
-                } else {
-                    newResult.name = e.location.x + ',' + e.location.y;
-                }
+                var pt = new Point(e.location.x, e.location.y, sR);
                 // create attributes
                 var attributes = {};
                 // set attributes
@@ -1207,7 +1165,60 @@ Point, Extent, Locator, scaleUtils) {
                 if (e.hasOwnProperty('score')) {
                     attributes.score = e.score;
                 }
-                newResult.feature = new Graphic(point, null, attributes, null);
+                newResult.feature = new Graphic(pt, null, attributes, null);
+            }
+            else{
+                newResult.feature = null;
+            }
+            // need extent
+            if (e.hasOwnProperty('extent')) {
+                // set extent
+                newResult.extent = new Extent(e.extent);
+                // set spatial ref
+                newResult.extent.setSpatialReference(new SpatialReference(sR));
+            }
+            else if(newResult.feature && newResult.feature.geometry){
+                // create extent from point
+                if (this.get("map")) {
+                    // current map scale is greater than zoomScale
+                    if(this.get("map").getScale() > this.get("zoomScale")){
+                        // get extent for scale at zoom scale
+                        newResult.extent = scaleUtils.getExtentForScale(this.get("map"), this.get("zoomScale")).centerAt(newResult.feature.geometry);
+                    }
+                    else{
+                        // use centered extent at current scale
+                        newResult.extent = this.get("map").extent.centerAt(newResult.feature.geometry);
+                    }
+                } else {
+                    // create extent
+                    newResult.extent = new Extent({
+                        "xmin": newResult.feature.geometry.x - 0.25,
+                        "ymin": newResult.feature.geometry.y - 0.25,
+                        "xmax": newResult.feature.geometry.x + 0.25,
+                        "ymax": newResult.feature.geometry.y + 0.25,
+                        "spatialReference": {
+                            "wkid": 4326
+                        }
+                    });
+                }
+            }
+            else{
+                newResult.extent = null;
+            }
+            // need name
+            if (e.hasOwnProperty('name')) {
+                newResult.name = e.name;
+            }
+            // set name
+            else if (e.hasOwnProperty('address') && typeof e.address === 'string') {
+                newResult.name = e.address;
+            } else if (e.hasOwnProperty('address') && typeof e.address === 'object' && e.address.hasOwnProperty('Address')) {
+                newResult.name = e.address.Address;
+            } else if(newResult.feature && newResult.feature.geometry) {
+                newResult.name = newResult.feature.geometry.x + ',' + newResult.feature.geometry.y;
+            }
+            else{
+                newResult.name = '';
             }
             return newResult;
         },
