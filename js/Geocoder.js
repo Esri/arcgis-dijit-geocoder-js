@@ -415,7 +415,7 @@ Point, Extent, Locator, scaleUtils) {
                 // ArcGIS Geocoder URL
                 if (!this._arcgisGeocoder.url) {
                     // set esri geocoder options
-                    this._arcgisGeocoder.url = location.protocol + "//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+                    this._arcgisGeocoder.url = (location.protocol === "file:" ? "http:" : location.protocol) + "//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
                 }
                 // if name not set
                 if (!this._arcgisGeocoder.name) {
