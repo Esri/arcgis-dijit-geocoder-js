@@ -11,8 +11,8 @@ define([
     "dojo/keys",
     "dojo/on",
     "dojo/query",
-	"dojo/i18n!zesri/nls/jsapi",
-    "dojo/text!zesri/dijit/templates/Geocoder.html",
+	"dojo/i18n!application/nls/jsapi",
+    "dojo/text!application/dijit/templates/Geocoder.html",
     "dojo/uacss",
     "dijit/a11yclick",
     "dijit/_TemplatedMixin",
@@ -24,13 +24,14 @@ define([
     "esri/dijit/_EventedWidget",
     "esri/geometry/Point",
     "esri/geometry/Extent",
-    "esri/tasks/locator"
+    "esri/tasks/locator",
+    "esri/geometry/scaleUtils"
 ],
 function(
 declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, JSON, keys, on, query, i18n, template, has,
 a11yclick, _TemplatedMixin, focusUtil,
 esriNS, SpatialReference, Graphic, esriRequest, _EventedWidget,
-Point, Extent, Locator) {
+Point, Extent, Locator, scaleUtils) {
     var Widget = declare([_EventedWidget, _TemplatedMixin], {
         declaredClass: "esri.dijit.Geocoder",
         // Set template file HTML
@@ -93,7 +94,8 @@ Point, Extent, Locator) {
                 showResults: true, // show result suggestions
                 map: null,
                 activeGeocoder: null,
-                geocoders: null
+                geocoders: null,
+                zoomScale: 10000
             };
             // mix in settings and defaults
             var defaults = lang.mixin({}, this.options, options);
@@ -112,6 +114,7 @@ Point, Extent, Locator) {
             this.set("map", defaults.map);
             this.set("activeGeocoder", defaults.activeGeocoder);
             this.set("geocoders", defaults.geocoders);
+            this.set("zoomScale", defaults.zoomScale);
             // results holder
             this.set("results", []);
             // languages
@@ -417,7 +420,7 @@ Point, Extent, Locator) {
                 // ArcGIS Geocoder URL
                 if (!this._arcgisGeocoder.url) {
                     // set esri geocoder options
-                    this._arcgisGeocoder.url = location.protocol + "//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+                    this._arcgisGeocoder.url = (location.protocol === "file:" ? "http:" : location.protocol) + "//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
                 }
                 // if name not set
                 if (!this._arcgisGeocoder.name) {
@@ -664,10 +667,10 @@ Point, Extent, Locator) {
                 var partialMatch = this.get("value"),
                     i;
                 // partial match highlight
-                var regex = new RegExp('(' + partialMatch + ')', 'gi');
+                var r = new RegExp('(' + partialMatch + ')', 'gi');
                 html += '<ul role="presentation">';
                 // for each result
-                for (i = 0; i < this.get("results").length; ++i) {
+                for (i = 0; i < this.get("results").length && i < 5; ++i) {
                     // location text
                     var text = this.get("results")[i].text || this.get("results")[i].name;
                     // set layer class
@@ -685,7 +688,7 @@ Point, Extent, Locator) {
                         layerClass += ' ' + this._css.resultsItemLastClass;
                     }
                     // create list item
-                    html += '<li data-text="' + text + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + text.replace(regex, '<strong class="' + this._css.resultsPartialMatchClass + '">' + partialMatch + '</strong>') + '</li>';
+                    html += '<li title="' + text + '" data-text="' + text + '" data-item="true" data-index="' + i + '" role="menuitem" tabindex="0" class="' + layerClass + '">' + text.replace(r, '<strong class="' + this._css.resultsPartialMatchClass + '">$1</strong>') + '</li>';
                 }
                 // close list
                 html += '</ul>';
@@ -1142,64 +1145,30 @@ Point, Extent, Locator) {
             this._checkStatus();
         },
         _hydrateResult: function(e) {
-            var sR = this._defaultSR;
+            // result to add
+            var newResult = {}, sR = this._defaultSR;
+            // set default spatial reference
             if (this.get("map")) {
                 sR = this.get("map").spatialReference;
             }
-            // result to add
-            var newResult = {},
-                geometry;
             // suggest api result
             if (e.hasOwnProperty('text') && e.hasOwnProperty('magicKey')) {
+                // don't do anything
                 return e;
             }
-            // find geocoder
-            if (e.hasOwnProperty('extent')) {
-                // set extent
-                newResult.extent = new Extent(e.extent);
-                // set spatial ref
-                newResult.extent.setSpatialReference(new SpatialReference(sR));
-                // set name
-                if (e.hasOwnProperty('name')) {
-                    newResult.name = e.name;
-                }
-                // Set feature
-                if (e.hasOwnProperty('feature')) {
-                    newResult.feature = new Graphic(e.feature);
-                    geometry = newResult.feature.geometry;
-                    // fix goemetry SR
-                    if (geometry) {
-                        geometry.setSpatialReference(sR);
-                    }
+            // need feature graphic
+            if (e.hasOwnProperty('feature')) {
+                newResult.feature = new Graphic(e.feature);
+                var geometry = newResult.feature.geometry;
+                // fix goemetry SR
+                if (geometry) {
+                    geometry.setSpatialReference(sR);
                 }
             }
             // address candidates geocoder
             else if (e.hasOwnProperty('location')) {
                 // create point
-                var point = new Point(e.location.x, e.location.y, sR);
-                // create extent from point
-                if (this.get("map")) {
-                    newResult.extent = this.get("map").extent.centerAt(point);
-                } else {
-                    // create extent
-                    newResult.extent = new Extent({
-                        "xmin": point.x - 0.25,
-                        "ymin": point.y - 0.25,
-                        "xmax": point.x + 0.25,
-                        "ymax": point.y + 0.25,
-                        "spatialReference": {
-                            "wkid": 4326
-                        }
-                    });
-                }
-                // set name
-                if (e.hasOwnProperty('address') && typeof e.address === 'string') {
-                    newResult.name = e.address;
-                } else if (e.hasOwnProperty('address') && typeof e.address === 'object' && e.address.hasOwnProperty('Address')) {
-                    newResult.name = e.address.Address;
-                } else {
-                    newResult.name = '';
-                }
+                var pt = new Point(e.location.x, e.location.y, sR);
                 // create attributes
                 var attributes = {};
                 // set attributes
@@ -1210,7 +1179,60 @@ Point, Extent, Locator) {
                 if (e.hasOwnProperty('score')) {
                     attributes.score = e.score;
                 }
-                newResult.feature = new Graphic(point, null, attributes, null);
+                newResult.feature = new Graphic(pt, null, attributes, null);
+            }
+            else{
+                newResult.feature = null;
+            }
+            // need extent
+            if (e.hasOwnProperty('extent')) {
+                // set extent
+                newResult.extent = new Extent(e.extent);
+                // set spatial ref
+                newResult.extent.setSpatialReference(new SpatialReference(sR));
+            }
+            else if(newResult.feature && newResult.feature.geometry){
+                // create extent from point
+                if (this.get("map")) {
+                    // current map scale is greater than zoomScale
+                    if(this.get("map").getScale() > this.get("zoomScale")){
+                        // get extent for scale at zoom scale
+                        newResult.extent = scaleUtils.getExtentForScale(this.get("map"), this.get("zoomScale")).centerAt(newResult.feature.geometry);
+                    }
+                    else{
+                        // use centered extent at current scale
+                        newResult.extent = this.get("map").extent.centerAt(newResult.feature.geometry);
+                    }
+                } else {
+                    // create extent
+                    newResult.extent = new Extent({
+                        "xmin": newResult.feature.geometry.x - 0.25,
+                        "ymin": newResult.feature.geometry.y - 0.25,
+                        "xmax": newResult.feature.geometry.x + 0.25,
+                        "ymax": newResult.feature.geometry.y + 0.25,
+                        "spatialReference": {
+                            "wkid": 4326
+                        }
+                    });
+                }
+            }
+            else{
+                newResult.extent = null;
+            }
+            // need name
+            if (e.hasOwnProperty('name')) {
+                newResult.name = e.name;
+            }
+            // set name
+            else if (e.hasOwnProperty('address') && typeof e.address === 'string') {
+                newResult.name = e.address;
+            } else if (e.hasOwnProperty('address') && typeof e.address === 'object' && e.address.hasOwnProperty('Address')) {
+                newResult.name = e.address.Address;
+            } else if(newResult.feature && newResult.feature.geometry) {
+                newResult.name = newResult.feature.geometry.x + ',' + newResult.feature.geometry.y;
+            }
+            else{
+                newResult.name = '';
             }
             return newResult;
         },
@@ -1221,7 +1243,7 @@ Point, Extent, Locator) {
             // if results
             if (e && e.length) {
                 var i = 0;
-                for (i; i < e.length && i < 5; i++) {
+                for (i; i < e.length; i++) {
                     var newResult = this._hydrateResult(e[i]);
                     // add to return array
                     results.push(newResult);

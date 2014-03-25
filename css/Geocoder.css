@@ -268,7 +268,7 @@
     display: block;
     width: 100%;
     margin: 0;
-    border: 2px solid #666;
+    border: 1px solid #57585A;
     background: #fff;
     -webkit-border-radius: 5px;
     border-radius: 5px;
@@ -371,7 +371,7 @@
     left: 0;
     top: 100%;
     margin: -1px 0 0;
-    border: 2px solid #666;
+    border: 1px solid #57585A;
     border-top: 0;
     padding: 0;
     background: #fff;
@@ -416,7 +416,7 @@
     margin: -1px 0 0;
     padding: 0;
     background: #fff;
-    border: 2px solid #666;
+    border: 1px solid #57585A;
     border-top: 0;
     -webkit-border-radius: 0 0 5px 5px;
     border-radius: 0 0 5px 5px;
