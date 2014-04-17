@@ -27,16 +27,17 @@
         var dojoConfig = {
             // The locationPath logic below may look confusing but all its doing is 
             // enabling us to load the api from a CDN and load local modules from the correct location.
-            packages: [{
-                name: "modules",
-                location: package_path + '/js'
+            packages: [
+            {
+                name: "esri",
+                location: '../../esri'
             }, {
                 name: "application",
                 location: package_path + '/js'
             }]
         };
     </script>
-    <script src="http://js.arcgis.com/3.7/"></script>
+    <script src="http://localhost/git/arcgis-js-api/src/js/dojo/dojo/dojo.js"></script>
     <script>
       var map, geocoder;
 
@@ -108,7 +109,7 @@
             geocoderMenu: true, // Show geocoder menu if necessary
             autoNavigate: true, // Automatically navigate
             showResults: true, // show result suggestions
-            geocoders: geocoders,
+            //geocoders: geocoders,
             map: map
         }, "search");
         geocoder.startup();

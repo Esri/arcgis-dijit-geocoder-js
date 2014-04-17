@@ -7,7 +7,6 @@ define([
     "dojo/dom-class",
     "dojo/dom-style",
     "dojo/dom-construct",
-    "dojo/json",
     "dojo/keys",
     "dojo/on",
     "dojo/query",
@@ -20,7 +19,6 @@ define([
     "esri/kernel",
     "esri/SpatialReference",
     "esri/graphic",
-    "esri/request",
     "esri/dijit/_EventedWidget",
     "esri/geometry/Point",
     "esri/geometry/Extent",
@@ -28,9 +26,9 @@ define([
     "esri/geometry/scaleUtils"
 ],
 function(
-declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, JSON, keys, on, query, i18n, template, has,
+declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, keys, on, query, i18n, template, has,
 a11yclick, _TemplatedMixin, focusUtil,
-esriNS, SpatialReference, Graphic, esriRequest, _EventedWidget,
+esriNS, SpatialReference, Graphic, _EventedWidget,
 Point, Extent, Locator, scaleUtils) {
     var Widget = declare([_EventedWidget, _TemplatedMixin], {
         declaredClass: "esri.dijit.Geocoder",
@@ -42,8 +40,6 @@ Point, Extent, Locator, scaleUtils) {
             "find-results": ["results"],
             "auto-complete": ["results"],
             "geocoder-select": ["geocoder"],
-            "auto-complete-select-start":["result"],
-            "auto-complete-select-finish":["result"],
             "clear": true,
             "enter-key-select": true,
             "load": true
@@ -141,12 +137,12 @@ Point, Extent, Locator, scaleUtils) {
         // start widget
         startup: function() {
             if (!this._geocoders.length) {
-                console.log('No geocoders defined.');
+                console.log('Geocoder:: No geocoders defined.');
                 this.destroy();
                 return;
             }
             if (!this.domNode) {
-                console.log('domNode is undefined.');
+                console.log('Geocoder:: domNode is undefined.');
                 this.destroy();
                 return;
             }
@@ -348,9 +344,6 @@ Point, Extent, Locator, scaleUtils) {
         onEnterKeySelect: function() {},
         // widget loaded
         onLoad: function() {},
-        // widget loaded
-        onAutoCompleteSelectStart: function() {},
-        onAutoCompleteSelectFinish: function() {},
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */
@@ -417,6 +410,11 @@ Point, Extent, Locator, scaleUtils) {
                     // set esri geocoder options
                     this._arcgisGeocoder.suggest = true;
                 }
+                // ArcGIS Geocoder Single Line
+                if (!this._arcgisGeocoder.hasOwnProperty('singleLineFieldName')) {
+                    // set esri geocoder options
+                    this._arcgisGeocoder.singleLineFieldName = "SingleLine";
+                }
                 // ArcGIS Geocoder URL
                 if (!this._arcgisGeocoder.url) {
                     // set esri geocoder options
@@ -475,7 +473,8 @@ Point, Extent, Locator, scaleUtils) {
             domAttr.set(this.submitNode, 'title', this._placeholder);
         },
         // update value of text box
-        _updateValue: function(attr, oldVal, newVal) {
+        _updateValue: function() {
+            var newVal = arguments[2];
             // If we want to update value of input
             if (!this._ignoreUpdateValue) {
                 domAttr.set(this.inputNode, 'value', newVal);
@@ -483,12 +482,16 @@ Point, Extent, Locator, scaleUtils) {
             }
         },
         // update theme
-        _updateTheme: function(attr, oldVal, newVal) {
+        _updateTheme: function() {
+            var oldVal = arguments[1];
+            var newVal = arguments[2];
             domClass.remove(this.domNode, oldVal);
             domClass.add(this.domNode, newVal);
         },
         // change active geocoder
-        _setActiveGeocoderIndex: function(attr, oldVal, newVal) {
+        _setActiveGeocoderIndex: function() {
+            var oldVal = arguments[1];
+            var newVal = arguments[2];
             this.set("activeGeocoderIndex", newVal);
             // set geocoder object
             this._setActiveGeocoder();
@@ -546,80 +549,46 @@ Point, Extent, Locator, scaleUtils) {
                 }
                 // maximum results
                 var maxLocations = this.get("maxLocations") || 6;
-                // if we can use the find function
-                if (this.get("activeGeocoder").suggest) {
-                    var mapSR = this._defaultSR;
-                    if (this.get("map")) {
-                        mapSR = this.get("map").spatialReference;
+                // Params
+                params = {
+                    address: {},
+                    maxLocations: maxLocations
+                };
+                // Esri Geocoder country
+                if (this.get("activeGeocoder").sourceCountry) {
+                    params.sourceCountry = this.get("activeGeocoder").sourceCountry;
+                }
+                // within extent
+                if (this.get("activeGeocoder").searchExtent) {
+                    params.searchExtent = this.get("activeGeocoder").searchExtent;
+                }
+                // Geocoder
+                this._task = new Locator(this.get("activeGeocoder").url);
+                // spatial ref output
+                this._task.outSpatialReference = this._defaultSR;
+                if (this.get("map")) {
+                    this._task.outSpatialReference = this.get("map").spatialReference;
+                }
+                // distance and point
+                if (this.get("map") && this.get("activeGeocoder").localSearchOptions && this.get("activeGeocoder").localSearchOptions.hasOwnProperty('distance') && this.get("activeGeocoder").localSearchOptions.hasOwnProperty('minScale')) {
+                    // current scale of map
+                    var scale = this.get("map").getScale();
+                    // location search will be performed when the map scale is less than minScale.
+                    if (!this.get("activeGeocoder").localSearchOptions.minScale || (scale && scale <= parseFloat(this.get("activeGeocoder").localSearchOptions.minScale))) {
+                        params.location = this.get("map").extent.getCenter();
+                        params.distance = this.get("activeGeocoder").localSearchOptions.distance;
                     }
-                    // Query object
-                    params = {
-                        "text": singleLine,
-                        "maxLocations": maxLocations,
-                        "outSR": mapSR.wkid || JSON.stringify(mapSR.toJson()),
-                        "f": "json"
-                    };
-                    if (this.get("map") && this.get("activeGeocoder").localSearchOptions && this.get("activeGeocoder").localSearchOptions.hasOwnProperty('distance') && this.get("activeGeocoder").localSearchOptions.hasOwnProperty('minScale')) {
-                        // set center point
-                        var normalizedPoint = this.get("map").extent.getCenter().normalize();
-                        // current scale of map
-                        var scale = this.get("map").getScale();
-                        // location search will be performed when the map scale is less than minScale.
-                        if (!this.get("activeGeocoder").localSearchOptions.minScale || (scale && scale <= parseFloat(this.get("activeGeocoder").localSearchOptions.minScale))) {
-                            params.location = JSON.stringify(normalizedPoint.toJson());
-                            params.distance = this.get("activeGeocoder").localSearchOptions.distance;
-                        }
-                    }
-                    // if magic key
-                    if (e.magicKey) {
-                        params.magicKey = e.magicKey;
-                    }
-                    // if outfields
-                    if (outFields) {
-                        params.outFields = outFields;
-                    }
-                    // Esri Geocoder country
-                    if (this.get("activeGeocoder").sourceCountry) {
-                        params.sourceCountry = this.get("activeGeocoder").sourceCountry;
-                    }
-                    // local results only
-                    if (this.get("activeGeocoder").searchExtent) {
-                        var bbox = {
-                            "xmin": this.get("activeGeocoder").searchExtent.xmin,
-                            "ymin": this.get("activeGeocoder").searchExtent.ymin,
-                            "xmax": this.get("activeGeocoder").searchExtent.xmax,
-                            "ymax": this.get("activeGeocoder").searchExtent.ymax,
-                            "spatialReference": this.get("activeGeocoder").searchExtent.spatialReference.toJson()
-                        };
-                        params.bbox = JSON.stringify(bbox);
-                    }
-                    var path = '/find';
-                    if (e.autoComplete && this.get("activeGeocoder").suggest) {
-                        path = '/suggest';
-                        
-                    }
-                    var url = this.get("activeGeocoder").url + path;
-                    if(e.autoComplete && this.get("activeGeocoder").suggest && this.get("activeGeocoder").suggestUrl){
-                        url = this.get("activeGeocoder").suggestUrl;
-                    }
-                    // send request
-                    esriRequest({
-                        url: url,
-                        content: params,
-                        handleAs: 'json',
-                        callbackParamName: 'callback',
-                        // on load
-                        load: lang.hitch(this, function(response) {
-                            var results = response.suggestions || response.locations;
-                            this._receivedResults(results, def, e);
-                        })
-                    });
-                } else {
-                    // Params
-                    params = {
-                        address: {},
-                        maxLocations: maxLocations
-                    };
+                }
+                if (this.get("activeGeocoder").suggest && e.autoComplete) {
+                    // text for suggestions
+                    params.text = singleLine;
+                    // query for suggestions
+                    this._task.suggestLocations(params).then(lang.hitch(this, function(response) {
+                        this._receivedResults(response, def, e);
+                    }), lang.hitch(this, function(response) {
+                        this._receivedResults(response, def, e);
+                    }));
+                }else{
                     if (e.magicKey) {
                         params.magicKey = e.magicKey;
                     }
@@ -631,17 +600,6 @@ Point, Extent, Locator, scaleUtils) {
                     // if outfields
                     if (outFields) {
                         params.outFields = [outFields];
-                    }
-                    // within extent
-                    if (this.get("activeGeocoder").searchExtent) {
-                        params.searchExtent = this.get("activeGeocoder").searchExtent;
-                    }
-                    // Geocoder
-                    this._task = new Locator(this.get("activeGeocoder").url);
-                    // spatial ref output
-                    this._task.outSpatialReference = this._defaultSR;
-                    if (this.get("map")) {
-                        this._task.outSpatialReference = this.get("map").spatialReference;
                     }
                     // query for location
                     this._task.addressToLocations(params, lang.hitch(this, function(response) {
@@ -882,15 +840,9 @@ Point, Extent, Locator, scaleUtils) {
                     if (this.get("results") && this.get("results")[resultIndex]) {
                         // result
                         var result = this.get("results")[resultIndex];
-                        
-                        this.onAutoCompleteSelectStart(result);
-                        
-                        
                         if (this.get("results")[resultIndex].name) {
                             this.select(this.get("results")[resultIndex]);
-                            this.onAutoCompleteSelectFinish(result);
                         } else {
-                            
                             var text = result.text;
                             var magicKey = result.magicKey || null;
                             var params = {
@@ -901,7 +853,6 @@ Point, Extent, Locator, scaleUtils) {
                             this._query(params).then(lang.hitch(this, function(response) {
                                 // Locate
                                 this.select(response.results[0]);
-                                this.onAutoCompleteSelectFinish(result);
                             }));
                         }
                     }
