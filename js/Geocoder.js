@@ -30,8 +30,7 @@ declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, keys,
 a11yclick, _TemplatedMixin, focusUtil,
 esriNS, SpatialReference, Graphic, _EventedWidget,
 Point, Extent, Locator, scaleUtils) {
-    var Widget = declare([_EventedWidget, _TemplatedMixin], {
-        declaredClass: "esri.dijit.Geocoder",
+    var Widget = declare("esri.dijit.Geocoder", [_EventedWidget, _TemplatedMixin], {
         // Set template file HTML
         templateString: template,
         // On to Connect Event Mapping
@@ -291,7 +290,7 @@ Point, Extent, Locator, scaleUtils) {
                         def.reject(error);
                     });
                 } else {
-                    def.reject('Invalid find type');
+                    def.reject('Geocoder:: Invalid find type');
                 }
             } else {
                 this._queryDeferred(this.get('value')).then(function(resp) {
@@ -372,15 +371,14 @@ Point, Extent, Locator, scaleUtils) {
             var def = new Deferred();
             if (pt && this.get("activeGeocoder")) {
                 var geo = geometry || pt;
-                // reverse Geocoder
-                this._reverseTask = new Locator(this.get("activeGeocoder").url);
-                // spatial ref output
-                this._reverseTask.outSpatialReference = this._defaultSR;
-                if (this.get("map")) {
-                    this._reverseTask.outSpatialReference = this.get("map").spatialReference;
-                }
                 var distance = this.get("activeGeocoder").distance || 1500;
-                this._reverseTask.locationToAddress(pt, distance, lang.hitch(this, function(response) {
+                // spatial ref output
+                this._task.outSpatialReference = this._defaultSR;
+                if (this.get("map")) {
+                    this._task.outSpatialReference = this.get("map").spatialReference;
+                }
+                // reverse geocode
+                this._task.locationToAddress(pt, distance, lang.hitch(this, function(response) {
                     var result = this._hydrateResult(response);
                     var obj = {
                         "results": [result],
@@ -392,7 +390,7 @@ Point, Extent, Locator, scaleUtils) {
                     def.reject(error);
                 }));
             } else {
-                def.reject("no point or active geocoder defined");
+                def.reject("Geocoder:: no point or active geocoder defined");
             }
             return def.promise;
         },
@@ -440,6 +438,8 @@ Point, Extent, Locator, scaleUtils) {
         _setActiveGeocoder: function() {
             // set current active geocoder object
             this.set("activeGeocoder", this._geocoders[this.get("activeGeocoderIndex")]);
+            // locator task
+            this._task = new Locator(this.get("activeGeocoder").url);
             // update placeholder nodes
             this._updatePlaceholder();
         },
@@ -532,9 +532,9 @@ Point, Extent, Locator, scaleUtils) {
                 // show loading spinner
                 this._showLoading();
                 // query parameters
-                var params;
-                // Fields
-                var outFields = this.get("activeGeocoder").outFields || '';
+                var params = {
+                    address: {}
+                };
                 // single line query
                 var singleLine = '';
                 // query prefix
@@ -548,12 +548,7 @@ Point, Extent, Locator, scaleUtils) {
                     singleLine += this.get("activeGeocoder").suffix;
                 }
                 // maximum results
-                var maxLocations = this.get("maxLocations") || 6;
-                // Params
-                params = {
-                    address: {},
-                    maxLocations: maxLocations
-                };
+                params.maxLocations = this.get("maxLocations") || 6;
                 // Esri Geocoder country
                 if (this.get("activeGeocoder").sourceCountry) {
                     params.sourceCountry = this.get("activeGeocoder").sourceCountry;
@@ -562,8 +557,6 @@ Point, Extent, Locator, scaleUtils) {
                 if (this.get("activeGeocoder").searchExtent) {
                     params.searchExtent = this.get("activeGeocoder").searchExtent;
                 }
-                // Geocoder
-                this._task = new Locator(this.get("activeGeocoder").url);
                 // spatial ref output
                 this._task.outSpatialReference = this._defaultSR;
                 if (this.get("map")) {
@@ -597,6 +590,8 @@ Point, Extent, Locator, scaleUtils) {
                     } else {
                         params.address["Single Line Input"] = singleLine;
                     }
+                    // Fields
+                    var outFields = this.get("activeGeocoder").outFields;
                     // if outfields
                     if (outFields) {
                         params.outFields = [outFields];
@@ -610,7 +605,7 @@ Point, Extent, Locator, scaleUtils) {
                 }
             } else {
                 this._hideLoading();
-                def.reject('no search to perform');
+                def.reject('Geocoder:: no search to perform');
             }
         },
         // called on AC Results
@@ -1190,10 +1185,9 @@ Point, Extent, Locator, scaleUtils) {
         // create Extent and Graphic objects from JSON
         _hydrateResults: function(e) {
             // return results array
-            var results = [];
+            var results = [], i = 0;
             // if results
             if (e && e.length) {
-                var i = 0;
                 for (i; i < e.length; i++) {
                     var newResult = this._hydrateResult(e[i]);
                     // add to return array
