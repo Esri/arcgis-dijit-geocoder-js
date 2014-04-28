@@ -926,7 +926,16 @@ function (
                             }));
                         }
                     }
-                } else if (e.type === 'keydown' && e.keyCode === keys.UP_ARROW) {
+              }
+              else if (e.type === 'keydown' && (e.keyCode === keys.BACKSPACE || e.keyCode === keys.DELETE)) {
+                event.stop(e);
+                this.inputNode.focus();
+                // backspace from current value
+                var newVal = this.inputNode.value.slice(0,-1);
+                domAttr.set(this.inputNode, 'value', newVal);
+                this.set("value", newVal);
+              }  
+              else if (e.type === 'keydown' && e.keyCode === keys.UP_ARROW) {
                     event.stop(e);
                     // go to previous item
                     newIndex = resultIndex - 1;
