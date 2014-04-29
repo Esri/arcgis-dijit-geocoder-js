@@ -560,15 +560,22 @@ function (
             // set deferred variable if needed to cancel it
             var def = new Deferred();
             this._deferreds.push(def);
-            // clear timeout for query
-            this._clearQueryTimeout();
-            // timeout
-            this._queryTimer = setTimeout(lang.hitch(this, function () {
+            // if we have a delay
+            if(e.delay){
+                // clear timeout for query
+                this._clearQueryTimeout();
+                // timeout
+                this._queryTimer = setTimeout(lang.hitch(this, function () {
+                    // start the task
+                    this._performTask(def, e);
+                    // set timer to null
+                    this._queryTimer = null;
+                }), e.delay);
+            }
+            else{
                 // start the task
                 this._performTask(def, e);
-                // set timer to null
-                this._queryTimer = null;
-            }), e.delay);
+            }
             return def.promise;
         },
         // when geocoder search starts
