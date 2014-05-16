@@ -649,7 +649,14 @@ function (
                     var outFields = this.get("activeGeocoder").outFields;
                     // if outfields
                     if (outFields) {
-                        params.outFields = outFields;
+                        // if outfields is already an array
+                        if(outFields instanceof Array){
+                            params.outFields = outFields;
+                        }
+                        else{
+                            // outfields string
+                            params.outFields = [outFields];   
+                        }
                     }
                     // query for location
                     this._task.addressToLocations(params, lang.hitch(this, function (response) {
