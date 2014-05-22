@@ -591,8 +591,6 @@ function (
                 this._hideGeolocatorMenu();
                 // show loading spinner
                 this._showLoading();
-                
-                
                 // single line query
                 var singleLine = '';
                 // query prefix
@@ -605,7 +603,6 @@ function (
                 if (this.get("activeGeocoder").suffix) {
                     singleLine += this.get("activeGeocoder").suffix;
                 }
-                
                 // Fields
                 var outFields = this.get("activeGeocoder").outFields;
                 // if outfields
@@ -615,22 +612,18 @@ function (
                         outFields = [outFields];
                     }
                 }
-                
+                // max results
                 var num = this.get("maxLocations") || 6;
-                
+                // constrain to extent
                 var searchExtent = this.get("activeGeocoder").searchExtent;
-                
                 // spatial ref output
                 var outSpatialReference = this._defaultSR;
                 if (this.get("map")) {
                     outSpatialReference = this.get("map").spatialReference;
                 }
-                
-                
+                // layer query task?
                 if(this.get("activeGeocoder").type === 'query'){
-                    
                     var q = new Query();
-
                     // spatial ref
                     q.outSpatialReference = outSpatialReference; 
                     q.returnGeometry = true;
@@ -639,26 +632,22 @@ function (
                         q.geometry = searchExtent;
                     }
                     q.text = singleLine;
-                    
                     // outfields
                     if (outFields) {
                         q.outFields = outFields;
                     }
-                    
+                    // search
                     this._task.execute(q, lang.hitch(this, function (response) {
                         this._receivedResults(response.features, def, e);
                     }), lang.hitch(this, function (response) {
                         this._receivedResults([], def, e);
                     }));
-                    
                 }
                 else{
-                    
                     // query parameters
                     var params = {
                         address: {}
                     };
-                    
                     // maximum results
                     params.maxLocations = num;
                     // Esri Geocoder country
@@ -703,10 +692,6 @@ function (
                         if (outFields) {
                             params.outFields = outFields;
                         }
-                        
-                        
-                        console.log(this);
-                        
                         // query for location
                         this._task.addressToLocations(params, lang.hitch(this, function (response) {
                             this._receivedResults(response, def, e);
