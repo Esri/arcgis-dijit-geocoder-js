@@ -36,6 +36,10 @@ require([
     });
 
     var geocoders = [{
+        url: "http://tmservices1.esri.com/arcgis/rest/services/LiveFeeds/Earthquakes/MapServer/0",
+        field: "LOCATION",
+        type: "query"
+    },{
         url: "http://geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer",
         name: "geocode.arcgis.com",
         outFields: "Xmin, Xmax, Ymin, Ymax",
@@ -49,7 +53,7 @@ require([
 
     geocoder = new Geocoder({
         autoComplete: true, // show autocomplete?
-        //arcgisGeocoder: true, // use esri geocoder
+        arcgisGeocoder: false, // use esri geocoder
         //value: "", // Value of input
         //theme: "simpleGeocoder", // Theme
         //maxLocations: 15, // Maximum result locations to return
@@ -58,7 +62,7 @@ require([
         //geocoderMenu: true, // Show geocoder menu if necessary
         //autoNavigate: true, // Automatically navigate
         //showResults: true, // show result suggestions
-        //geocoders: geocoders,
+        geocoders: geocoders,
         map: map
     }, "search");
     geocoder.startup();
@@ -205,7 +209,7 @@ require([
             y: 411
         });
         graphic.setGeometry(geom_polygon);
-        geocoder.find(geom_screenpoint);
+        //geocoder.find(geom_screenpoint);
     });
 
 

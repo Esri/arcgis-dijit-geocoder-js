@@ -23,13 +23,15 @@ define([
     "esri/geometry/Point",
     "esri/geometry/Extent",
     "esri/tasks/locator",
+    "esri/tasks/query",
+    "esri/tasks/QueryTask",
     "esri/geometry/scaleUtils"
 ],
 function (
     declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, keys, on, query, i18n, template, has,
     a11yclick, _TemplatedMixin, focusUtil,
     esriNS, SpatialReference, Graphic, _EventedWidget,
-    Point, Extent, Locator, scaleUtils) {
+    Point, Extent, Locator, Query, QueryTask, scaleUtils) {
     var Widget = declare("esri.dijit.Geocoder", [_EventedWidget, _TemplatedMixin], {
         // Set template file HTML
         templateString: template,
@@ -464,8 +466,13 @@ function (
         _setActiveGeocoder: function () {
             // set current active geocoder object
             this.set("activeGeocoder", this._geocoders[this.get("activeGeocoderIndex")]);
-            // create locator task
-            this._task = new Locator(this.get("activeGeocoder").url);
+            if(this.activeGeocoder.type === 'query'){
+                this._task = new QueryTask(this.get("activeGeocoder").url);
+            }
+            else{
+                // create locator task
+                this._task = new Locator(this.get("activeGeocoder").url);    
+            }
             // update placeholder nodes
             this._updatePlaceholder();
         },
@@ -568,8 +575,6 @@ function (
                 this._queryTimer = setTimeout(lang.hitch(this, function () {
                     // start the task
                     this._performTask(def, e);
-                    // set timer to null
-                    this._queryTimer = null;
                 }), e.delay);
             }
             else{
@@ -586,10 +591,8 @@ function (
                 this._hideGeolocatorMenu();
                 // show loading spinner
                 this._showLoading();
-                // query parameters
-                var params = {
-                    address: {}
-                };
+                
+                
                 // single line query
                 var singleLine = '';
                 // query prefix
@@ -602,68 +605,115 @@ function (
                 if (this.get("activeGeocoder").suffix) {
                     singleLine += this.get("activeGeocoder").suffix;
                 }
-                // maximum results
-                params.maxLocations = this.get("maxLocations") || 6;
-                // Esri Geocoder country
-                if (this.get("activeGeocoder").sourceCountry) {
-                    params.sourceCountry = this.get("activeGeocoder").sourceCountry;
+                
+                // Fields
+                var outFields = this.get("activeGeocoder").outFields;
+                // if outfields
+                if (outFields) {
+                    // if outfields is not an array
+                    if(!(outFields instanceof Array)){
+                        outFields = [outFields];
+                    }
                 }
-                // within extent
-                if (this.get("activeGeocoder").searchExtent) {
-                    params.searchExtent = this.get("activeGeocoder").searchExtent;
-                }
+                
+                var num = this.get("maxLocations") || 6;
+                
+                var searchExtent = this.get("activeGeocoder").searchExtent;
+                
                 // spatial ref output
-                this._task.outSpatialReference = this._defaultSR;
+                var outSpatialReference = this._defaultSR;
                 if (this.get("map")) {
-                    this._task.outSpatialReference = this.get("map").spatialReference;
+                    outSpatialReference = this.get("map").spatialReference;
                 }
-                // distance and point
-                if (this.get("map") && this.get("activeGeocoder").localSearchOptions && this.get("activeGeocoder").localSearchOptions.hasOwnProperty('distance') && this.get("activeGeocoder").localSearchOptions.hasOwnProperty('minScale')) {
-                    // current scale of map
-                    var scale = this.get("map").getScale();
-                    // location search will be performed when the map scale is less than minScale.
-                    if (!this.get("activeGeocoder").localSearchOptions.minScale || (scale && scale <= parseFloat(this.get("activeGeocoder").localSearchOptions.minScale))) {
-                        params.location = this.get("map").extent.getCenter();
-                        params.distance = this.get("activeGeocoder").localSearchOptions.distance;
+                
+                
+                if(this.get("activeGeocoder").type === 'query'){
+                    
+                    var q = new Query();
+
+                    // spatial ref
+                    q.outSpatialReference = outSpatialReference; 
+                    q.returnGeometry = true;
+                    q.num = num;
+                    if(searchExtent){
+                        q.geometry = searchExtent;
                     }
-                }
-                if (this.get("activeGeocoder").suggest && e.autoComplete) {
-                    // text for suggestions
-                    params.text = singleLine;
-                    // query for suggestions
-                    this._task.suggestLocations(params).then(lang.hitch(this, function (response) {
-                        this._receivedResults(response, def, e);
-                    }), lang.hitch(this, function (response) {
-                        this._receivedResults(response, def, e);
-                    }));
-                } else {
-                    if (e.magicKey) {
-                        params.magicKey = e.magicKey;
-                    }
-                    if (this.get("activeGeocoder").singleLineFieldName) {
-                        params.address[this.get("activeGeocoder").singleLineFieldName] = singleLine;
-                    } else {
-                        params.address["Single Line Input"] = singleLine;
-                    }
-                    // Fields
-                    var outFields = this.get("activeGeocoder").outFields;
-                    // if outfields
+                    q.text = singleLine;
+                    
+                    // outfields
                     if (outFields) {
-                        // if outfields is already an array
-                        if(outFields instanceof Array){
+                        q.outFields = outFields;
+                    }
+                    
+                    this._task.execute(q, lang.hitch(this, function (response) {
+                        this._receivedResults(response.features, def, e);
+                    }), lang.hitch(this, function (response) {
+                        this._receivedResults([], def, e);
+                    }));
+                    
+                }
+                else{
+                    
+                    // query parameters
+                    var params = {
+                        address: {}
+                    };
+                    
+                    // maximum results
+                    params.maxLocations = num;
+                    // Esri Geocoder country
+                    if (this.get("activeGeocoder").sourceCountry) {
+                        params.sourceCountry = this.get("activeGeocoder").sourceCountry;
+                    }
+                    // within extent
+                    if (searchExtent) {
+                        params.searchExtent = searchExtent;
+                    }
+                    // spatial ref output
+                    this._task.outSpatialReference = outSpatialReference;
+                    // distance and point
+                    if (this.get("map") && this.get("activeGeocoder").localSearchOptions && this.get("activeGeocoder").localSearchOptions.hasOwnProperty('distance') && this.get("activeGeocoder").localSearchOptions.hasOwnProperty('minScale')) {
+                        // current scale of map
+                        var scale = this.get("map").getScale();
+                        // location search will be performed when the map scale is less than minScale.
+                        if (!this.get("activeGeocoder").localSearchOptions.minScale || (scale && scale <= parseFloat(this.get("activeGeocoder").localSearchOptions.minScale))) {
+                            params.location = this.get("map").extent.getCenter();
+                            params.distance = this.get("activeGeocoder").localSearchOptions.distance;
+                        }
+                    }
+                    if (this.get("activeGeocoder").suggest && e.autoComplete) {
+                        // text for suggestions
+                        params.text = singleLine;
+                        // query for suggestions
+                        this._task.suggestLocations(params).then(lang.hitch(this, function (response) {
+                            this._receivedResults(response, def, e);
+                        }), lang.hitch(this, function (response) {
+                            this._receivedResults(response, def, e);
+                        }));
+                    } else {
+                        if (e.magicKey) {
+                            params.magicKey = e.magicKey;
+                        }
+                        if (this.get("activeGeocoder").singleLineFieldName) {
+                            params.address[this.get("activeGeocoder").singleLineFieldName] = singleLine;
+                        } else {
+                            params.address["Single Line Input"] = singleLine;
+                        }
+                        // if outfields
+                        if (outFields) {
                             params.outFields = outFields;
                         }
-                        else{
-                            // outfields string
-                            params.outFields = [outFields];   
-                        }
+                        
+                        
+                        console.log(this);
+                        
+                        // query for location
+                        this._task.addressToLocations(params, lang.hitch(this, function (response) {
+                            this._receivedResults(response, def, e);
+                        }), lang.hitch(this, function (response) {
+                            this._receivedResults(response, def, e);
+                        }));
                     }
-                    // query for location
-                    this._task.addressToLocations(params, lang.hitch(this, function (response) {
-                        this._receivedResults(response, def, e);
-                    }), lang.hitch(this, function (response) {
-                        this._receivedResults(response, def, e);
-                    }));
                 }
             } else {
                 this._hideLoading();
@@ -1200,7 +1250,7 @@ function (
         },
         _hydrateResult: function (e) {
             // result to add
-            var newResult = {}, sR = this._defaultSR;
+            var newResult = {}, sR = this._defaultSR, attributes, geometry;
             // set default spatial reference
             if (this.get("map")) {
                 sR = this.get("map").spatialReference;
@@ -1214,7 +1264,20 @@ function (
             if (e.hasOwnProperty('feature')) {
                 // create graphic feature
                 newResult.feature = new Graphic(e.feature);
-                var geometry = newResult.feature.geometry;
+                geometry = newResult.feature.geometry;
+                // fix goemetry SR
+                if (geometry) {
+                    geometry.setSpatialReference(sR);
+                }
+            }
+            // already a feature
+            else if (e.hasOwnProperty('geometry')) {
+                // create graphic feature
+                var symbol = e.symbol || null;
+                attributes = e.attributes || {};
+                var infoTemplate = e.infoTemplate || null;
+                newResult.feature = new Graphic(e.geometry, symbol, attributes, infoTemplate);
+                geometry = newResult.feature.geometry;
                 // fix goemetry SR
                 if (geometry) {
                     geometry.setSpatialReference(sR);
@@ -1225,7 +1288,7 @@ function (
                 // create point
                 var pt = new Point(e.location.x, e.location.y, sR);
                 // create attributes
-                var attributes = {};
+                attributes = {};
                 // set attributes
                 if (e.hasOwnProperty('attributes')) {
                     attributes = e.attributes;
@@ -1275,12 +1338,20 @@ function (
             if (e.hasOwnProperty('name')) {
                 newResult.name = e.name;
             }
-            // set name
+            // set name for layer query
+            else if (this.activeGeocoder.type === 'query' && this.activeGeocoder.field && e.hasOwnProperty('attributes') && e.attributes.hasOwnProperty(this.activeGeocoder.field)) {
+                newResult.name = e.attributes[this.activeGeocoder.field];
+            }
+            // set name for address
             else if (e.hasOwnProperty('address') && typeof e.address === 'string') {
                 newResult.name = e.address;
-            } else if (e.hasOwnProperty('address') && typeof e.address === 'object' && e.address.hasOwnProperty('Address')) {
+            }
+            // set name for address 2
+            else if (e.hasOwnProperty('address') && typeof e.address === 'object' && e.address.hasOwnProperty('Address')) {
                 newResult.name = e.address.Address;
-            } else if (newResult.feature && newResult.feature.geometry) {
+            }
+            // set name for x,y
+            else if (newResult.feature && newResult.feature.geometry) {
                 newResult.name = newResult.feature.geometry.x + ',' + newResult.feature.geometry.y;
             } else {
                 newResult.name = '';
