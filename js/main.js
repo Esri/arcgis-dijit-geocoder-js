@@ -36,6 +36,7 @@ require([
     });
 
     var geocoders = [{
+        name: "Earthquakes FS",
         url: "http://tmservices1.esri.com/arcgis/rest/services/LiveFeeds/Earthquakes/MapServer/0",
         field: "LOCATION",
         type: "query"
