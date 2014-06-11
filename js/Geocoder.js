@@ -349,6 +349,22 @@ function (
                 this.get("map").setExtent(e.extent);
             }
         },
+        // ac query
+        autoComplete: function () {
+            // query with delay set
+            this._query({
+                delay: this.get("searchDelay"),
+                autoComplete: true,
+                search: this.get("value")
+            }).then(lang.hitch(this, function (response) {
+                // emit autocomplete event
+                this.onAutoComplete(response);
+                if (this.get("showResults")) {
+                    // show results if allowed
+                    this._showResults(response);
+                }
+            }));
+        },
         /* ---------------- */
         /* Public Events */
         /* ---------------- */
@@ -631,7 +647,14 @@ function (
                     if(searchExtent){
                         q.geometry = searchExtent;
                     }
-                    q.text = singleLine;
+                    var exactMatch = this.get("activeGeocoder").exactMatch;
+                    var field = this.get("activeGeocoder").field;
+                    if(exactMatch){
+                        q.where = field + " = '" + singleLine + "'";
+                    }
+                    else{
+                        q.where = "Upper(" + field + ") LIKE '%" + singleLine.toUpperCase() + "%'";
+                    }
                     // outfields
                     if (outFields) {
                         q.outFields = outFields;
@@ -760,22 +783,6 @@ function (
                 // hide menu
                 this._hideResultsMenu();
             }
-        },
-        // ac query
-        _autoComplete: function () {
-            // query with delay set
-            this._query({
-                delay: this.get("searchDelay"),
-                autoComplete: true,
-                search: this.get("value")
-            }).then(lang.hitch(this, function (response) {
-                // emit autocomplete event
-                this.onAutoComplete(response);
-                if (this.get("showResults")) {
-                    // show results if allowed
-                    this._showResults(response);
-                }
-            }));
         },
         // received results
         _receivedResults: function (response, def) {
@@ -1150,7 +1157,7 @@ function (
                     this._cancelDeferreds();
                     this._hideMenus();
                 } else if (this.get("autoComplete") && alength >= this.get("minCharacters")) {
-                    this._autoComplete();
+                    this.autoComplete();
                 } else {
                     // hide menus
                     this._hideMenus();
