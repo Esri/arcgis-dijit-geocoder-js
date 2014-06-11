@@ -349,22 +349,6 @@ function (
                 this.get("map").setExtent(e.extent);
             }
         },
-        // ac query
-        suggest: function () {
-            // query with delay set
-            this._query({
-                delay: this.get("searchDelay"),
-                autoComplete: true,
-                search: this.get("value")
-            }).then(lang.hitch(this, function (response) {
-                // emit autocomplete event
-                this.onAutoComplete(response);
-                if (this.get("showResults")) {
-                    // show results if allowed
-                    this._showResults(response);
-                }
-            }));
-        },
         /* ---------------- */
         /* Public Events */
         /* ---------------- */
@@ -385,6 +369,22 @@ function (
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */
+        // ac query
+        _autoComplete: function () {
+            // query with delay set
+            this._query({
+                delay: this.get("searchDelay"),
+                autoComplete: true,
+                search: this.get("value")
+            }).then(lang.hitch(this, function (response) {
+                // emit autocomplete event
+                this.onAutoComplete(response);
+                if (this.get("showResults")) {
+                    // show results if allowed
+                    this._showResults(response);
+                }
+            }));
+        },
         _init: function () {
             // set widget ready
             this.set("loaded", true);
@@ -1157,7 +1157,7 @@ function (
                     this._cancelDeferreds();
                     this._hideMenus();
                 } else if (this.get("autoComplete") && alength >= this.get("minCharacters")) {
-                    this.suggest();
+                    this._autoComplete();
                 } else {
                     // hide menus
                     this._hideMenus();
