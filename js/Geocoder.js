@@ -350,7 +350,7 @@ function (
             }
         },
         // ac query
-        autoComplete: function () {
+        suggest: function () {
             // query with delay set
             this._query({
                 delay: this.get("searchDelay"),
@@ -1157,7 +1157,7 @@ function (
                     this._cancelDeferreds();
                     this._hideMenus();
                 } else if (this.get("autoComplete") && alength >= this.get("minCharacters")) {
-                    this.autoComplete();
+                    this.suggest();
                 } else {
                     // hide menus
                     this._hideMenus();
