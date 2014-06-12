@@ -39,6 +39,7 @@ require([
         name: "Earthquakes FS",
         url: "http://tmservices1.esri.com/arcgis/rest/services/LiveFeeds/Earthquakes/MapServer/0",
         field: "LOCATION",
+        outFields: "*",
         type: "query"
     },{
         url: "http://geocodedev.arcgis.com/arcgis/rest/services/World/GeocodeServer",
