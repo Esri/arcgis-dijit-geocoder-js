@@ -653,7 +653,7 @@ function (
                         q.where = field + " = '" + singleLine + "'";
                     }
                     else{
-                        q.where = field + " LIKE '%" + singleLine + "%'";
+                        q.where = "UPPER(" + field + ") LIKE '%" + singleLine.toUpperCase() + "%'";
                     }
                     // outfields
                     if (outFields) {
