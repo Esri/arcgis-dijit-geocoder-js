@@ -653,7 +653,7 @@ function (
                         q.where = field + " = '" + singleLine + "'";
                     }
                     else{
-                        q.where = field + " LIKE '%" + singleLine + "%'";
+                        q.where = "UPPER(" + field + ") LIKE '%" + singleLine.toUpperCase() + "%'";
                     }
                     // outfields
                     if (outFields) {
@@ -1301,28 +1301,49 @@ function (
                 // set spatial ref
                 newResult.extent.setSpatialReference(new SpatialReference(sR));
             } else if (newResult.feature && newResult.feature.geometry) {
-                // create extent from point
-                if (this.get("map")) {
-                    // current map scale is greater than zoomScale
-                    if (this.get("map").getScale() > this.get("zoomScale")) {
-                        // get extent for scale at zoom scale
-                        newResult.extent = scaleUtils.getExtentForScale(this.get("map"), this.get("zoomScale")).centerAt(newResult.feature.geometry);
-                    } else {
-                        // use centered extent at current scale
-                        newResult.extent = this.get("map").extent.centerAt(newResult.feature.geometry);
-                    }
-                } else {
-                    // create extent
-                    newResult.extent = new Extent({
-                        "xmin": newResult.feature.geometry.x - 0.25,
-                        "ymin": newResult.feature.geometry.y - 0.25,
-                        "xmax": newResult.feature.geometry.x + 0.25,
-                        "ymax": newResult.feature.geometry.y + 0.25,
-                        "spatialReference": {
-                            "wkid": 4326
+                // create extent from geometry
+                switch (newResult.feature.geometry.type) {
+                case "extent":
+                    // get oint from center of extent
+                    newResult.extent = newResult.feature.geometry;
+                    break;
+                case "multipoint":
+                    // get extent from multipoint, then get center of that
+                    newResult.extent = newResult.feature.geometry.getExtent();
+                    break;
+                case "polygon":
+                    // get extent from polygon then get center
+                    newResult.extent = newResult.feature.geometry.getExtent();
+                    break;
+                case "polyline":
+                    // get extent from line, then get center
+                    newResult.extent = newResult.feature.geometry.getExtent();
+                    break;
+                case "point":
+                    // use geometry as is
+                    if (this.get("map")) {
+                        // current map scale is greater than zoomScale
+                        if (this.get("map").getScale() > this.get("zoomScale")) {
+                            // get extent for scale at zoom scale
+                            newResult.extent = scaleUtils.getExtentForScale(this.get("map"), this.get("zoomScale")).centerAt(newResult.feature.geometry);
+                        } else {
+                            // use centered extent at current scale
+                            newResult.extent = this.get("map").extent.centerAt(newResult.feature.geometry);
                         }
-                    });
-                }
+                    } else {
+                        // create extent
+                        newResult.extent = new Extent({
+                            "xmin": newResult.feature.geometry.x - 0.25,
+                            "ymin": newResult.feature.geometry.y - 0.25,
+                            "xmax": newResult.feature.geometry.x + 0.25,
+                            "ymax": newResult.feature.geometry.y + 0.25,
+                            "spatialReference": {
+                                "wkid": 4326
+                            }
+                        });
+                    }
+                    break;
+                }  
             } else {
                 newResult.extent = null;
             }
