@@ -659,7 +659,10 @@ function (
                     var field = this.get("activeGeocoder").field;
                     // Fix for non latin characters
                     var nlc = '';
-                    if(this._containsNonLatinCharacter(singleLine)){
+                    // hosted feature service
+                    var reHostedFS = /https?:\/\/services.*\.arcgis\.com/i;
+                    // is hosted fs and has non latin char
+                    if(reHostedFS.test(this.get("activeGeocoder").url) && this._containsNonLatinCharacter(singleLine)){
                       nlc = 'N';
                     }
                     if(exactMatch){
