@@ -391,6 +391,14 @@ function (
             // loaded
             this.onLoad();
         },
+        _containsNonLatinCharacter: function(s) {
+          for (var i = 0; i < s.length; i++) {
+            if (s.charCodeAt(i) > 255) {
+              return true;
+            }
+          }
+          return false;
+        },
         _findQuery: function (search) {
             var def = new Deferred();
             // query and then Locate
@@ -649,11 +657,16 @@ function (
                     }
                     var exactMatch = this.get("activeGeocoder").exactMatch;
                     var field = this.get("activeGeocoder").field;
+                    // Fix for non latin characters
+                    var nlc = '';
+                    if(this._containsNonLatinCharacter(singleLine)){
+                      nlc = 'N';
+                    }
                     if(exactMatch){
-                        q.where = field + " = '" + singleLine + "'";
+                        q.where = field + " = " + nlc + "'" + singleLine + "'";
                     }
                     else{
-                        q.where = "UPPER(" + field + ") LIKE '%" + singleLine.toUpperCase() + "%'";
+                        q.where = "UPPER(" + field + ") LIKE " + nlc + "'%" + singleLine.toUpperCase() + "%'";
                     }
                     // outfields
                     if (outFields) {
