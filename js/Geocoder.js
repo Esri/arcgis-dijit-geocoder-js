@@ -35,6 +35,7 @@ function (
     var Widget = declare("esri.dijit.Geocoder", [_EventedWidget, _TemplatedMixin], {
         // Set template file HTML
         templateString: template,
+        reHostedFS: /https?:\/\/services.*\.arcgis\.com/i,
         // On to Connect Event Mapping
         _eventMap: {
             "select": ["result"],
@@ -371,19 +372,24 @@ function (
         /* ---------------- */
         // ac query
         _autoComplete: function () {
-            // query with delay set
-            this._query({
-                delay: this.get("searchDelay"),
-                autoComplete: true,
-                search: this.get("value")
-            }).then(lang.hitch(this, function (response) {
-                // emit autocomplete event
-                this.onAutoComplete(response);
-                if (this.get("showResults")) {
-                    // show results if allowed
-                    this._showResults(response);
-                }
-            }));
+            var ag = this.get("activeGeocoder");
+            var hs = this.reHostedFS.test(ag.url);
+            // fs and not hosted fs
+            if(ag.type !== 'query' || hs){
+              // query with delay set
+              this._query({
+                  delay: this.get("searchDelay"),
+                  autoComplete: true,
+                  search: this.get("value")
+              }).then(lang.hitch(this, function (response) {
+                  // emit autocomplete event
+                  this.onAutoComplete(response);
+                  if (this.get("showResults")) {
+                      // show results if allowed
+                      this._showResults(response);
+                  }
+              }));
+            }
         },
         _init: function () {
             // set widget ready
@@ -659,10 +665,8 @@ function (
                     var field = this.get("activeGeocoder").field;
                     // Fix for non latin characters
                     var nlc = '';
-                    // hosted feature service
-                    var reHostedFS = /https?:\/\/services.*\.arcgis\.com/i;
                     // is hosted fs and has non latin char
-                    if(reHostedFS.test(this.get("activeGeocoder").url) && this._containsNonLatinCharacter(singleLine)){
+                    if(this.reHostedFS.test(this.get("activeGeocoder").url) && this._containsNonLatinCharacter(singleLine)){
                       nlc = 'N';
                     }
                     if(exactMatch){
