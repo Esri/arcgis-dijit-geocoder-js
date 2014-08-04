@@ -19,6 +19,7 @@ define([
     "esri/kernel",
     "esri/SpatialReference",
     "esri/graphic",
+    "esri/symbols/PictureMarkerSymbol",
     "esri/dijit/_EventedWidget",
     "esri/geometry/Point",
     "esri/geometry/Extent",
@@ -28,7 +29,7 @@ define([
 function (
     declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, keys, on, query, i18n, template, has,
     a11yclick, _TemplatedMixin, focusUtil,
-    esriNS, SpatialReference, Graphic, _EventedWidget,
+    esriNS, SpatialReference, Graphic, PictureMarkerSymbol, _EventedWidget,
     Point, Extent, Locator, scaleUtils) {
     var Widget = declare("esri.dijit.Geocoder", [_EventedWidget, _TemplatedMixin], {
         // Set template file HTML
@@ -90,7 +91,10 @@ function (
                 map: null,
                 activeGeocoder: null,
                 geocoders: null,
-                zoomScale: 10000
+                zoomScale: 10000,
+                highlightLocation: true,
+                symbol: new PictureMarkerSymbol(require.toUrl("esri/dijit") + '/images/sdk_gps_location.png', 28, 28),
+                graphicsLayer: null
             };
             // mix in settings and defaults
             var defaults = lang.mixin({}, this.options, options);
@@ -110,6 +114,9 @@ function (
             this.set("activeGeocoder", defaults.activeGeocoder);
             this.set("geocoders", defaults.geocoders);
             this.set("zoomScale", defaults.zoomScale);
+            this.set("highlightLocation", defaults.highlightLocation);
+            this.set("symbol", defaults.symbol);
+            this.set("graphicsLayer", defaults.graphicsLayer);
             // results holder
             this.set("results", []);
             // languages
@@ -204,6 +211,17 @@ function (
         clear: function () {
             // clear event
             this.onClear();
+            // clear highlighted graphic
+            var g = this.get("highlightGraphic"), gl = this.get("graphicsLayer");
+            if(g){
+                if(gl){
+                    gl.remove(g);
+                }
+                else{
+                    this.get("map").graphics.remove(g);   
+                }
+                this.set("highlightGraphic", null);
+            }
             // empty input value
             domAttr.set(this.inputNode, 'value', '');
             // set current text
@@ -345,6 +363,32 @@ function (
             if (this.get("autoNavigate") && e && e.hasOwnProperty('extent') && this.get("map")) {
                 // set map extent to location
                 this.get("map").setExtent(e.extent);
+            }
+            // has a graphic and highlightLocation
+            if (e.feature) {
+                // get highlight graphic
+                var g = this.get("highlightGraphic"), gl = this.get("graphicsLayer");
+                // if graphic currently on map
+                if (g) {
+                    g.setGeometry(e.feature.geometry);
+                    g.setAttributes(e.feature.attributes);
+                    g.setInfoTemplate(e.feature.infoTemplate);
+                    g.setSymbol(e.feature.symbol);
+                } else {
+                    g = e.feature;
+                    // highlight enabled
+                    if (this.get("highlightLocation")) {
+                        g.setSymbol(this.get('symbol'));
+                        if(gl){
+                            gl.add(g);
+                        }
+                        else{
+                            this.get("map").graphics.add(g);
+                        }
+                    }
+                }
+                // set highlight graphic
+                this.set("highlightGraphic", g);
             }
         },
         /* ---------------- */
