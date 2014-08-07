@@ -54,8 +54,8 @@ require([
     }];
 
     geocoder = new Geocoder({
-        autoComplete: true, // show autocomplete?
-        arcgisGeocoder: false, // use esri geocoder
+        //autoComplete: true, // show autocomplete?
+        //arcgisGeocoder: false, // use esri geocoder
         //value: "", // Value of input
         //theme: "simpleGeocoder", // Theme
         //maxLocations: 15, // Maximum result locations to return
@@ -64,7 +64,7 @@ require([
         //geocoderMenu: true, // Show geocoder menu if necessary
         //autoNavigate: true, // Automatically navigate
         //showResults: true, // show result suggestions
-        geocoders: geocoders,
+        //geocoders: geocoders,
         map: map
     }, "search");
     geocoder.startup();

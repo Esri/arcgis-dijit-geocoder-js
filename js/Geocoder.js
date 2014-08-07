@@ -31,7 +31,7 @@ define([
 function (
     declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, keys, on, query, i18n, template, has,
     a11yclick, _TemplatedMixin, focusUtil,
-    esriNS, SpatialReference, Graphic, _EventedWidget,
+    esriNS, SpatialReference, Graphic, PictureMarkerSymbol, _EventedWidget,
     Point, Extent, Locator, Query, QueryTask, scaleUtils) {
     var Widget = declare("esri.dijit.Geocoder", [_EventedWidget, _TemplatedMixin], {
         // Set template file HTML
@@ -95,7 +95,7 @@ function (
                 activeGeocoder: null,
                 geocoders: null,
                 zoomScale: 10000,
-                highlightLocation: true,
+                highlightLocation: false,
                 symbol: new PictureMarkerSymbol(require.toUrl("esri/dijit") + '/images/sdk_gps_location.png', 28, 28),
                 graphicsLayer: null
             };
@@ -371,17 +371,19 @@ function (
             if (e.feature) {
                 // get highlight graphic
                 var g = this.get("highlightGraphic"), gl = this.get("graphicsLayer");
+                // set symbol
+                var symbol = this.get('symbol') || e.feature.symbol;
                 // if graphic currently on map
                 if (g) {
                     g.setGeometry(e.feature.geometry);
                     g.setAttributes(e.feature.attributes);
                     g.setInfoTemplate(e.feature.infoTemplate);
-                    g.setSymbol(e.feature.symbol);
+                    g.setSymbol(symbol);
                 } else {
                     g = e.feature;
                     // highlight enabled
                     if (this.get("highlightLocation")) {
-                        g.setSymbol(this.get('symbol'));
+                        g.setSymbol(symbol);
                         if(gl){
                             gl.add(g);
                         }
