@@ -743,6 +743,10 @@ function (
                     if (this.get("activeGeocoder").sourceCountry) {
                         params.sourceCountry = this.get("activeGeocoder").sourceCountry;
                     }
+                    // category
+                    if (this.get("activeGeocoder").category) {
+                        params.category = this.get("activeGeocoder").category;
+                    }
                     // within extent
                     if (searchExtent) {
                         params.searchExtent = searchExtent;
