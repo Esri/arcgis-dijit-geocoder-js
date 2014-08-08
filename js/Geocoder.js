@@ -743,9 +743,9 @@ function (
                     if (this.get("activeGeocoder").sourceCountry) {
                         params.sourceCountry = this.get("activeGeocoder").sourceCountry;
                     }
-                    // category
-                    if (this.get("activeGeocoder").category) {
-                        params.category = this.get("activeGeocoder").category;
+                    // categories
+                    if (this.get("activeGeocoder").categories) {
+                        params.categories = this.get("activeGeocoder").categories;
                     }
                     // within extent
                     if (searchExtent) {
