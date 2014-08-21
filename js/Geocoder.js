@@ -741,7 +741,7 @@ function (
                     params.maxLocations = num;
                     // Esri Geocoder country
                     if (this.get("activeGeocoder").sourceCountry) {
-                        params.sourceCountry = this.get("activeGeocoder").sourceCountry;
+                        params.countryCode = this.get("activeGeocoder").sourceCountry;
                     }
                     // categories
                     if (this.get("activeGeocoder").categories) {
