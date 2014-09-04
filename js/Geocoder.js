@@ -353,6 +353,8 @@ function (
             this.inputNode.blur();
             // hide any menus
             this._hideMenus();
+            //reinstate map navigation
+            this.get("map").enableKeyboardNavigation();
         },
         // go to a location
         select: function (e) {
@@ -797,6 +799,8 @@ function (
                 this._hideLoading();
                 def.reject('Geocoder:: no search to perform');
             }
+            //reinstate map navigation
+            this.get("map").enableKeyboardNavigation();
         },
         // called on AC Results
         _showResults: function () {
@@ -1309,6 +1313,8 @@ function (
             }
             // check status of text box
             this._checkStatus();
+            //disable navigation (so keyboard arrows stop panning map)
+            this.get("map").disableKeyboardNavigation();
         },
         _hydrateResult: function (e) {
             // result to add
