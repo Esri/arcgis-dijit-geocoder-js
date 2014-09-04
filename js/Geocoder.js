@@ -354,7 +354,10 @@ function (
             // hide any menus
             this._hideMenus();
             //reinstate map navigation
-            this.get("map").enableKeyboardNavigation();
+            var map = this.get("map");
+            if(map){
+                map.enableKeyboardNavigation();
+            }
         },
         // go to a location
         select: function (e) {
@@ -800,7 +803,10 @@ function (
                 def.reject('Geocoder:: no search to perform');
             }
             //reinstate map navigation
-            this.get("map").enableKeyboardNavigation();
+            var map = this.get("map");
+            if(map){
+                map.enableKeyboardNavigation();
+            }
         },
         // called on AC Results
         _showResults: function () {
@@ -1314,7 +1320,10 @@ function (
             // check status of text box
             this._checkStatus();
             //disable navigation (so keyboard arrows stop panning map)
-            this.get("map").disableKeyboardNavigation();
+            var map = this.get("map");
+            if(map){
+                map.disableKeyboardNavigation();   
+            }
         },
         _hydrateResult: function (e) {
             // result to add
