@@ -1,4 +1,5 @@
 define([
+    "require",
     "dojo/_base/declare",
     "dojo/_base/lang",
     "dojo/_base/Deferred",
@@ -29,7 +30,7 @@ define([
     "esri/geometry/scaleUtils"
 ],
 function (
-    declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, keys, on, query, i18n, template, has,
+    require, declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, keys, on, query, i18n, template, has,
     a11yclick, _TemplatedMixin, focusUtil,
     esriNS, SpatialReference, Graphic, PictureMarkerSymbol, _EventedWidget,
     Point, Extent, Locator, Query, QueryTask, scaleUtils) {
