@@ -97,7 +97,7 @@ function (
                 geocoders: null,
                 zoomScale: 10000,
                 highlightLocation: false,
-                symbol: new PictureMarkerSymbol(require.toUrl("esri/dijit") + '/images/sdk_gps_location.png', 28, 28),
+                symbol: new PictureMarkerSymbol(require.toUrl(".") + '/images/sdk_gps_location.png', 28, 28),
                 graphicsLayer: null
             };
             // mix in settings and defaults
@@ -740,22 +740,10 @@ function (
                 }
                 else{
                     // query parameters
-                    var params = {
-                        address: {}
-                    };
-                    // maximum results
-                    params.maxLocations = num;
-                    // Esri Geocoder country
-                    if (this.get("activeGeocoder").sourceCountry) {
-                        params.countryCode = this.get("activeGeocoder").sourceCountry;
-                    }
+                    var params = {};
                     // categories
                     if (this.get("activeGeocoder").categories) {
                         params.categories = this.get("activeGeocoder").categories;
-                    }
-                    // within extent
-                    if (searchExtent) {
-                        params.searchExtent = searchExtent;
                     }
                     // spatial ref output
                     this._task.outSpatialReference = outSpatialReference;
@@ -779,6 +767,18 @@ function (
                             this._receivedResults(response, def, e);
                         }));
                     } else {
+                        // address object
+                        params.address = {};
+                        // maximum results
+                        params.maxLocations = num;
+                        // within extent
+                        if (searchExtent) {
+                            params.searchExtent = searchExtent;
+                        }
+                        // Esri Geocoder country
+                        if (this.get("activeGeocoder").sourceCountry) {
+                            params.countryCode = this.get("activeGeocoder").sourceCountry;
+                        }
                         if (e.magicKey) {
                             params.magicKey = e.magicKey;
                         }
