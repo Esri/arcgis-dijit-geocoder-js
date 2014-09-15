@@ -97,7 +97,7 @@ function (
                 geocoders: null,
                 zoomScale: 10000,
                 highlightLocation: false,
-                symbol: new PictureMarkerSymbol(require.toUrl(".") + '/images/sdk_gps_location.png', 28, 28),
+                symbol: new PictureMarkerSymbol(require.toUrl("esri/dijit") + '/images/sdk_gps_location.png', 28, 28),
                 graphicsLayer: null
             };
             // mix in settings and defaults
