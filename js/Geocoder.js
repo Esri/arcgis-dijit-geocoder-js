@@ -97,7 +97,7 @@ function (
                 geocoders: null,
                 zoomScale: 10000,
                 highlightLocation: false,
-                symbol: new PictureMarkerSymbol(require.toUrl("esri/dijit") + '/images/sdk_gps_location.png', 28, 28),
+                symbol: new PictureMarkerSymbol(require.toUrl(".") + '/images/sdk_gps_location.png', 28, 28),
                 graphicsLayer: null
             };
             // mix in settings and defaults
@@ -760,6 +760,10 @@ function (
                     if (this.get("activeGeocoder").suggest && e.autoComplete) {
                         // text for suggestions
                         params.text = singleLine;
+                        // within extent
+                        if (searchExtent) {
+                            params.searchExtent = searchExtent;
+                        }
                         // query for suggestions
                         this._task.suggestLocations(params).then(lang.hitch(this, function (response) {
                             this._receivedResults(response, def, e);
@@ -1224,7 +1228,7 @@ function (
                     alength = aquery.length;
                 }
                 // ignored keys
-                if (e.ctrlKey || e.shiftKey || e.metaKey || e.altKey || e.keyCode === keys.copyKey || e.keyCode === keys.ALT || e.keyCode === keys.CTRL || e.keyCode === keys.META || e.keyCode === keys.SHIFT || e.keyCode === keys.UP_ARROW || e.keyCode === keys.DOWN_ARROW || e.keyCode === keys.LEFT_ARROW || e.keyCode === keys.RIGHT_ARROW) {
+                if (e.ctrlKey || e.metaKey || e.altKey || e.keyCode === keys.copyKey || e.keyCode === keys.ALT || e.keyCode === keys.CTRL || e.keyCode === keys.META || e.keyCode === keys.SHIFT || e.keyCode === keys.UP_ARROW || e.keyCode === keys.DOWN_ARROW || e.keyCode === keys.LEFT_ARROW || e.keyCode === keys.RIGHT_ARROW) {
                     return e;
                 } else if (e && e.keyCode === keys.ENTER) { // if enter key was pushed
                     this._cancelDeferreds();
@@ -1440,6 +1444,14 @@ function (
             // set name for layer query
             else if (this.activeGeocoder.type === 'query' && this.activeGeocoder.field && e.hasOwnProperty('attributes') && e.attributes.hasOwnProperty(this.activeGeocoder.field)) {
                 newResult.name = e.attributes[this.activeGeocoder.field];
+            }
+            // set name for match address
+            else if (e.hasOwnProperty('Match_addr') && typeof e.Match_addr === 'string') {
+                newResult.name = e.Match_addr;
+            }
+            // set name for match address 2
+            else if (e.hasOwnProperty('address') && typeof e.address === 'object' && e.address.hasOwnProperty('Match_addr')) {
+                newResult.name = e.address.Match_addr;
             }
             // set name for address
             else if (e.hasOwnProperty('address') && typeof e.address === 'string') {
