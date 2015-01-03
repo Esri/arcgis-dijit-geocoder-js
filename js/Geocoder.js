@@ -1187,7 +1187,7 @@ function (
             this._events.push(geocoderMenuButtonKeyDown);
             // if map set
             if (this.get("map")) {
-                var mapClick = on(this.get("map"), "click", lang.hitch(this, function () {
+                var mapClick = on(this.get("map"), "mouse-down", lang.hitch(this, function () {
                     this.blur();
                 }));
                 this._events.push(mapClick);
