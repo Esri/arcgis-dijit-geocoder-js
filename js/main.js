@@ -54,7 +54,7 @@ require([
     }];
 
     geocoder = new Geocoder({
-        //autoComplete: true, // show autocomplete?
+        autoComplete: true, // show autocomplete?
         //arcgisGeocoder: false, // use esri geocoder
         //value: "", // Value of input
         //theme: "simpleGeocoder", // Theme
