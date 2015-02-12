@@ -364,6 +364,8 @@
 }
 
 .simpleGeocoder .esriGeocoderResults {
+    max-height: 140px;
+    overflow: auto;
     display: none;
     z-index: 99;
     width: 100%;
