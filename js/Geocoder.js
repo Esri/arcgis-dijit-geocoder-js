@@ -2,7 +2,7 @@ define([
     "require",
     "dojo/_base/declare",
     "dojo/_base/lang",
-    "dojo/_base/Deferred",
+    "dojo/Deferred",
     "dojo/_base/event",
     "dojo/dom-attr",
     "dojo/dom-class",
@@ -14,9 +14,11 @@ define([
     "dojo/i18n!application/nls/jsapi",
     "dojo/text!application/dijit/templates/Geocoder.html",
     "dojo/uacss",
+    "dojo/_base/kernel",
     "dijit/a11yclick",
     "dijit/_TemplatedMixin",
     "dijit/focus",
+    "dijit/_FocusMixin",
     "esri/kernel",
     "esri/SpatialReference",
     "esri/graphic",
@@ -30,11 +32,11 @@ define([
     "esri/geometry/scaleUtils"
 ],
 function (
-    require, declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, keys, on, query, i18n, template, has,
-    a11yclick, _TemplatedMixin, focusUtil,
+    require, declare, lang, Deferred, event, domAttr, domClass, domStyle, domConstruct, keys, on, query, i18n, template, has, kernel,
+    a11yclick, _TemplatedMixin, focusUtil, _FocusMixin,
     esriNS, SpatialReference, Graphic, PictureMarkerSymbol, _EventedWidget,
     Point, Extent, Locator, Query, QueryTask, scaleUtils) {
-    var Widget = declare("esri.dijit.Geocoder", [_EventedWidget, _TemplatedMixin], {
+    var Widget = declare("esri.dijit.Geocoder", [_EventedWidget, _TemplatedMixin, _FocusMixin], {
         // Set template file HTML
         templateString: template,
         reHostedFS: /https?:\/\/services.*\.arcgis\.com/i,
@@ -50,6 +52,7 @@ function (
         },
         // init
         constructor: function (options, srcRefNode) {
+            kernel.deprecated("esri.dijit.Geocoder", "Use esri.dijit.Search instead", "4.0");
             // class names
             this._css = {
                 GeocoderContainerClass: 'esriGeocoderContainer',
@@ -344,6 +347,11 @@ function (
         // focus on input
         focus: function () {
             focusUtil.focus(this.inputNode);
+            //disable navigation (so keyboard arrows stop panning map)
+              var map = this.get("map");
+              if(map){
+                  map.disableKeyboardNavigation();   
+              }
         },
         // blur input
         blur: function () {
@@ -424,6 +432,14 @@ function (
         /* ---------------- */
         /* Private Functions */
         /* ---------------- */
+        _onFocus: function () {
+          this.focus();
+          this.inherited(arguments);
+        },
+        _onBlur: function () {
+          this.blur();
+          this.inherited(arguments);
+        },
         // ac query
         _autoComplete: function () {
             var ag = this.get("activeGeocoder");
@@ -1317,20 +1333,6 @@ function (
         _inputClick: function () {
             // hide geolocator switch
             this._hideGeolocatorMenu();
-            // if input value is empty
-            if (!this.get("value")) {
-                // clear address
-                this.clear();
-                // hide menus
-                this._hideMenus();
-            }
-            // check status of text box
-            this._checkStatus();
-            //disable navigation (so keyboard arrows stop panning map)
-            var map = this.get("map");
-            if(map){
-                map.disableKeyboardNavigation();
-            }
         },
         _hydrateResult: function (e) {
             // result to add
