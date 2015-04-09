@@ -95,6 +95,7 @@ function (
                 geocoderMenu: true, // Show geocoder menu if necessary
                 autoNavigate: true, // Automatically navigate
                 showResults: true, // show result suggestions
+                maxResults: 5, // maximum number of results that will return in the GeocoderResults window.
                 map: null,
                 activeGeocoder: null,
                 geocoders: null,
@@ -117,6 +118,7 @@ function (
             this.set("geocoderMenu", defaults.geocoderMenu);
             this.set("autoNavigate", defaults.autoNavigate);
             this.set("showResults", defaults.showResults);
+            this.set("maxResults", defaults.maxResults);
             this.set("map", defaults.map);
             this.set("activeGeocoder", defaults.activeGeocoder);
             this.set("geocoders", defaults.geocoders);
@@ -225,7 +227,7 @@ function (
                     gl.remove(g);
                 }
                 else{
-                    this.get("map").graphics.remove(g);   
+                    this.get("map").graphics.remove(g);
                 }
                 this.set("highlightGraphic", null);
             }
@@ -569,7 +571,7 @@ function (
             }
             else{
                 // create locator task
-                this._task = new Locator(this.get("activeGeocoder").url);    
+                this._task = new Locator(this.get("activeGeocoder").url);
             }
             // update placeholder nodes
             this._updatePlaceholder();
@@ -723,7 +725,7 @@ function (
                 if(this.get("activeGeocoder").type === 'query'){
                     var q = new Query();
                     // spatial ref
-                    q.outSpatialReference = outSpatialReference; 
+                    q.outSpatialReference = outSpatialReference;
                     q.returnGeometry = true;
                     q.num = num;
                     if(searchExtent){
@@ -844,7 +846,7 @@ function (
                 var r = new RegExp('(' + partialMatch + ')', 'gi');
                 html += '<ul role="presentation">';
                 // for each result
-                for (i = 0; i < this.get("results").length && i < 5; ++i) {
+                for (i = 0; i < this.get("results").length && i < this.maxResults; ++i) {
                     // location text
                     var text = this.get("results")[i].text || this.get("results")[i].name;
                     // set layer class
@@ -910,7 +912,7 @@ function (
         },
         // show geocoder selection menu
         _showGeolocatorMenu: function () {
-            // add class to container                
+            // add class to container
             domClass.add(this.containerNode, this._css.activeMenuClass);
             domClass.add(this.domNode, this._css.GeocoderMenuOpenClass);
             // display menu node
@@ -1091,7 +1093,7 @@ function (
                 var newVal = this.inputNode.value.slice(0,-1);
                 domAttr.set(this.inputNode, 'value', newVal);
                 this.set("value", newVal);
-              }  
+              }
               else if (e.type === 'keydown' && e.keyCode === keys.UP_ARROW) {
                     event.stop(e);
                     // go to previous item
@@ -1435,7 +1437,7 @@ function (
                         });
                     }
                     break;
-                }  
+                }
             } else {
                 newResult.extent = null;
             }
