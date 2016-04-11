@@ -12,7 +12,7 @@ See example HTML file included in download.
 
 * Notepad or HTML editor
 * A little background with Javascript
-* Experience with the [ArcGIS Javascript API](http://www.esri.com/) would help.
+* Experience with the [ArcGIS JavaScript API](https://developers.arcgis.com/javascript/) would help.
 
 ## Resources
 
